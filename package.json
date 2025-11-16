@@ -1,0 +1,37 @@
+{
+  "dependencies": {
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
+    "express": "^5.1.0",
+    "pg": "^8.16.3",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "0.3.27"
+  },
+  "name": "carrerstory-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "devDependencies": {
+    "@types/express": "^5.0.5",
+    "@types/node": "^22.19.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+  "start": "node --loader ts-node/esm src/index.ts",
+    "typeorm": "typeorm-ts-node-commonjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CodeWithIsmail/CarrerStory-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/CodeWithIsmail/CarrerStory-backend/issues"
+  },
+  "homepage": "https://github.com/CodeWithIsmail/CarrerStory-backend#readme"
+}
