@@ -3,6 +3,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Unique,
 } from 'typeorm';
 
@@ -38,4 +39,7 @@ export class User {
 
   @Column({ type: 'timestamp', nullable: true })
   passwordLastModificationTime: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 }
