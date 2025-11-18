@@ -1,94 +1,109 @@
 import { Request, Response } from 'express';
 import { UserService } from '../services/user.service.ts';
 
+/**
+ * UserController
+ * ----------------
+ * Handles HTTP requests related to User entity.
+ * Delegates business logic to UserService.
+ * Responsible for request/response lifecycle and error handling.
+ */
+
 export class UserController {
   private userService = new UserService();
 
-  // CREATE USER
+  // POST /users : create a new user
   createUser = async (req: Request, res: Response) => {
     try {
       const { userName, name, email, role } = req.body;
-
-      if (!userName || !name || !email) {
-        return res
-          .status(400)
-          .json({ message: 'userName, name, and email are required' });
-      }
-
-      const createdUser = await this.userService.createUser({
+      const user = await this.userService.createUser({
         userName,
         name,
         email,
         role,
       });
-      return res.status(201).json({ data: createdUser });
-    } catch (err) {}
+      res.status(201).json(user);
+    } catch (error) {
+      // res.send(error);
+      console.error('Error creating user:', error);
+      return res.status(500).json({ message: 'Failed to create user' });
+    }
   };
 
-  // GET ALL USERS
+  // GET /users : retrieve all users
   getAllUsers = async (_req: Request, res: Response) => {
     try {
       const users = await this.userService.getAllUsers();
-      return res.status(200).json({ data: users });
-    } catch (err) {}
+      return res.status(200).json(users);
+    } catch (error) {
+      res.send(error);
+      // console.error('Error fetching users:', error);
+      return res.status(500).json({ message: 'Failed to fetch all users' });
+    }
   };
 
-  // GET USER BY ID
+  // GET /users/:id : retrieve a user by ID
   getUserById = async (req: Request, res: Response) => {
     try {
-      const userId = Number(req.params.userId);
-      if (isNaN(userId)) {
-        return res.status(400).json({ message: 'Invalid user ID' });
+      const id = Number(req.params.userId);
+      const user = await this.userService.getUserById(id);
+
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
       }
 
-      const user = await this.userService.getUserById(userId);
-      if (!user) return res.status(404).json({ message: 'User not found' });
-
-      return res.status(200).json({ data: user });
-    } catch (err) {}
+      return res.status(200).json(user);
+    } catch (error) {
+      res.send(error);
+      // console.error('Error fetching user:', error);
+      return res
+        .status(500)
+        .json({ message: `Failed to fetch user with ID ${req.params.id}` });
+    }
   };
 
-  // UPDATE USER
+  // PUT /users/:id : update a user by ID
   updateUser = async (req: Request, res: Response) => {
     try {
-      const userId = Number(req.params.userId);
-      if (isNaN(userId)) {
-        return res.status(400).json({ message: 'Invalid user ID' });
-      }
+      const id = Number(req.params.userId);
+      const updateData = req.body;
 
-      const { userName, name, email, role } = req.body;
-      if (!userName && !name && !email && !role) {
-        return res
-          .status(400)
-          .json({ message: 'At least one field is required to update' });
-      }
+      const updatedUser = await this.userService.updateUser(id, updateData);
 
-      const updatedUser = await this.userService.updateUser(userId, {
-        userName,
-        name,
-        email,
-        role,
-      });
-      if (!updatedUser)
+      if (!updatedUser) {
         return res.status(404).json({ message: 'User not found' });
+      }
 
-      return res.status(200).json({ data: updatedUser });
-    } catch (err) {}
+      return res.status(200).json(updatedUser);
+    } catch (error) {
+      res.send(error);
+      // console.error('Error updating user:', error);
+      return res
+        .status(500)
+        .json({ message: `Failed to update user with ID ${req.params.id}` });
+    }
   };
 
-  // DELETE USER (soft delete)
+  // DELETE /users/:id : soft delete a user by ID
   deleteUser = async (req: Request, res: Response) => {
     try {
-      const userId = Number(req.params.userId);
-      if (isNaN(userId)) {
-        return res.status(400).json({ message: 'Invalid user ID' });
+      const id = Number(req.params.userId);
+      const result = await this.userService.deleteUser(id);
+
+      // TypeORM returns { affected: 0 } when nothing was deleted
+      if (result.affected === 0) {
+        return res.status(404).json({ message: 'User not found' });
       }
 
-      const deletedUser = await this.userService.deleteUser(userId);
-      if (!deletedUser)
-        return res.status(404).json({ message: 'User not found' });
-
-      return res.status(200).json({ message: 'User deleted successfully' });
-    } catch (err) {}
+      return res
+        .status(200)
+        .json({ message: 'User soft deleted successfully' });
+    } catch (error) {
+      res.send(error);
+      // console.error('Error deleting user:', error);
+      return res
+        .status(500)
+        .json({ message: `Failed to delete user with ID ${req.params.id}` });
+    }
   };
 }
