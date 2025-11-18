@@ -14,14 +14,10 @@ export enum UserRole {
 @Entity()
 @Unique(['userName', 'email'])
 export class User {
-  @PrimaryGeneratedColumn({
-    type: 'int',
-  })
+  @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
-  @Column({
-    unique: true,
-  })
+  @Column({ unique: true })
   userName: string;
 
   @Column()
@@ -33,7 +29,7 @@ export class User {
   @CreateDateColumn()
   joinDate: Date;
 
-  @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
+  @Column({ type: 'enum', enum: UserRole })
   role: UserRole;
 
   @Column({ type: 'timestamp', nullable: true })
