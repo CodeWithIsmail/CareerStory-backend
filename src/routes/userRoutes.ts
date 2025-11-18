@@ -8,7 +8,6 @@ userRouter.post('/users', userController.createUser);
 userRouter.get('/users', userController.getAllUsers);
 userRouter.get('/users/:userId', userController.getUserById);
 userRouter.put('/users/:userId', userController.updateUser);
-userRouter.patch('/users/:userId', userController.updateUser);
 userRouter.delete('/users/:userId', userController.deleteUser);
 
 export default userRouter;
