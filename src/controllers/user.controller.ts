@@ -24,8 +24,6 @@ export class UserController {
       });
       res.status(201).json(user);
     } catch (error) {
-      // res.send(error);
-      console.error('Error creating user:', error);
       return res.status(500).json({ message: 'Failed to create user' });
     }
   };
@@ -36,8 +34,6 @@ export class UserController {
       const users = await this.userService.getAllUsers();
       return res.status(200).json(users);
     } catch (error) {
-      res.send(error);
-      // console.error('Error fetching users:', error);
       return res.status(500).json({ message: 'Failed to fetch all users' });
     }
   };
@@ -54,8 +50,6 @@ export class UserController {
 
       return res.status(200).json(user);
     } catch (error) {
-      res.send(error);
-      // console.error('Error fetching user:', error);
       return res
         .status(500)
         .json({ message: `Failed to fetch user with ID ${req.params.id}` });
@@ -76,8 +70,6 @@ export class UserController {
 
       return res.status(200).json(updatedUser);
     } catch (error) {
-      res.send(error);
-      // console.error('Error updating user:', error);
       return res
         .status(500)
         .json({ message: `Failed to update user with ID ${req.params.id}` });
@@ -99,8 +91,6 @@ export class UserController {
         .status(200)
         .json({ message: 'User soft deleted successfully' });
     } catch (error) {
-      res.send(error);
-      // console.error('Error deleting user:', error);
       return res
         .status(500)
         .json({ message: `Failed to delete user with ID ${req.params.id}` });
