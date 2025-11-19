@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { UserService } from '../services/user.service.ts';
+import { UserService } from '../services/userService.ts';
 
 /**
  * UserController
@@ -12,7 +12,6 @@ import { UserService } from '../services/user.service.ts';
 export class UserController {
   private userService = new UserService();
 
-  // POST /users : create a new user
   createUser = async (req: Request, res: Response) => {
     try {
       const { userName, name, email, role } = req.body;
@@ -28,7 +27,6 @@ export class UserController {
     }
   };
 
-  // GET /users : retrieve all users
   getAllUsers = async (_req: Request, res: Response) => {
     try {
       const users = await this.userService.getAllUsers();
@@ -38,7 +36,6 @@ export class UserController {
     }
   };
 
-  // GET /users/:id : retrieve a user by ID
   getUserById = async (req: Request, res: Response) => {
     try {
       const id = Number(req.params.userId);
@@ -56,7 +53,6 @@ export class UserController {
     }
   };
 
-  // PUT /users/:id : update a user by ID
   updateUser = async (req: Request, res: Response) => {
     try {
       const id = Number(req.params.userId);
@@ -76,7 +72,6 @@ export class UserController {
     }
   };
 
-  // DELETE /users/:id : soft delete a user by ID
   deleteUser = async (req: Request, res: Response) => {
     try {
       const id = Number(req.params.userId);
