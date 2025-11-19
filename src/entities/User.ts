@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   Unique,
+  DeleteDateColumn,
 } from 'typeorm';
 
 // enum for user roles
@@ -12,7 +13,7 @@ export enum UserRole {
   USER = 'USER',
 }
 
-@Entity()
+@Entity({ name: 'users' })
 @Unique(['userName', 'email']) // ensure combination of username and email is unique
 export class User {
   @PrimaryGeneratedColumn({ type: 'int' }) // auto-incrementing primary key
@@ -32,4 +33,7 @@ export class User {
 
   @Column({ type: 'enum', enum: UserRole }) //user role: ADMIN or USER
   role: UserRole;
+
+  @DeleteDateColumn()
+  deletedAt?: Date; // timestamp for soft deletion
 }
