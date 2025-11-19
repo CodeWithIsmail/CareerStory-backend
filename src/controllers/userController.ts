@@ -49,7 +49,7 @@ export class UserController {
     } catch (error) {
       return res
         .status(500)
-        .json({ message: `Failed to fetch user with ID ${req.params.id}` });
+        .json({ message: `Failed to fetch user with ID ${req.params.userId}` });
     }
   };
 
@@ -66,9 +66,9 @@ export class UserController {
 
       return res.status(200).json(updatedUser);
     } catch (error) {
-      return res
-        .status(500)
-        .json({ message: `Failed to update user with ID ${req.params.id}` });
+      return res.status(500).json({
+        message: `Failed to update user with ID ${req.params.userId}`,
+      });
     }
   };
 
@@ -86,9 +86,9 @@ export class UserController {
         .status(200)
         .json({ message: 'User soft deleted successfully' });
     } catch (error) {
-      return res
-        .status(500)
-        .json({ message: `Failed to delete user with ID ${req.params.id}` });
+      return res.status(500).json({
+        message: `Failed to delete user with ID ${req.params.userId}`,
+      });
     }
   };
 }

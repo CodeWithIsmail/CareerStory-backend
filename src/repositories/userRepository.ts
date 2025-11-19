@@ -29,7 +29,7 @@ export class UserRepository {
     id: number,
     updateData: Partial<User>,
   ): Promise<User | null> {
-    this.userRepository.update(id, updateData);
+    await this.userRepository.update(id, updateData);
     return this.getUserById(id);
   }
 
