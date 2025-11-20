@@ -3,28 +3,19 @@ import { User } from './User.ts';
 
 @Entity()
 export class Auth {
-  @PrimaryColumn({ length: 50 }) // part of composite primary key, matches User.userName
-  userName: string;
+  @PrimaryColumn('uuid')
+  userId: string;
 
-  @PrimaryColumn({ length: 255 }) // part of composite primary key, matches User.email
-  email: string;
-
-  @Column() // hashed password
+  @Column()
   password: string;
 
-  @Column({ type: 'timestamp', nullable: true }) // timestamp of last password modification
+  @Column({ type: 'timestamp', nullable: true })
   passwordLastModificationTime: Date;
 
-  @OneToOne(() => User) // one-to-one relationship with User entity
-  @JoinColumn([
-    {
-      name: 'userName',
-      referencedColumnName: 'userName',
-    },
-    {
-      name: 'email',
-      referencedColumnName: 'email',
-    },
-  ])
+  @OneToOne(() => User)
+  @JoinColumn({
+    name: 'userId',
+    referencedColumnName: 'id',
+  })
   user: User;
 }

@@ -1,6 +1,5 @@
 import { UserRepository } from '../repositories/userRepository.ts';
-import { DeleteResult } from 'typeorm';
-import { User } from '../entities/User.ts';
+import { CreateUserDto, UpdateUserDto, UserResponseDto } from '../dto/userDto.ts';
 
 /**
  * UserService
@@ -12,26 +11,30 @@ import { User } from '../entities/User.ts';
 export class UserService {
   private userRepository = new UserRepository();
 
-  async createUser(user: Partial<User>): Promise<User> {
-    return this.userRepository.createUser(user);
+  async createUser(user: CreateUserDto): Promise<UserResponseDto> {
+    const newUser = await this.userRepository.createUser(user);
+    return UserResponseDto.fromEntity(newUser);
   }
 
-  async getAllUsers(): Promise<User[]> {
-    return this.userRepository.getAllUsers();
+  async getAllUsers(): Promise<UserResponseDto[]> {
+    const users = await this.userRepository.getAllUsers();
+    return users.map(UserResponseDto.fromEntity);
   }
 
-  async getUserById(id: number): Promise<User | null> {
-    return this.userRepository.getUserById(id);
+  async getUserById(id: string): Promise<UserResponseDto> {
+    const user = await this.userRepository.getUserById(id);
+    if (!user) throw new Error('User not found');
+    return UserResponseDto.fromEntity(user);
   }
 
-  async updateUser(
-    id: number,
-    updateData: Partial<User>,
-  ): Promise<User | null> {
-    return this.userRepository.updateUser(id, updateData);
+  async updateUser(id: string, updateData: UpdateUserDto): Promise<UserResponseDto> {
+    const updatedUser = await this.userRepository.updateUser(id, updateData);
+    if (!updatedUser) throw new Error('User not found');
+    return UserResponseDto.fromEntity(updatedUser);
   }
 
-  async deleteUser(id: number): Promise<DeleteResult> {
-    return this.userRepository.deleteUser(id);
+  async deleteUser(id: string): Promise<void> {
+    const result = await this.userRepository.deleteUser(id);
+    if (result.affected === 0) throw new Error('User not found');
   }
 }
