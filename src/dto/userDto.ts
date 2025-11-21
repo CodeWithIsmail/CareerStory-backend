@@ -1,5 +1,6 @@
+import { z } from 'zod';
 import { UserRole } from '../entities/User.ts';
-import { User } from '../entities/User.ts';
+import { createUserSchema, updateUserSchema } from '../validators/userValidator.ts';
 
 /**
  * Data Transfer Objects (DTOs) for User entity
@@ -8,19 +9,8 @@ import { User } from '../entities/User.ts';
  * Facilitates data validation and transformation between different layers of the application.
  */
 
-export class CreateUserDto {
-  userName: string;
-  name: string;
-  email: string;
-  role: UserRole;
-}
-
-export class UpdateUserDto {
-  userName?: string;
-  name?: string;
-  email?: string;
-  role?: UserRole;
-}
+export type CreateUserDto = z.infer<typeof createUserSchema>;
+export type UpdateUserDto = z.infer<typeof updateUserSchema>;
 
 export class UserResponseDto {
   id: string;
@@ -29,15 +19,4 @@ export class UserResponseDto {
   email: string;
   joinDate: Date;
   role: UserRole;
-
-  static fromEntity(user: User): UserResponseDto {
-    const dto = new UserResponseDto();
-    dto.id = user.id;
-    dto.userName = user.userName;
-    dto.name = user.name;
-    dto.email = user.email;
-    dto.joinDate = user.joinDate;
-    dto.role = user.role;
-    return dto;
-  }
 }
