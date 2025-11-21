@@ -1,6 +1,7 @@
-import { DeleteResult } from 'typeorm';
+import { DeleteResult, UpdateDescription } from 'typeorm';
 import { AppDataSource } from '../dataSource.ts';
 import { User } from '../entities/User.ts';
+import { CreateUserDto, UpdateUserDto, UserResponseDto } from '../dto/userDto.ts';
 
 /**
  * UserRepository
@@ -12,8 +13,8 @@ import { User } from '../entities/User.ts';
 export class UserRepository {
   private userRepository = AppDataSource.getRepository(User);
 
-  async createUser(user: Partial<User>): Promise<User> {
-    const newUser = this.userRepository.create(user);
+  async createUser(userData: CreateUserDto): Promise<User> {
+    const newUser = this.userRepository.create(userData);
     return this.userRepository.save(newUser);
   }
 
@@ -21,19 +22,16 @@ export class UserRepository {
     return this.userRepository.find();
   }
 
-  async getUserById(id: number): Promise<User | null> {
+  async getUserById(id: string): Promise<User | null> {
     return this.userRepository.findOne({ where: { id } });
   }
 
-  async updateUser(
-    id: number,
-    updateData: Partial<User>,
-  ): Promise<User | null> {
+  async updateUser(id: string, updateData: UpdateUserDto): Promise<User | null> {
     await this.userRepository.update(id, updateData);
     return this.getUserById(id);
   }
 
-  async deleteUser(id: number): Promise<DeleteResult> {
+  async deleteUser(id: string): Promise<DeleteResult> {
     return this.userRepository.softDelete(id);
   }
 }
