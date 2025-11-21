@@ -1,5 +1,6 @@
 import { UserRepository } from '../repositories/userRepository.ts';
 import { CreateUserDto, UpdateUserDto, UserResponseDto } from '../dto/userDto.ts';
+import { mapUsersToDtoList, mapUserToDto } from '../utils/userMapper.ts';
 
 /**
  * UserService
@@ -13,24 +14,24 @@ export class UserService {
 
   async createUser(user: CreateUserDto): Promise<UserResponseDto> {
     const newUser = await this.userRepository.createUser(user);
-    return UserResponseDto.fromEntity(newUser);
+    return mapUserToDto(newUser);
   }
 
   async getAllUsers(): Promise<UserResponseDto[]> {
     const users = await this.userRepository.getAllUsers();
-    return users.map(UserResponseDto.fromEntity);
+    return mapUsersToDtoList(users);
   }
 
   async getUserById(id: string): Promise<UserResponseDto> {
     const user = await this.userRepository.getUserById(id);
     if (!user) throw new Error('User not found');
-    return UserResponseDto.fromEntity(user);
+    return mapUserToDto(user);
   }
 
   async updateUser(id: string, updateData: UpdateUserDto): Promise<UserResponseDto> {
     const updatedUser = await this.userRepository.updateUser(id, updateData);
     if (!updatedUser) throw new Error('User not found');
-    return UserResponseDto.fromEntity(updatedUser);
+    return mapUserToDto(updatedUser);
   }
 
   async deleteUser(id: string): Promise<void> {

@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import { UserService } from '../services/userService.ts';
 import { CreateUserDto, UpdateUserDto, UserResponseDto } from '../dto/userDto.ts';
-import { User } from '../entities/User.ts';
+import { z } from 'zod';
+import { UserValidator } from '../validators/userValidator.ts';
 
 /**
  * UserController
@@ -16,12 +17,14 @@ export class UserController {
 
   createUser = async (req: Request, res: Response) => {
     try {
-      const userData: CreateUserDto = req.body;
-      const newUser = await this.userService.createUser(userData);
+      const validatedNewUser: CreateUserDto = UserValidator.validateCreateUser(req.body);
+      const newUser = await this.userService.createUser(validatedNewUser);
       return res.status(201).json(newUser);
     } catch (error) {
-      console.log(error);
-      return res.status(400).json({ message: 'Failed to create user' });
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Failed to create user' });
+      }
+      return res.status(500).json({ message: 'Failed to create user' });
     }
   };
 
@@ -30,28 +33,41 @@ export class UserController {
       const users = await this.userService.getAllUsers();
       return res.status(200).json(users);
     } catch (error) {
-      return res.status(400).json({ message: 'Failed to fetch all users' });
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Failed to fetch all users' });
+      }
+      return res.status(500).json({ message: 'Failed to fetch all users' });
     }
   };
 
   getUserById = async (req: Request, res: Response) => {
     try {
-      const id = req.params.userId;
-      const user = await this.userService.getUserById(id);
+      const userId = UserValidator.validateUserIdParam(req.params);
+      const user = await this.userService.getUserById(userId);
       return res.status(200).json(user);
     } catch (error) {
-      return res.status(400).json({ message: `Failed to fetch user with ID ${req.params.userId}` });
+      if (error instanceof z.ZodError) {
+        return res
+          .status(400)
+          .json({ message: `Failed to fetch user with ID ${req.params.userId}` });
+      }
+      return res.status(500).json({ message: `Failed to fetch user with ID ${req.params.userId}` });
     }
   };
 
   updateUser = async (req: Request, res: Response) => {
     try {
-      const id = req.params.userId;
-      const updateData: UpdateUserDto = req.body;
-      const updatedUser = await this.userService.updateUser(id, updateData);
+      const userId = UserValidator.validateUserIdParam(req.params);
+      const updateData: UpdateUserDto = UserValidator.validateUpdateUser(req.body);
+      const updatedUser = await this.userService.updateUser(userId, updateData);
       return res.status(200).json(updatedUser);
     } catch (error) {
-      return res.status(400).json({
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: `Failed to update user with ID ${req.params.userId}`,
+        });
+      }
+      return res.status(500).json({
         message: `Failed to update user with ID ${req.params.userId}`,
       });
     }
@@ -59,11 +75,16 @@ export class UserController {
 
   deleteUser = async (req: Request, res: Response) => {
     try {
-      const id = req.params.userId;
-      await this.userService.deleteUser(id);
+      const userId = UserValidator.validateUserIdParam(req.params);
+      await this.userService.deleteUser(userId);
       return res.status(200).json({ message: 'User soft deleted successfully' });
     } catch (error) {
-      return res.status(400).json({
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: `Failed to delete user with ID ${req.params.userId}`,
+        });
+      }
+      return res.status(500).json({
         message: `Failed to delete user with ID ${req.params.userId}`,
       });
     }
