@@ -2,11 +2,7 @@ import { Request, Response } from 'express';
 import { UserService } from '../services/userService.ts';
 import { CreateUserDto, UpdateUserDto, UserResponseDto } from '../dto/userDto.ts';
 import { z } from 'zod';
-import {
-  createUserSchema,
-  updateUserSchema,
-  userIdParamSchema,
-} from '../validators/userValidator.ts';
+import { UserValidator } from '../validators/userValidator.ts';
 
 /**
  * UserController
@@ -21,7 +17,7 @@ export class UserController {
 
   createUser = async (req: Request, res: Response) => {
     try {
-      const validatedNewUser: CreateUserDto = createUserSchema.parse(req.body);
+      const validatedNewUser: CreateUserDto = UserValidator.validateCreateUser(req.body);
       const newUser = await this.userService.createUser(validatedNewUser);
       return res.status(201).json(newUser);
     } catch (error) {
@@ -46,7 +42,7 @@ export class UserController {
 
   getUserById = async (req: Request, res: Response) => {
     try {
-      const userId = userIdParamSchema.parse(req.params).userId;
+      const userId = UserValidator.validateUserIdParam(req.params);
       const user = await this.userService.getUserById(userId);
       return res.status(200).json(user);
     } catch (error) {
@@ -61,8 +57,8 @@ export class UserController {
 
   updateUser = async (req: Request, res: Response) => {
     try {
-      const userId = userIdParamSchema.parse(req.params).userId;
-      const updateData: UpdateUserDto = updateUserSchema.parse(req.body);
+      const userId = UserValidator.validateUserIdParam(req.params);
+      const updateData: UpdateUserDto = UserValidator.validateUpdateUser(req.body);
       const updatedUser = await this.userService.updateUser(userId, updateData);
       return res.status(200).json(updatedUser);
     } catch (error) {
@@ -79,7 +75,7 @@ export class UserController {
 
   deleteUser = async (req: Request, res: Response) => {
     try {
-      const userId = userIdParamSchema.parse(req.params).userId;
+      const userId = UserValidator.validateUserIdParam(req.params);
       await this.userService.deleteUser(userId);
       return res.status(200).json({ message: 'User soft deleted successfully' });
     } catch (error) {
