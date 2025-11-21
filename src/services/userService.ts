@@ -1,6 +1,7 @@
 import { UserRepository } from '../repositories/userRepository.ts';
 import { CreateUserDto, UpdateUserDto, UserResponseDto } from '../dto/userDto.ts';
 import { mapUsersToDtoList, mapUserToDto } from '../utils/userMapper.ts';
+import { NotFoundError } from '../errors/CustomErrors.ts';
 
 /**
  * UserService
@@ -24,13 +25,13 @@ export class UserService {
 
   async getUserById(id: string): Promise<UserResponseDto> {
     const user = await this.userRepository.getUserById(id);
-    if (!user) throw new Error('User not found');
+    if (!user) throw new NotFoundError(`User with ID ${id} not found`);
     return mapUserToDto(user);
   }
 
   async updateUser(id: string, updateData: UpdateUserDto): Promise<UserResponseDto> {
     const updatedUser = await this.userRepository.updateUser(id, updateData);
-    if (!updatedUser) throw new Error('User not found');
+    if (!updatedUser) throw new NotFoundError(`User with ID ${id} not found`);
     return mapUserToDto(updatedUser);
   }
 
