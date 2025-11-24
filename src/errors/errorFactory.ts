@@ -1,4 +1,3 @@
-import { AppError } from './AppError.ts';
 import {
   NotFoundError,
   ValidationError,
@@ -8,23 +7,23 @@ import {
 } from './CustomErrors.ts';
 
 export class ErrorFactory {
-  static createNotFoundError = (message?: string): NotFoundError => {
-    return new NotFoundError(message);
+  static createNotFoundError = (message?: string, context?: string): NotFoundError => {
+    return new NotFoundError(message, context);
   };
 
-  static createValidationError = (message?: string): ValidationError => {
-    return new ValidationError(message);
+  static createValidationError = (message?: string, context?: string): ValidationError => {
+    return new ValidationError(message, context);
   };
 
-  static createUnauthorizedError = (message?: string): UnauthorizedError => {
-    return new UnauthorizedError(message);
+  static createUnauthorizedError = (message?: string, context?: string): UnauthorizedError => {
+    return new UnauthorizedError(message, context);
   };
 
-  static createForbiddenError = (message?: string): ForbiddenError => {
-    return new ForbiddenError(message);
+  static createForbiddenError = (message?: string, context?: string): ForbiddenError => {
+    return new ForbiddenError(message, context);
   };
 
-  static createDatabaseError = (message?: string): DatabaseError => {
-    return new DatabaseError(message);
+  static createDatabaseError = (message?: string, context?: string): DatabaseError => {
+    return new DatabaseError(message, context);
   };
 }

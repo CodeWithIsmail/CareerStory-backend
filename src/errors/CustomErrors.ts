@@ -1,31 +1,35 @@
+import { constantErrorMessages, constantStatusCodes } from '../constants/errorMessages.ts';
 import { AppError } from './AppError.ts';
 
 export class ValidationError extends AppError {
-  constructor(message: string = 'Invalid request data') {
-    super(message, 400);
+  constructor(message: string = constantErrorMessages.USER.BAD_REQUEST, context: string = '') {
+    super(message, constantStatusCodes.BAD_REQUEST, context);
   }
 }
 
 export class UnauthorizedError extends AppError {
-  constructor(message: string = 'Unauthorized') {
-    super(message, 401);
+  constructor(message: string = constantErrorMessages.USER.UNAUTHORIZED, context: string = '') {
+    super(message, constantStatusCodes.UNAUTHORIZED, context);
   }
 }
 
 export class ForbiddenError extends AppError {
-  constructor(message: string = 'Forbidden') {
-    super(message, 403);
+  constructor(message: string = constantErrorMessages.USER.FORBIDDEN, context: string = '') {
+    super(message, constantStatusCodes.FORBIDDEN, context);
   }
 }
 
 export class NotFoundError extends AppError {
-  constructor(message: string = 'Resource not found') {
-    super(message, 404);
+  constructor(message: string = constantErrorMessages.USER.NOT_FOUND, context: string = '') {
+    super(message, constantStatusCodes.NOT_FOUND, context);
   }
 }
 
 export class DatabaseError extends AppError {
-  constructor(message: string = 'Database error occurred') {
-    super(message, 500);
+  constructor(
+    message: string = constantErrorMessages.USER.INTERNAL_SERVER_ERROR,
+    context: string = '',
+  ) {
+    super(message, constantStatusCodes.INTERNAL_SERVER_ERROR, context);
   }
 }
