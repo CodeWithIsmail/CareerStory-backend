@@ -3,6 +3,8 @@ import { UserService } from '../services/userService.ts';
 import { CreateUserDto, UpdateUserDto, UserResponseDto } from '../dto/userDto.ts';
 import { z } from 'zod';
 import { UserValidator } from '../validators/userValidator.ts';
+import { AppError } from '../errors/AppError.ts';
+import { ErrorFactory } from '../errors/errorFactory.ts';
 
 /**
  * UserController
@@ -22,9 +24,13 @@ export class UserController {
       return res.status(201).json(newUser);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: 'Failed to create user' });
+        const validationError = ErrorFactory.createValidationError('Invalid request data');
+        return res.status(validationError.statusCode).json({ message: validationError.message });
       }
-      return res.status(500).json({ message: 'Failed to create user' });
+      if (error instanceof AppError) {
+        return res.status(error.statusCode).json({ message: error.message });
+      }
+      return res.status(500).json({ message: 'Unexpected error occurred while creating user' });
     }
   };
 
@@ -33,10 +39,12 @@ export class UserController {
       const users = await this.userService.getAllUsers();
       return res.status(200).json(users);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: 'Failed to fetch all users' });
+      if (error instanceof AppError) {
+        return res.status(error.statusCode).json({ message: error.message });
       }
-      return res.status(500).json({ message: 'Failed to fetch all users' });
+      return res
+        .status(500)
+        .json({ message: 'Unexpected error occurred while fetching all users' });
     }
   };
 
@@ -47,11 +55,15 @@ export class UserController {
       return res.status(200).json(user);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res
-          .status(400)
-          .json({ message: `Failed to fetch user with ID ${req.params.userId}` });
+        const validationError = ErrorFactory.createValidationError('Invalid user ID parameter');
+        return res.status(validationError.statusCode).json({ message: validationError.message });
       }
-      return res.status(500).json({ message: `Failed to fetch user with ID ${req.params.userId}` });
+      if (error instanceof AppError) {
+        return res.status(error.statusCode).json({ message: error.message });
+      }
+      return res.status(500).json({
+        message: `Unexpected error occurred while fetching user with ID ${req.params.userId}`,
+      });
     }
   };
 
@@ -63,12 +75,14 @@ export class UserController {
       return res.status(200).json(updatedUser);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({
-          message: `Failed to update user with ID ${req.params.userId}`,
-        });
+        const validationError = ErrorFactory.createValidationError('Invalid user data for update');
+        return res.status(validationError.statusCode).json({ message: validationError.message });
+      }
+      if (error instanceof AppError) {
+        return res.status(error.statusCode).json({ message: error.message });
       }
       return res.status(500).json({
-        message: `Failed to update user with ID ${req.params.userId}`,
+        message: `Unexpected error occurred while updating user with ID ${req.params.userId}`,
       });
     }
   };
@@ -80,12 +94,14 @@ export class UserController {
       return res.status(200).json({ message: 'User soft deleted successfully' });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({
-          message: `Failed to delete user with ID ${req.params.userId}`,
-        });
+        const validationError = ErrorFactory.createValidationError('Invalid user ID parameter');
+        return res.status(validationError.statusCode).json({ message: validationError.message });
+      }
+      if (error instanceof AppError) {
+        return res.status(error.statusCode).json({ message: error.message });
       }
       return res.status(500).json({
-        message: `Failed to delete user with ID ${req.params.userId}`,
+        message: `Unexpected error occurred while deleting user with ID ${req.params.userId}`,
       });
     }
   };
