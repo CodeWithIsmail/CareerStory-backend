@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import { UserService } from '../services/userService.ts';
-import { CreateUserDto, UpdateUserDto, UserResponseDto } from '../dto/userDto.ts';
-import { z } from 'zod';
+import { CreateUserDto, UpdateUserDto } from '../dto/userDto.ts';
 import { UserValidator } from '../validators/userValidator.ts';
+import { ErrorHandler } from '../errors/errorHandler.ts';
 
 /**
  * UserController
@@ -21,10 +21,7 @@ export class UserController {
       const newUser = await this.userService.createUser(validatedNewUser);
       return res.status(201).json(newUser);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: 'Failed to create user' });
-      }
-      return res.status(500).json({ message: 'Failed to create user' });
+      return ErrorHandler.handleError(error, res, 'creating new user');
     }
   };
 
@@ -33,10 +30,7 @@ export class UserController {
       const users = await this.userService.getAllUsers();
       return res.status(200).json(users);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: 'Failed to fetch all users' });
-      }
-      return res.status(500).json({ message: 'Failed to fetch all users' });
+      return ErrorHandler.handleError(error, res, 'fetching all users');
     }
   };
 
@@ -46,12 +40,7 @@ export class UserController {
       const user = await this.userService.getUserById(userId);
       return res.status(200).json(user);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res
-          .status(400)
-          .json({ message: `Failed to fetch user with ID ${req.params.userId}` });
-      }
-      return res.status(500).json({ message: `Failed to fetch user with ID ${req.params.userId}` });
+      return ErrorHandler.handleError(error, res, `fetching user with ID ${req.params.userId}`);
     }
   };
 
@@ -62,14 +51,7 @@ export class UserController {
       const updatedUser = await this.userService.updateUser(userId, updateData);
       return res.status(200).json(updatedUser);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({
-          message: `Failed to update user with ID ${req.params.userId}`,
-        });
-      }
-      return res.status(500).json({
-        message: `Failed to update user with ID ${req.params.userId}`,
-      });
+      return ErrorHandler.handleError(error, res, `updating user with ID ${req.params.userId}`);
     }
   };
 
@@ -79,14 +61,7 @@ export class UserController {
       await this.userService.deleteUser(userId);
       return res.status(200).json({ message: 'User soft deleted successfully' });
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({
-          message: `Failed to delete user with ID ${req.params.userId}`,
-        });
-      }
-      return res.status(500).json({
-        message: `Failed to delete user with ID ${req.params.userId}`,
-      });
+      return ErrorHandler.handleError(error, res, `deleting user with ID ${req.params.userId}`);
     }
   };
 }

@@ -1,4 +1,4 @@
-import { DeleteResult, UpdateDescription } from 'typeorm';
+import { DeleteResult, IsNull, UpdateDescription } from 'typeorm';
 import { AppDataSource } from '../dataSource.ts';
 import { User } from '../entities/User.ts';
 import { CreateUserDto, UpdateUserDto, UserResponseDto } from '../dto/userDto.ts';
@@ -32,6 +32,6 @@ export class UserRepository {
   }
 
   async deleteUser(id: string): Promise<DeleteResult> {
-    return this.userRepository.softDelete(id);
+    return this.userRepository.softDelete({ id, deletedAt: IsNull() });
   }
 }
