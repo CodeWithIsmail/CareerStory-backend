@@ -29,26 +29,7 @@ export class ErrorHandler {
         details: validationErrors,
       });
     }
-    // Handle TypeORM Database Errors
-    else if (error instanceof QueryFailedError) {
-      logger.error('Database error occurred', {
-        context,
-        errorCode: (error as any).code,
-        driverError: (error as any).driverError,
-      });
 
-      // Check for duplicate key violation
-      if ((error as any).code === 'ER_DUP_ENTRY' || (error as any).code === '23505') {
-        statusCode = constantStatusCodes.CONFLICT;
-        message = 'This record already exists (duplicate entry)';
-      }
-
-      // Generic database error
-      else {
-        statusCode = constantStatusCodes.INTERNAL_SERVER_ERROR;
-        message = 'A database error occurred';
-      }
-    }
     // Handle Custom Application Errors
     else if (error instanceof AppError) {
       statusCode = error.statusCode;
@@ -60,6 +41,16 @@ export class ErrorHandler {
         message,
       });
     }
+
+    // Handle TypeORM Database Errors
+    else if (error instanceof QueryFailedError) {
+      logger.error('Database error occurred', {
+        context,
+        errorCode: (error as any).code,
+        driverError: (error as any).driverError,
+      });
+    }
+
     // Handle Generic Errors
     else if (error instanceof Error) {
       statusCode = constantStatusCodes.INTERNAL_SERVER_ERROR;
@@ -71,6 +62,7 @@ export class ErrorHandler {
         stack: error.stack,
       });
     }
+
     // Handle Unknown Errors
     else {
       logger.error('Unknown error occurred', {

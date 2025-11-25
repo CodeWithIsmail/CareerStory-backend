@@ -4,7 +4,6 @@ import { mapUsersToDtoList, mapUserToDto } from '../utils/userMapper.ts';
 import { ErrorFactory } from '../errors/errorFactory.ts';
 import { constantErrorMessages } from '../constants/errorMessages.ts';
 import logger from '../utils/logger.ts';
-import { log } from 'console';
 /**
  * UserService
  * ----------------

@@ -37,10 +37,6 @@ export class UserValidator {
       message: 'At least one field must be provided for update',
     });
 
-  static userIdParamSchema = z.object({
-    userId: z.uuid(),
-  });
-
   static validateCreateUser(data: unknown): CreateUserDto {
     return this.createUserSchema.parse(data);
   }
@@ -50,6 +46,7 @@ export class UserValidator {
   }
 
   static validateUserIdParam(params: unknown): string {
-    return this.userIdParamSchema.parse(params).userId;
+    let userId = z.uuidv4().parse(params);
+    return userId;
   }
 }

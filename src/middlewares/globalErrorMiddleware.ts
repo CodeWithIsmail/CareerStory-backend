@@ -9,12 +9,10 @@ export const globalErrorMiddleware = (
   _next: NextFunction,
 ) => {
   const context = `${req.method} ${req.path}`;
-  const userId = (req as any).user?.id || 'unauthenticated';
 
   logger.error('Request error occurred', {
     error: err instanceof Error ? err.message : String(err),
     context,
-    userId,
     stack: err instanceof Error ? err.stack : undefined,
   });
 

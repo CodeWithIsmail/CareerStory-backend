@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { UserService } from '../services/userService.ts';
 import { CreateUserDto, UpdateUserDto } from '../dto/userDto.ts';
 import { UserValidator } from '../validators/userValidator.ts';
-import { ErrorHandler } from '../errors/errorHandler.ts';
+import { constantStatusCodes } from '../constants/errorMessages.ts';
 
 /**
  * UserController
@@ -19,7 +19,7 @@ export class UserController {
     try {
       const validatedNewUser: CreateUserDto = UserValidator.validateCreateUser(req.body);
       const newUser = await this.userService.createUser(validatedNewUser);
-      return res.status(201).json(newUser);
+      return res.status(constantStatusCodes.CREATED).json(newUser);
     } catch (error) {
       next(error);
     }
@@ -28,7 +28,7 @@ export class UserController {
   getAllUsers = async (_req: Request, res: Response, next: NextFunction) => {
     try {
       const users = await this.userService.getAllUsers();
-      return res.status(200).json(users);
+      return res.status(constantStatusCodes.OK).json(users);
     } catch (error) {
       next(error);
     }
@@ -36,9 +36,9 @@ export class UserController {
 
   getUserById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = UserValidator.validateUserIdParam(req.params);
+      const userId = UserValidator.validateUserIdParam(req.params.userId);
       const user = await this.userService.getUserById(userId);
-      return res.status(200).json(user);
+      return res.status(constantStatusCodes.OK).json(user);
     } catch (error) {
       next(error);
     }
@@ -46,10 +46,10 @@ export class UserController {
 
   updateUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = UserValidator.validateUserIdParam(req.params);
+      const userId = UserValidator.validateUserIdParam(req.params.userId);
       const updateData: UpdateUserDto = UserValidator.validateUpdateUser(req.body);
       const updatedUser = await this.userService.updateUser(userId, updateData);
-      return res.status(200).json(updatedUser);
+      return res.status(constantStatusCodes.OK).json(updatedUser);
     } catch (error) {
       next(error);
     }
@@ -57,7 +57,7 @@ export class UserController {
 
   deleteUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = UserValidator.validateUserIdParam(req.params);
+      const userId = UserValidator.validateUserIdParam(req.params.userId);
       await this.userService.deleteUser(userId);
       return res.status(200).json({ message: 'User soft deleted successfully' });
     } catch (error) {

@@ -1,7 +1,7 @@
-import { DeleteResult, IsNull, UpdateDescription } from 'typeorm';
+import { DeleteResult, IsNull } from 'typeorm';
 import { AppDataSource } from '../dataSource.ts';
 import { User } from '../entities/User.ts';
-import { CreateUserDto, UpdateUserDto, UserResponseDto } from '../dto/userDto.ts';
+import { CreateUserDto, UpdateUserDto } from '../dto/userDto.ts';
 
 /**
  * UserRepository
