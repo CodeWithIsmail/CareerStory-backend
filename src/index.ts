@@ -4,6 +4,7 @@ import { AppDataSource } from './dataSource.ts';
 import { globalErrorMiddleware } from './middlewares/globalErrorMiddleware.ts';
 import { routeNotFoundMiddleware } from './middlewares/notFoundMiddleware.ts';
 import logger from './utils/logger.ts';
+import storyRouter from './routes/storyRoutes.ts';
 
 const PORT = process.env.PORT || 3000;
 
@@ -11,6 +12,7 @@ const app = express();
 
 app.use(express.json());
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/stories', storyRouter);
 app.use(globalErrorMiddleware);
 app.use(routeNotFoundMiddleware);
 

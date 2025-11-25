@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import { Auth } from './entities/Auth.ts';
 import { User } from './entities/User.ts';
+import { Story } from './entities/Story.ts';
 
 /**
  * AppDataSource - TypeORM database connection configuration
@@ -17,5 +18,5 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_DATABASE,
   synchronize: true,
   logging: false,
-  entities: [User, Auth],
+  entities: [User, Auth, Story],
 });
