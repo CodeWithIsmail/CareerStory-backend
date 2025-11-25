@@ -11,18 +11,31 @@ import { CreateUserDto, UpdateUserDto } from '../dto/userDto.ts';
  */
 export class UserValidator {
   static createUserSchema = z.object({
-    userName: z.string().min(3).max(50),
-    name: z.string().min(3).max(100),
+    userName: z
+      .string()
+      .min(3, 'Username must be at least 3 characters')
+      .max(50, 'Username must be at most 50 characters'),
+    name: z
+      .string()
+      .min(3, 'Name must be at least 3 characters')
+      .max(100, 'Name must be at most 100 characters'),
     email: z.email().max(255),
     role: z.enum(UserRole),
   });
 
-  static updateUserSchema = z.object({
-    userName: z.string().min(3).max(50).optional(),
-    name: z.string().min(3).max(100).optional(),
-    email: z.email().max(255).optional(),
-    role: z.enum(UserRole).optional(),
-  });
+  static updateUserSchema = z
+    .object({
+      name: z
+        .string()
+        .min(3, 'Name must be at least 3 characters')
+        .max(100, 'Name must be at most 100 characters')
+        .optional(),
+      role: z.enum(UserRole).optional(),
+    })
+    .strict()
+    .refine((data) => Object.keys(data).length > 0, {
+      message: 'At least one field must be provided for update',
+    });
 
   static userIdParamSchema = z.object({
     userId: z.uuid(),

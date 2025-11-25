@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { UserService } from '../services/userService.ts';
 import { CreateUserDto, UpdateUserDto } from '../dto/userDto.ts';
 import { UserValidator } from '../validators/userValidator.ts';
@@ -15,53 +15,53 @@ import { ErrorHandler } from '../errors/errorHandler.ts';
 export class UserController {
   private userService = new UserService();
 
-  createUser = async (req: Request, res: Response) => {
+  createUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const validatedNewUser: CreateUserDto = UserValidator.validateCreateUser(req.body);
       const newUser = await this.userService.createUser(validatedNewUser);
       return res.status(201).json(newUser);
     } catch (error) {
-      return ErrorHandler.handleError(error, res, 'creating new user');
+      next(error);
     }
   };
 
-  getAllUsers = async (_req: Request, res: Response) => {
+  getAllUsers = async (_req: Request, res: Response, next: NextFunction) => {
     try {
       const users = await this.userService.getAllUsers();
       return res.status(200).json(users);
     } catch (error) {
-      return ErrorHandler.handleError(error, res, 'fetching all users');
+      next(error);
     }
   };
 
-  getUserById = async (req: Request, res: Response) => {
+  getUserById = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = UserValidator.validateUserIdParam(req.params);
       const user = await this.userService.getUserById(userId);
       return res.status(200).json(user);
     } catch (error) {
-      return ErrorHandler.handleError(error, res, `fetching user with ID ${req.params.userId}`);
+      next(error);
     }
   };
 
-  updateUser = async (req: Request, res: Response) => {
+  updateUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = UserValidator.validateUserIdParam(req.params);
       const updateData: UpdateUserDto = UserValidator.validateUpdateUser(req.body);
       const updatedUser = await this.userService.updateUser(userId, updateData);
       return res.status(200).json(updatedUser);
     } catch (error) {
-      return ErrorHandler.handleError(error, res, `updating user with ID ${req.params.userId}`);
+      next(error);
     }
   };
 
-  deleteUser = async (req: Request, res: Response) => {
+  deleteUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = UserValidator.validateUserIdParam(req.params);
       await this.userService.deleteUser(userId);
       return res.status(200).json({ message: 'User soft deleted successfully' });
     } catch (error) {
-      return ErrorHandler.handleError(error, res, `deleting user with ID ${req.params.userId}`);
+      next(error);
     }
   };
 }
