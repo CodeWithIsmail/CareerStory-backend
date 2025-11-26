@@ -1,5 +1,6 @@
 import winston from 'winston';
 import path from 'path';
+import { ENV } from '../config/environment.ts';
 
 const logsDir = 'logs';
 
@@ -26,7 +27,7 @@ const transports = [
 
   new winston.transports.Console({
     level: 'debug',
-    silent: process.env.NODE_ENV === 'production',
+    silent: ENV.NODE_ENV === 'production',
     format: winston.format.combine(
       winston.format.colorize(),
       winston.format.printf(({ level, message, timestamp, context, ...meta }) => {
@@ -38,7 +39,7 @@ const transports = [
 ];
 
 export const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
+  level: ENV.LOG_LEVEL || 'info',
   format: customFormat,
   transports: transports,
 });

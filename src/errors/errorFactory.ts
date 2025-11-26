@@ -6,7 +6,7 @@ import {
   DatabaseError,
   ConflictError,
 } from './CustomErrors.ts';
-import { constantErrorMessages } from '../constants/errorMessages.ts';
+import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
 
 export class ErrorFactory {
   static createNotFoundError = (message?: string, context?: string): NotFoundError => {
@@ -33,14 +33,10 @@ export class ErrorFactory {
     fieldName: string = 'resource',
     context: string = '',
   ): ConflictError => {
-    let message = constantErrorMessages.USER.CONFLICT;
-
-    if (fieldName.toLowerCase() === 'email') {
-      message = constantErrorMessages.USER.DUPLICATE_EMAIL;
-    } else if (fieldName.toLowerCase() === 'username') {
-      message = constantErrorMessages.USER.DUPLICATE_USERNAME;
-    }
-
+    let message =
+      fieldName.toLowerCase() === 'email'
+        ? ERROR_MESSAGES.USER.DUPLICATE_EMAIL
+        : ERROR_MESSAGES.USER.DUPLICATE_USERNAME;
     return new ConflictError(message, context);
   };
 }

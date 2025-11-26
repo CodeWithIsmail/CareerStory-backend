@@ -1,28 +1,42 @@
 import { z } from 'zod';
 import { CreateStoryDto, UpdateStoryDto } from '../dto/storyDto.ts';
+import { VALIDATION_MESSAGES } from '../constants/validationMessages.ts';
 
 export class StoryValidator {
-  static createStorySchema = z.object({
-    userId: z.uuidv4('userId must be a valid UUID'),
-    title: z
-      .string()
-      .min(5, 'Title must be at least 5 characters')
-      .max(255, 'Title must be at most 255 characters'),
-    body: z.string().min(10, 'Body must be at least 10 characters'),
-  });
+  static createStorySchema = z
+    .object({
+      userId: z.uuidv4(VALIDATION_MESSAGES.STORY.USER_ID.INVALID),
+      title: z
+        .string({ message: VALIDATION_MESSAGES.STORY.TITLE.REQUIRED })
+        .trim()
+        .min(5, VALIDATION_MESSAGES.STORY.TITLE.MIN)
+        .max(255, VALIDATION_MESSAGES.STORY.TITLE.MAX),
+      body: z
+        .string({ message: VALIDATION_MESSAGES.STORY.BODY.REQUIRED })
+        .trim()
+        .min(10, VALIDATION_MESSAGES.STORY.BODY.MIN)
+        .max(5000, VALIDATION_MESSAGES.STORY.BODY.MAX),
+    })
+    .strict();
 
   static updateStorySchema = z
     .object({
       title: z
-        .string()
-        .min(5, 'Title must be at least 5 characters')
-        .max(255, 'Title must be at most 255 characters')
+        .string({ message: VALIDATION_MESSAGES.STORY.TITLE.REQUIRED })
+        .trim()
+        .min(5, VALIDATION_MESSAGES.STORY.TITLE.MIN)
+        .max(255, VALIDATION_MESSAGES.STORY.TITLE.MAX)
         .optional(),
-      body: z.string().min(10, 'Body must be at least 10 characters').optional(),
+      body: z
+        .string({ message: VALIDATION_MESSAGES.STORY.BODY.REQUIRED })
+        .trim()
+        .min(10, VALIDATION_MESSAGES.STORY.BODY.MIN)
+        .max(5000, VALIDATION_MESSAGES.STORY.BODY.MAX)
+        .optional(),
     })
     .strict()
     .refine((data) => Object.keys(data).length > 0, {
-      message: 'At least one field must be provided for update',
+      message: VALIDATION_MESSAGES.COMMON.AT_LEAST_ONE_FIELD,
     });
 
   static validateCreateStory(data: unknown): CreateStoryDto {
@@ -34,7 +48,6 @@ export class StoryValidator {
   }
 
   static validateStoryIdParam(params: unknown): string {
-    let storyId = z.uuidv4().parse(params);
-    return storyId;
+    return z.uuidv4().parse(params);
   }
 }

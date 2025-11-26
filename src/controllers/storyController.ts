@@ -3,16 +3,16 @@ import { StoryService } from '../services/storyService.ts';
 import { CreateStoryDto, UpdateStoryDto } from '../dto/storyDto.ts';
 import { StoryValidator } from '../validators/storyValidator.ts';
 import { UserValidator } from '../validators/userValidator.ts';
-import { constantStatusCodes } from '../constants/errorMessages.ts';
+import { ResponseHandler } from '../utils/responseHandler.ts';
+import { RESPONSE_MESSAGES } from '../constants/responseMessages.ts';
 
 export class StoryController {
   private storyService = new StoryService();
 
   createStory = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const validatedNewStory: CreateStoryDto = StoryValidator.validateCreateStory(req.body);
-      const newStory = await this.storyService.createStory(validatedNewStory);
-      return res.status(constantStatusCodes.CREATED).json(newStory);
+      const newStory = await this.storyService.createStory(req.body);
+      return ResponseHandler.created(res, newStory, RESPONSE_MESSAGES.STORY.CREATE.SUCCESS);
     } catch (error) {
       next(error);
     }
@@ -21,7 +21,7 @@ export class StoryController {
   getAllStories = async (_req: Request, res: Response, next: NextFunction) => {
     try {
       const stories = await this.storyService.getAllStories();
-      return res.status(constantStatusCodes.OK).json(stories);
+      return ResponseHandler.success(res, stories, RESPONSE_MESSAGES.STORY.FETCH.ALL_SUCCESS);
     } catch (error) {
       next(error);
     }
@@ -29,9 +29,8 @@ export class StoryController {
 
   getStoryById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const storyId = StoryValidator.validateStoryIdParam(req.params.storyId);
-      const story = await this.storyService.getStoryById(storyId);
-      return res.status(constantStatusCodes.OK).json(story);
+      const story = await this.storyService.getStoryById(req.params.storyId);
+      return ResponseHandler.success(res, story, RESPONSE_MESSAGES.STORY.FETCH.BY_ID_SUCCESS);
     } catch (error) {
       next(error);
     }
@@ -39,9 +38,8 @@ export class StoryController {
 
   getStoriesByUserId = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = UserValidator.validateUserIdParam(req.params.userId);
-      const stories = await this.storyService.getStoriesByUserId(userId);
-      return res.status(constantStatusCodes.OK).json(stories);
+      const stories = await this.storyService.getStoriesByUserId(req.params.userId);
+      return ResponseHandler.success(res, stories, RESPONSE_MESSAGES.STORY.FETCH.BY_USER_SUCCESS);
     } catch (error) {
       next(error);
     }
@@ -49,10 +47,8 @@ export class StoryController {
 
   updateStory = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const storyId = StoryValidator.validateStoryIdParam(req.params.storyId);
-      const updateData: UpdateStoryDto = StoryValidator.validateUpdateStory(req.body);
-      const updatedStory = await this.storyService.updateStory(storyId, updateData);
-      return res.status(constantStatusCodes.OK).json(updatedStory);
+      const updatedStory = await this.storyService.updateStory(req.params.storyId, req.body);
+      return ResponseHandler.success(res, updatedStory, RESPONSE_MESSAGES.STORY.UPDATE.SUCCESS);
     } catch (error) {
       next(error);
     }
@@ -60,9 +56,12 @@ export class StoryController {
 
   deleteStory = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const storyId = StoryValidator.validateStoryIdParam(req.params.storyId);
-      await this.storyService.deleteStory(storyId);
-      return res.status(constantStatusCodes.OK).json({ message: 'Story deleted successfully' });
+      await this.storyService.deleteStory(req.params.storyId);
+      return ResponseHandler.success(
+        res,
+        { id: req.params.storyId },
+        RESPONSE_MESSAGES.STORY.DELETE.SUCCESS,
+      );
     } catch (error) {
       next(error);
     }
