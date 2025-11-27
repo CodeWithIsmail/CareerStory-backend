@@ -3,12 +3,6 @@ import { AppDataSource } from '../dataSource.ts';
 import { User } from '../entities/User.ts';
 import { CreateUserDto, UpdateUserDto } from '../dto/userDto.ts';
 import { UserOrNull } from '../types/customTypes.ts';
-/**
- * UserRepository
- * ----------------
- * Handles all database operations related to the User entity.
- * Follows Repository Pattern to separate data access logic from service/controller.
- */
 
 export class UserRepository {
   private userRepository = AppDataSource.getRepository(User);

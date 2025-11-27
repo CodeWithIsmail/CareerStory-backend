@@ -1,16 +1,10 @@
 import { UserRepository } from '../repositories/userRepository.ts';
 import { CreateUserDto, UpdateUserDto, UserResponseDto } from '../dto/userDto.ts';
-import { mapUsersToDtoList, mapUserToDto } from '../mappers/userMapper.ts';
+import { mapUsersToDtoList, mapUserToDto } from '../utils/userMapper.ts';
 import { ErrorFactory } from '../errors/errorFactory.ts';
 import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
 import logger from '../utils/logger.ts';
 import { LOG_MESSAGES } from '../constants/logMessages.ts';
-/**
- * UserService
- * ----------------
- * Contains business logic related to User entity.
- * Interacts with UserRepository for data access.
- */
 
 export class UserService {
   private userRepository = new UserRepository();
@@ -21,20 +15,23 @@ export class UserService {
     const existingEmailUser = await this.userRepository.getUserByEmail(user.email);
     if (existingEmailUser) {
       logger.warn(LOG_MESSAGES.USER.CREATE.DUPLICATE_EMAIL, { email: user.email });
-      throw ErrorFactory.createConflictError('email', 'creating user');
+      throw ErrorFactory.createConflictError(ERROR_MESSAGES.USER.DUPLICATE_EMAIL, 'creating user');
     }
 
     const existingUsernameUser = await this.userRepository.getUserByUsername(user.userName);
     if (existingUsernameUser) {
       logger.warn(LOG_MESSAGES.USER.CREATE.DUPLICATE_USERNAME, { userName: user.userName });
-      throw ErrorFactory.createConflictError('username', 'creating user');
+      throw ErrorFactory.createConflictError(
+        ERROR_MESSAGES.USER.DUPLICATE_USERNAME,
+        'creating user',
+      );
     }
 
     const newUser = await this.userRepository.createUser(user);
     if (!newUser) {
       logger.error(LOG_MESSAGES.USER.CREATE.FAILED, { user });
       throw ErrorFactory.createDatabaseError(
-        ERROR_MESSAGES.COMMON.INTERNAL_SERVER_ERROR,
+        ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR,
         'creating user',
       );
     }
@@ -55,7 +52,7 @@ export class UserService {
     if (!user) {
       logger.warn(LOG_MESSAGES.USER.FETCH.BY_ID_NOT_FOUND, { userId });
       throw ErrorFactory.createNotFoundError(
-        ERROR_MESSAGES.COMMON.NOT_FOUND,
+        ERROR_MESSAGES.USER.NOT_FOUND,
         `fetching user with ID ${userId}`,
       );
     }
@@ -69,7 +66,7 @@ export class UserService {
     if (!updatedUser) {
       logger.warn(LOG_MESSAGES.USER.UPDATE.NOT_FOUND_UPDATE, { userId });
       throw ErrorFactory.createNotFoundError(
-        ERROR_MESSAGES.COMMON.NOT_FOUND,
+        ERROR_MESSAGES.USER.NOT_FOUND,
         `updating user with ID ${userId}`,
       );
     }
@@ -83,7 +80,7 @@ export class UserService {
     if (result.affected === 0) {
       logger.warn(LOG_MESSAGES.USER.DELETE.NOT_FOUND_DELETE, { userId });
       throw ErrorFactory.createNotFoundError(
-        ERROR_MESSAGES.COMMON.NOT_FOUND,
+        ERROR_MESSAGES.USER.NOT_FOUND,
         `deleting user with ID ${userId}`,
       );
     }

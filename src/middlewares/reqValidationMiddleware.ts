@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-import { UserValidator } from '../validators/userValidator.ts';
 import z from 'zod';
 
 export const validateParamId = (paramName: string, validateFn: (value: unknown) => any) => {

@@ -16,7 +16,6 @@ export class ErrorHandler {
     if (error instanceof z.ZodError) {
       statusCode = HTTP_STATUS_CODES.BAD_REQUEST;
       message = ERROR_MESSAGES.COMMON.INVALID_INPUT;
-      console.log('Zod Error:', error);
       errorDetails = formatZodErrors(error);
 
       logger.warn('Validation error', {
@@ -40,6 +39,8 @@ export class ErrorHandler {
 
     // Handle TypeORM Database Errors
     else if (error instanceof QueryFailedError) {
+      statusCode = HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
+      message = error.message;
       logger.error('Database error occurred', {
         context,
         errorCode: (error as any).code,
@@ -50,7 +51,7 @@ export class ErrorHandler {
     // Handle Generic Errors
     else if (error instanceof Error) {
       statusCode = HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
-      message = ERROR_MESSAGES.COMMON.INTERNAL_SERVER_ERROR;
+      message = ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR;
 
       logger.error('Unexpected error', {
         context,

@@ -31,17 +31,16 @@ export const VALIDATION_MESSAGES = {
   STORY: {
     USER_ID: {
       INVALID: 'userId must be a valid UUID',
-      
     },
     TITLE: {
       MIN: 'Title must be at least 5 characters',
       MAX: 'Title must be at most 255 characters',
-        REQUIRED: 'Title is required',
+      REQUIRED: 'Title is required',
     },
     BODY: {
       MIN: 'Body must be at least 10 characters',
       MAX: 'Body must be at most 5000 characters',
-        REQUIRED: 'Body is required',
+      REQUIRED: 'Body is required',
     },
     STORY_ID: {
       INVALID: 'Story ID must be a valid UUID',

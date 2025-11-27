@@ -1,19 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { UserService } from '../services/userService.ts';
-import { CreateUserDto, UpdateUserDto } from '../dto/userDto.ts';
-import { UserValidator } from '../validators/userValidator.ts';
-import { HTTP_STATUS_CODES } from '../constants/errorMessages.ts';
 import { ResponseHandler } from '../utils/responseHandler.ts';
 import { RESPONSE_MESSAGES } from '../constants/responseMessages.ts';
-import { id } from 'zod/locales';
-
-/**
- * UserController
- * ----------------
- * Handles HTTP requests related to User entity.
- * Delegates business logic to UserService.
- * Responsible for request/response lifecycle and error handling.
- */
 
 export class UserController {
   private userService = new UserService();

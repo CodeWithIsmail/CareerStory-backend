@@ -1,10 +1,12 @@
-import { StoryRepository } from '../repositories/storyRepository.ts';
 import { CreateStoryDto, UpdateStoryDto, StoryResponseDto } from '../dto/storyDto.ts';
-import { mapStoryToDto, mapStoriesToDtoList } from '../mappers/storyMapper.ts';
+import { mapStoryToDto, mapStoriesToDtoList } from '../utils/storyMapper.ts';
 import { ErrorFactory } from '../errors/errorFactory.ts';
 import { UserRepository } from '../repositories/userRepository.ts';
+import { StoryRepository } from '../repositories/storyRepository.ts';
 import logger from '../utils/logger.ts';
 import { LOG_MESSAGES } from '../constants/logMessages.ts';
+import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
+
 export class StoryService {
   private storyRepository = new StoryRepository();
   private userRepository = new UserRepository();
@@ -15,13 +17,16 @@ export class StoryService {
     const user = await this.userRepository.getUserById(story.userId);
     if (!user) {
       logger.warn(LOG_MESSAGES.STORY.CREATE.USER_NOT_FOUND, { userId: story.userId });
-      throw ErrorFactory.createNotFoundError('User not found', 'creating story');
+      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, 'creating story');
     }
 
     const newStory = await this.storyRepository.createStory(story);
     if (!newStory) {
       logger.error(LOG_MESSAGES.STORY.CREATE.FAILED, { story });
-      throw ErrorFactory.createDatabaseError('Failed to create story', 'creating story');
+      throw ErrorFactory.createDatabaseError(
+        ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR,
+        'creating story',
+      );
     }
 
     logger.info(LOG_MESSAGES.STORY.CREATE.SUCCESS, { storyId: newStory.storyId });
@@ -41,7 +46,10 @@ export class StoryService {
 
     if (!story) {
       logger.warn(LOG_MESSAGES.STORY.FETCH.BY_ID_NOT_FOUND, { storyId });
-      throw ErrorFactory.createNotFoundError('Story not found', `fetching story ${storyId}`);
+      throw ErrorFactory.createNotFoundError(
+        ERROR_MESSAGES.STORY.NOT_FOUND,
+        `fetching story ${storyId}`,
+      );
     }
 
     logger.info(LOG_MESSAGES.STORY.FETCH.BY_ID_SUCCESS, { storyId });
@@ -61,7 +69,10 @@ export class StoryService {
     const updatedStory = await this.storyRepository.updateStory(storyId, updateData);
     if (!updatedStory) {
       logger.warn(LOG_MESSAGES.STORY.UPDATE.NOT_FOUND, { storyId });
-      throw ErrorFactory.createNotFoundError('Story not found', `updating story ${storyId}`);
+      throw ErrorFactory.createNotFoundError(
+        ERROR_MESSAGES.STORY.NOT_FOUND,
+        `updating story ${storyId}`,
+      );
     }
 
     logger.info(LOG_MESSAGES.STORY.UPDATE.SUCCESS, { storyId });
@@ -74,7 +85,10 @@ export class StoryService {
 
     if (result.affected === 0) {
       logger.warn(LOG_MESSAGES.STORY.DELETE.NOT_FOUND, { storyId });
-      throw ErrorFactory.createNotFoundError('Story not found', `deleting story ${storyId}`);
+      throw ErrorFactory.createNotFoundError(
+        ERROR_MESSAGES.STORY.NOT_FOUND,
+        `deleting story ${storyId}`,
+      );
     }
 
     logger.info(LOG_MESSAGES.STORY.DELETE.SUCCESS, { storyId });

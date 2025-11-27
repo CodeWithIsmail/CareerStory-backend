@@ -1,8 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import { StoryService } from '../services/storyService.ts';
-import { CreateStoryDto, UpdateStoryDto } from '../dto/storyDto.ts';
-import { StoryValidator } from '../validators/storyValidator.ts';
-import { UserValidator } from '../validators/userValidator.ts';
 import { ResponseHandler } from '../utils/responseHandler.ts';
 import { RESPONSE_MESSAGES } from '../constants/responseMessages.ts';
 
