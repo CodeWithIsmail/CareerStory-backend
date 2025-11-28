@@ -36,4 +36,12 @@ export class UserRepository {
   async getUserByUsername(userName: string): Promise<UserOrNull> {
     return this.userRepository.findOneBy({ userName });
   }
+
+  async getUserByEmail(email: string): Promise<User | null> {
+    return this.userRepository.findOneBy({ email });
+  }
+
+  async getUserByUsername(userName: string): Promise<User | null> {
+    return this.userRepository.findOneBy({ userName });
+  }
 }

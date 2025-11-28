@@ -36,3 +36,9 @@ export class ConflictError extends AppError {
     super(message, HTTP_STATUS_CODES.CONFLICT, context);
   }
 }
+
+export class ConflictError extends AppError {
+  constructor(message: string = constantErrorMessages.USER.CONFLICT, context: string = '') {
+    super(message, constantStatusCodes.CONFLICT, context);
+  }
+}
