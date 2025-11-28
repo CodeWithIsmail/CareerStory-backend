@@ -15,9 +15,9 @@ export class StoryController {
     }
   };
 
-  getAllStories = async (_req: Request, res: Response, next: NextFunction) => {
+  getAllStories = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const stories = await this.storyService.getAllStories();
+      const stories = await this.storyService.getAllStories(req.validatedQuery);
       return ResponseHandler.success(res, stories, RESPONSE_MESSAGES.STORY.FETCH.ALL_SUCCESS);
     } catch (error) {
       next(error);

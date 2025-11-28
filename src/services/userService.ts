@@ -1,10 +1,16 @@
 import { UserRepository } from '../repositories/userRepository.ts';
 import { CreateUserDto, UpdateUserDto, UserResponseDto } from '../dto/userDto.ts';
-import { mapUsersToDtoList, mapUserToDto } from '../utils/userMapper.ts';
+import { mapUsersToDtoList, mapUserToDto } from '../mappers/userMapper.ts';
 import { ErrorFactory } from '../errors/errorFactory.ts';
 import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
 import logger from '../utils/logger.ts';
 import { LOG_MESSAGES } from '../constants/logMessages.ts';
+import { UserPaginationQuery } from '../validators/paginationValidator.ts';
+import { PaginatedResponse } from '../types/customTypes.ts';
+import { AppDataSource } from '../dataSource.ts';
+import { Story } from '../entities/Story.ts';
+import { User } from '../entities/User.ts';
+import { IsNull } from 'typeorm';
 
 export class UserService {
   private userRepository = new UserRepository();
@@ -39,11 +45,20 @@ export class UserService {
     return mapUserToDto(newUser);
   }
 
-  async getAllUsers(): Promise<UserResponseDto[]> {
+  async getAllUsers(
+    paginationParams: UserPaginationQuery,
+  ): Promise<PaginatedResponse<UserResponseDto>> {
     logger.debug(LOG_MESSAGES.USER.FETCH.ALL_START);
-    const users = await this.userRepository.getAllUsers();
-    logger.info(LOG_MESSAGES.USER.FETCH.ALL_SUCCESS, { userCount: users.length });
-    return mapUsersToDtoList(users);
+    const paginatedUsers = await this.userRepository.getAllUsers(paginationParams);
+    logger.info(LOG_MESSAGES.USER.FETCH.ALL_SUCCESS, {
+      userCount: paginatedUsers.data.length,
+      page: paginatedUsers.pagination.currentPage,
+      totalItems: paginatedUsers.pagination.totalItems,
+    });
+    return {
+      data: mapUsersToDtoList(paginatedUsers.data),
+      pagination: paginatedUsers.pagination,
+    };
   }
 
   async getUserById(userId: string): Promise<UserResponseDto> {
@@ -75,15 +90,30 @@ export class UserService {
   }
 
   async deleteUser(userId: string): Promise<void> {
+    // logger.debug(LOG_MESSAGES.USER.DELETE.START, { userId });
+    // const result = await this.userRepository.deleteUser(userId);
+    // if (result.affected === 0) {
+    //   logger.warn(LOG_MESSAGES.USER.DELETE.NOT_FOUND_DELETE, { userId });
+    //   throw ErrorFactory.createNotFoundError(
+    //     ERROR_MESSAGES.USER.NOT_FOUND,
+    //     `deleting user with ID ${userId}`,
+    //   );
+    // }
+    // logger.info(LOG_MESSAGES.USER.DELETE.SUCCESS, { userId });
+
     logger.debug(LOG_MESSAGES.USER.DELETE.START, { userId });
-    const result = await this.userRepository.deleteUser(userId);
-    if (result.affected === 0) {
+
+    const user = await this.userRepository.getUserById(userId);
+    if (!user) {
       logger.warn(LOG_MESSAGES.USER.DELETE.NOT_FOUND_DELETE, { userId });
-      throw ErrorFactory.createNotFoundError(
-        ERROR_MESSAGES.USER.NOT_FOUND,
-        `deleting user with ID ${userId}`,
-      );
+      throw ErrorFactory.createNotFoundError(`User with ID ${userId} not found`, 'deleting user');
     }
+
+    await AppDataSource.transaction(async (manager) => {
+      await manager.softDelete(Story, { userId, deletedAt: IsNull() });
+      await manager.softDelete(User, { userId, deletedAt: IsNull() });
+    });
+
     logger.info(LOG_MESSAGES.USER.DELETE.SUCCESS, { userId });
   }
 }

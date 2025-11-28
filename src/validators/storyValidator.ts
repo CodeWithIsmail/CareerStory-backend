@@ -43,10 +43,6 @@ export class StoryValidator {
     return this.createStorySchema.parse(data);
   }
 
-  static validateUpdateStory(data: unknown): UpdateStoryDto {
-    return this.updateStorySchema.parse(data);
-  }
-
   static validateStoryIdParam(params: unknown): string {
     return z.uuidv4().parse(params);
   }

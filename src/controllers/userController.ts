@@ -2,7 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import { UserService } from '../services/userService.ts';
 import { ResponseHandler } from '../utils/responseHandler.ts';
 import { RESPONSE_MESSAGES } from '../constants/responseMessages.ts';
-
+import { UserPaginationQuery } from '../validators/paginationValidator.ts';
+import { importOrRequireFile } from 'typeorm/util/ImportUtils.js';
 export class UserController {
   private userService = new UserService();
 
@@ -15,9 +16,9 @@ export class UserController {
     }
   };
 
-  getAllUsers = async (_req: Request, res: Response, next: NextFunction) => {
+  getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const users = await this.userService.getAllUsers();
+      const users = await this.userService.getAllUsers(req.validatedQuery);
       return ResponseHandler.success(res, users, RESPONSE_MESSAGES.USER.FETCH.ALL_SUCCESS);
     } catch (error) {
       next(error);

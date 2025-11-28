@@ -1,13 +1,22 @@
 import { Router } from 'express';
 import { StoryController } from '../controllers/storyController.ts';
-import { validateParamId, validateReqBody } from '../middlewares/reqValidationMiddleware.ts';
+import {
+  validateParamId,
+  validateReqBody,
+  validateReqQuery,
+} from '../middlewares/reqValidationMiddleware.ts';
 import { StoryValidator } from '../validators/storyValidator.ts';
+import { PaginationValidator } from '../validators/paginationValidator.ts';
 const storyRouter = Router();
 const storyController = new StoryController();
 
 storyRouter
   .post('/', validateReqBody(StoryValidator.createStorySchema), storyController.createStory)
-  .get('/', storyController.getAllStories)
+  .get(
+    '/',
+    validateReqQuery(PaginationValidator.validateStoryPagination.bind(PaginationValidator)),
+    storyController.getAllStories,
+  )
   .get(
     '/user/:userId',
     validateParamId('userId', StoryValidator.validateStoryIdParam),
