@@ -15,7 +15,7 @@ export class Auth {
   @OneToOne(() => User)
   @JoinColumn({
     name: 'userId',
-    referencedColumnName: 'id',
+    referencedColumnName: 'userId',
   })
   user: User;
 }

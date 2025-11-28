@@ -29,18 +29,7 @@ export class ErrorFactory {
     return new DatabaseError(message, context);
   };
 
-  static createConflictError = (
-    fieldName: string = 'resource',
-    context: string = '',
-  ): ConflictError => {
-    let message = constantErrorMessages.USER.CONFLICT;
-
-    if (fieldName.toLowerCase() === 'email') {
-      message = constantErrorMessages.USER.DUPLICATE_EMAIL;
-    } else if (fieldName.toLowerCase() === 'username') {
-      message = constantErrorMessages.USER.DUPLICATE_USERNAME;
-    }
-
+  static createConflictError = (message?: string, context?: string): ConflictError => {
     return new ConflictError(message, context);
   };
 }

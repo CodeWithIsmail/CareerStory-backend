@@ -2,90 +2,88 @@ import { UserRepository } from '../repositories/userRepository.ts';
 import { CreateUserDto, UpdateUserDto, UserResponseDto } from '../dto/userDto.ts';
 import { mapUsersToDtoList, mapUserToDto } from '../utils/userMapper.ts';
 import { ErrorFactory } from '../errors/errorFactory.ts';
-import { constantErrorMessages } from '../constants/errorMessages.ts';
+import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
 import logger from '../utils/logger.ts';
-/**
- * UserService
- * ----------------
- * Contains business logic related to User entity.
- * Interacts with UserRepository for data access.
- */
+import { LOG_MESSAGES } from '../constants/logMessages.ts';
 
 export class UserService {
   private userRepository = new UserRepository();
 
   async createUser(user: CreateUserDto): Promise<UserResponseDto> {
-    logger.debug('Creating a new user', { user });
+    logger.debug(LOG_MESSAGES.USER.CREATE.START, { user });
 
     const existingEmailUser = await this.userRepository.getUserByEmail(user.email);
     if (existingEmailUser) {
-      logger.warn('Email already exists', { email: user.email });
-      throw ErrorFactory.createConflictError('email', 'creating user');
+      logger.warn(LOG_MESSAGES.USER.CREATE.DUPLICATE_EMAIL, { email: user.email });
+      throw ErrorFactory.createConflictError(ERROR_MESSAGES.USER.DUPLICATE_EMAIL, 'creating user');
     }
 
     const existingUsernameUser = await this.userRepository.getUserByUsername(user.userName);
     if (existingUsernameUser) {
-      logger.warn('Username already exists', { userName: user.userName });
-      throw ErrorFactory.createConflictError('username', 'creating user');
+      logger.warn(LOG_MESSAGES.USER.CREATE.DUPLICATE_USERNAME, { userName: user.userName });
+      throw ErrorFactory.createConflictError(
+        ERROR_MESSAGES.USER.DUPLICATE_USERNAME,
+        'creating user',
+      );
     }
 
     const newUser = await this.userRepository.createUser(user);
     if (!newUser) {
-      logger.error('Failed to create user', { user });
+      logger.error(LOG_MESSAGES.USER.CREATE.FAILED, { user });
       throw ErrorFactory.createDatabaseError(
-        constantErrorMessages.USER.INTERNAL_SERVER_ERROR,
+        ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR,
         'creating user',
       );
     }
-    logger.info('User created successfully', { newUser });
+    logger.info(LOG_MESSAGES.USER.CREATE.SUCCESS, { newUser });
     return mapUserToDto(newUser);
   }
 
   async getAllUsers(): Promise<UserResponseDto[]> {
-    logger.debug('Fetching all users');
+    logger.debug(LOG_MESSAGES.USER.FETCH.ALL_START);
     const users = await this.userRepository.getAllUsers();
-    logger.info('Users fetched successfully', { userCount: users.length });
+    logger.info(LOG_MESSAGES.USER.FETCH.ALL_SUCCESS, { userCount: users.length });
     return mapUsersToDtoList(users);
   }
 
-  async getUserById(id: string): Promise<UserResponseDto> {
-    logger.debug('Fetching user', { userId: id });
-    const user = await this.userRepository.getUserById(id);
+  async getUserById(userId: string): Promise<UserResponseDto> {
+    logger.debug(LOG_MESSAGES.USER.FETCH.BY_ID_START, { userId });
+    const user = await this.userRepository.getUserById(userId);
     if (!user) {
-      logger.warn('User not found', { userId: id });
+      logger.warn(LOG_MESSAGES.USER.FETCH.BY_ID_NOT_FOUND, { userId });
       throw ErrorFactory.createNotFoundError(
-        constantErrorMessages.USER.NOT_FOUND,
-        `fetching user with ID ${id}`,
+        ERROR_MESSAGES.USER.NOT_FOUND,
+        `fetching user with ID ${userId}`,
       );
     }
-    logger.info('User fetched successfully', { userId: id });
+    logger.info(LOG_MESSAGES.USER.FETCH.BY_ID_SUCCESS, { userId });
     return mapUserToDto(user);
   }
 
-  async updateUser(id: string, updateData: UpdateUserDto): Promise<UserResponseDto> {
-    logger.debug('Updating user', { userId: id, updateData });
-    const updatedUser = await this.userRepository.updateUser(id, updateData);
+  async updateUser(userId: string, updateData: UpdateUserDto): Promise<UserResponseDto> {
+    logger.debug(LOG_MESSAGES.USER.UPDATE.START, { userId, updateData });
+    const updatedUser = await this.userRepository.updateUser(userId, updateData);
     if (!updatedUser) {
-      logger.warn('User not found for update', { userId: id });
+      logger.warn(LOG_MESSAGES.USER.UPDATE.NOT_FOUND_UPDATE, { userId });
       throw ErrorFactory.createNotFoundError(
-        constantErrorMessages.USER.NOT_FOUND,
-        `updating user with ID ${id}`,
+        ERROR_MESSAGES.USER.NOT_FOUND,
+        `updating user with ID ${userId}`,
       );
     }
-    logger.info('User updated successfully', { userId: id });
+    logger.info(LOG_MESSAGES.USER.UPDATE.SUCCESS, { userId });
     return mapUserToDto(updatedUser);
   }
 
-  async deleteUser(id: string): Promise<void> {
-    logger.debug('Deleting user', { userId: id });
-    const result = await this.userRepository.deleteUser(id);
+  async deleteUser(userId: string): Promise<void> {
+    logger.debug(LOG_MESSAGES.USER.DELETE.START, { userId });
+    const result = await this.userRepository.deleteUser(userId);
     if (result.affected === 0) {
-      logger.warn('User not found for deletion', { userId: id });
+      logger.warn(LOG_MESSAGES.USER.DELETE.NOT_FOUND_DELETE, { userId });
       throw ErrorFactory.createNotFoundError(
-        constantErrorMessages.USER.NOT_FOUND,
-        `deleting user with ID ${id}`,
+        ERROR_MESSAGES.USER.NOT_FOUND,
+        `deleting user with ID ${userId}`,
       );
     }
-    logger.info('User deleted successfully', { userId: id });
+    logger.info(LOG_MESSAGES.USER.DELETE.SUCCESS, { userId });
   }
 }

@@ -13,7 +13,7 @@ export const globalErrorMiddleware = (
   logger.error('Request error occurred', {
     error: err instanceof Error ? err.message : String(err),
     context,
-    stack: err instanceof Error ? err.stack : undefined,
+    // stack: err instanceof Error ? err.stack : undefined,
   });
 
   ErrorHandler.handleError(err, res, context);

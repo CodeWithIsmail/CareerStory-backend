@@ -1,32 +1,27 @@
 import { Response } from 'express';
 import { AppError } from './AppError.ts';
 import { z } from 'zod';
-import { constantErrorMessages, constantStatusCodes } from '../constants/errorMessages.ts';
-import { ErrorResponseDto, ErrorDetail } from '../dto/errorDto.ts';
+import { ERROR_MESSAGES, HTTP_STATUS_CODES } from '../constants/errorMessages.ts';
 import { QueryFailedError } from 'typeorm';
 import logger from '../utils/logger.ts';
-
+import { ResponseHandler } from '../utils/responseHandler.ts';
+import { formatZodErrors } from '../utils/formatZodErrors.ts';
 export class ErrorHandler {
   static handleError(error: unknown, res: Response, context: string = ''): void {
-    let statusCode = constantStatusCodes.INTERNAL_SERVER_ERROR;
-    let message = constantErrorMessages.USER.INTERNAL_SERVER_ERROR;
-    let details: any = {};
+    let statusCode = HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
+    let message = ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR;
+    let errorDetails: any;
 
     // Handle Zod Validation Errors
     if (error instanceof z.ZodError) {
-      statusCode = constantStatusCodes.BAD_REQUEST;
-      message = constantErrorMessages.USER.BAD_REQUEST;
-      const validationErrors: ErrorDetail[] = error.issues.map((issue: any) => ({
-        field: issue.path.join('.') || 'unknown',
-        message: issue.message,
-        code: issue.code,
-      }));
-      details = { errors: validationErrors };
+      statusCode = HTTP_STATUS_CODES.BAD_REQUEST;
+      message = ERROR_MESSAGES.COMMON.INVALID_INPUT;
+      errorDetails = formatZodErrors(error);
 
       logger.warn('Validation error', {
         context,
-        errorCount: validationErrors.length,
-        details: validationErrors,
+        errorCount: errorDetails.length,
+        details: errorDetails,
       });
     }
 
@@ -44,6 +39,8 @@ export class ErrorHandler {
 
     // Handle TypeORM Database Errors
     else if (error instanceof QueryFailedError) {
+      statusCode = HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
+      message = error.message;
       logger.error('Database error occurred', {
         context,
         errorCode: (error as any).code,
@@ -53,8 +50,8 @@ export class ErrorHandler {
 
     // Handle Generic Errors
     else if (error instanceof Error) {
-      statusCode = constantStatusCodes.INTERNAL_SERVER_ERROR;
-      message = constantErrorMessages.USER.INTERNAL_SERVER_ERROR;
+      statusCode = HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
+      message = ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR;
 
       logger.error('Unexpected error', {
         context,
@@ -71,16 +68,6 @@ export class ErrorHandler {
       });
     }
 
-    // Build response
-    const response: ErrorResponseDto = {
-      success: false,
-      statusCode,
-      message,
-      timestamp: new Date().toISOString(),
-      ...(Object.keys(details).length > 0 && details),
-      ...(process.env.NODE_ENV === 'development' && { stack: (error as any)?.stack }),
-    };
-
-    res.status(statusCode).json(response);
+    ResponseHandler.error(res, message, statusCode, errorDetails);
   }
 }

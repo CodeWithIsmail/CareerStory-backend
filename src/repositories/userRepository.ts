@@ -2,13 +2,7 @@ import { DeleteResult, IsNull } from 'typeorm';
 import { AppDataSource } from '../dataSource.ts';
 import { User } from '../entities/User.ts';
 import { CreateUserDto, UpdateUserDto } from '../dto/userDto.ts';
-
-/**
- * UserRepository
- * ----------------
- * Handles all database operations related to the User entity.
- * Follows Repository Pattern to separate data access logic from service/controller.
- */
+import { UserOrNull } from '../types/customTypes.ts';
 
 export class UserRepository {
   private userRepository = AppDataSource.getRepository(User);
@@ -22,17 +16,25 @@ export class UserRepository {
     return this.userRepository.find();
   }
 
-  async getUserById(id: string): Promise<User | null> {
-    return this.userRepository.findOneBy({ id });
+  async getUserById(userId: string): Promise<UserOrNull> {
+    return this.userRepository.findOneBy({ userId });
   }
 
-  async updateUser(id: string, updateData: UpdateUserDto): Promise<User | null> {
-    await this.userRepository.update(id, updateData);
-    return this.getUserById(id);
+  async updateUser(userId: string, updateData: UpdateUserDto): Promise<UserOrNull> {
+    await this.userRepository.update(userId, updateData);
+    return this.getUserById(userId);
   }
 
-  async deleteUser(id: string): Promise<DeleteResult> {
-    return this.userRepository.softDelete({ id, deletedAt: IsNull() });
+  async deleteUser(userId: string): Promise<DeleteResult> {
+    return this.userRepository.softDelete({ userId, deletedAt: IsNull() });
+  }
+
+  async getUserByEmail(email: string): Promise<UserOrNull> {
+    return this.userRepository.findOneBy({ email });
+  }
+
+  async getUserByUsername(userName: string): Promise<UserOrNull> {
+    return this.userRepository.findOneBy({ userName });
   }
 
   async getUserByEmail(email: string): Promise<User | null> {

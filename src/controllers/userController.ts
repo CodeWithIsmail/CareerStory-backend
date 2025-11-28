@@ -1,25 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 import { UserService } from '../services/userService.ts';
-import { CreateUserDto, UpdateUserDto } from '../dto/userDto.ts';
-import { UserValidator } from '../validators/userValidator.ts';
-import { constantStatusCodes } from '../constants/errorMessages.ts';
-
-/**
- * UserController
- * ----------------
- * Handles HTTP requests related to User entity.
- * Delegates business logic to UserService.
- * Responsible for request/response lifecycle and error handling.
- */
+import { ResponseHandler } from '../utils/responseHandler.ts';
+import { RESPONSE_MESSAGES } from '../constants/responseMessages.ts';
 
 export class UserController {
   private userService = new UserService();
 
   createUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const validatedNewUser: CreateUserDto = UserValidator.validateCreateUser(req.body);
-      const newUser = await this.userService.createUser(validatedNewUser);
-      return res.status(constantStatusCodes.CREATED).json(newUser);
+      const newUser = await this.userService.createUser(req.body);
+      return ResponseHandler.created(res, newUser, RESPONSE_MESSAGES.USER.CREATE.SUCCESS);
     } catch (error) {
       next(error);
     }
@@ -28,7 +18,7 @@ export class UserController {
   getAllUsers = async (_req: Request, res: Response, next: NextFunction) => {
     try {
       const users = await this.userService.getAllUsers();
-      return res.status(constantStatusCodes.OK).json(users);
+      return ResponseHandler.success(res, users, RESPONSE_MESSAGES.USER.FETCH.ALL_SUCCESS);
     } catch (error) {
       next(error);
     }
@@ -36,9 +26,8 @@ export class UserController {
 
   getUserById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = UserValidator.validateUserIdParam(req.params.userId);
-      const user = await this.userService.getUserById(userId);
-      return res.status(constantStatusCodes.OK).json(user);
+      const user = await this.userService.getUserById(req.params.userId);
+      return ResponseHandler.success(res, user, RESPONSE_MESSAGES.USER.FETCH.BY_ID_SUCCESS);
     } catch (error) {
       next(error);
     }
@@ -46,10 +35,8 @@ export class UserController {
 
   updateUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = UserValidator.validateUserIdParam(req.params.userId);
-      const updateData: UpdateUserDto = UserValidator.validateUpdateUser(req.body);
-      const updatedUser = await this.userService.updateUser(userId, updateData);
-      return res.status(constantStatusCodes.OK).json(updatedUser);
+      const updatedUser = await this.userService.updateUser(req.params.userId, req.body);
+      return ResponseHandler.success(res, updatedUser, RESPONSE_MESSAGES.USER.UPDATE.SUCCESS);
     } catch (error) {
       next(error);
     }
@@ -57,9 +44,12 @@ export class UserController {
 
   deleteUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = UserValidator.validateUserIdParam(req.params.userId);
-      await this.userService.deleteUser(userId);
-      return res.status(200).json({ message: 'User soft deleted successfully' });
+      await this.userService.deleteUser(req.params.userId);
+      return ResponseHandler.success(
+        res,
+        { id: req.params.userId },
+        RESPONSE_MESSAGES.USER.DELETE.SUCCESS,
+      );
     } catch (error) {
       next(error);
     }
