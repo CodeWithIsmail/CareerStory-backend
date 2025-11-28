@@ -33,3 +33,9 @@ export class DatabaseError extends AppError {
     super(message, constantStatusCodes.INTERNAL_SERVER_ERROR, context);
   }
 }
+
+export class ConflictError extends AppError {
+  constructor(message: string = constantErrorMessages.USER.CONFLICT, context: string = '') {
+    super(message, constantStatusCodes.CONFLICT, context);
+  }
+}

@@ -1,7 +1,7 @@
-import { DeleteResult, IsNull, UpdateDescription } from 'typeorm';
+import { DeleteResult, IsNull } from 'typeorm';
 import { AppDataSource } from '../dataSource.ts';
 import { User } from '../entities/User.ts';
-import { CreateUserDto, UpdateUserDto, UserResponseDto } from '../dto/userDto.ts';
+import { CreateUserDto, UpdateUserDto } from '../dto/userDto.ts';
 
 /**
  * UserRepository
@@ -23,7 +23,7 @@ export class UserRepository {
   }
 
   async getUserById(id: string): Promise<User | null> {
-    return this.userRepository.findOne({ where: { id } });
+    return this.userRepository.findOneBy({ id });
   }
 
   async updateUser(id: string, updateData: UpdateUserDto): Promise<User | null> {
@@ -33,5 +33,13 @@ export class UserRepository {
 
   async deleteUser(id: string): Promise<DeleteResult> {
     return this.userRepository.softDelete({ id, deletedAt: IsNull() });
+  }
+
+  async getUserByEmail(email: string): Promise<User | null> {
+    return this.userRepository.findOneBy({ email });
+  }
+
+  async getUserByUsername(userName: string): Promise<User | null> {
+    return this.userRepository.findOneBy({ userName });
   }
 }
