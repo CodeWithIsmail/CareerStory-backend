@@ -1,28 +1,25 @@
 import { z } from 'zod';
-
+import { userOrderByOptions, storyOrderByOptions } from '../constants/paginationFields.ts';
+import { VALIDATION_MESSAGES } from '../constants/validationMessages.ts';
 export const basePaginationSchema = z.object({
   find: z.string().optional(),
   page: z.coerce.number().int().min(1).default(1),
   itemsPerPage: z.coerce.number().int().min(1).max(100).default(20),
   sortDirection: z
-    .enum(['asc', 'desc', 'ASC', 'DESC'])
-    .transform((val) => val.toUpperCase())
+    .enum(['ASC', 'DESC'], { message: VALIDATION_MESSAGES.SORT_DIRECTION.INVALID })
     .default('ASC'),
 });
 
 export class PaginationValidator {
-  static userFields = ['userId', 'userName', 'name', 'email', 'createdAt', 'updatedAt'];
-  static storyFields = ['storyId', 'userId', 'title', 'body', 'createdAt', 'updatedAt'];
-
   static userPaginationSchema = basePaginationSchema
     .extend({
-      orderBy: z.enum(PaginationValidator.userFields).default('userName'),
+      orderBy: z.enum(userOrderByOptions).default('userName'),
     })
     .strict();
 
   static storyPaginationSchema = basePaginationSchema
     .extend({
-      orderBy: z.enum(PaginationValidator.storyFields).default('title'),
+      orderBy: z.enum(storyOrderByOptions).default('title'),
     })
     .strict();
 

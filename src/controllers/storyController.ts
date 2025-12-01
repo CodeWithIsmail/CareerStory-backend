@@ -54,11 +54,7 @@ export class StoryController {
   deleteStory = async (req: Request, res: Response, next: NextFunction) => {
     try {
       await this.storyService.deleteStory(req.params.storyId);
-      return ResponseHandler.success(
-        res,
-        { id: req.params.storyId },
-        RESPONSE_MESSAGES.STORY.DELETE.SUCCESS,
-      );
+      return ResponseHandler.noContent(res);
     } catch (error) {
       next(error);
     }

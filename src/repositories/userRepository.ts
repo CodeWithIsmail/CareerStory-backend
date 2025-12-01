@@ -4,7 +4,8 @@ import { User } from '../entities/User.ts';
 import { CreateUserDto, UpdateUserDto } from '../dto/userDto.ts';
 import { PaginatedResponse, UserOrNull } from '../types/customTypes.ts';
 import { UserPaginationQuery } from '../validators/paginationValidator.ts';
-import { NotFoundError } from '../errors/CustomErrors.ts';
+import { PaginationHelper } from '../utils/paginationHelper.ts';
+import { userFindOptions } from '../constants/paginationFields.ts';
 export class UserRepository {
   private userRepository = AppDataSource.getRepository(User);
 
@@ -14,57 +15,11 @@ export class UserRepository {
   }
 
   async getAllUsers(paginationParams: UserPaginationQuery): Promise<PaginatedResponse<User>> {
-    const { page, itemsPerPage, sortDirection, orderBy, find } = paginationParams;
-
-    const skip = (page - 1) * itemsPerPage;
-
     const query = this.userRepository.createQueryBuilder('users');
-
-    if (find && find.trim()) {
-      query.andWhere(
-        `users.userName ILIKE :find
-   OR users.name ILIKE :find
-   OR users.email ILIKE :find
-   OR similarity(users.userName, :find) > 0.2
-   OR similarity(users.name, :find) > 0.2
-   OR similarity(users.email, :find) > 0.2`,
-        { find: `%${find}%` },
-      );
-    }
-
-    const [data, totalItems] = await query
-      .skip(skip)
-      .take(itemsPerPage)
-      .orderBy(`users.${orderBy}`, sortDirection as 'ASC' | 'DESC')
-      .getManyAndCount();
-
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-
-    if (page > totalPages) {
-      throw new NotFoundError(
-        `Page ${page} does not exist. Total pages: ${totalPages}.`,
-        'fetching users',
-      );
-    }
-
-    const hasNextPage = page < totalPages;
-    const hasPreviousPage = page > 1;
-    const nextPage = hasNextPage ? page + 1 : null;
-    const previousPage = hasPreviousPage ? page - 1 : null;
-
-    return {
-      data,
-      pagination: {
-        totalItems,
-        totalPages,
-        currentPage: page,
-        itemsPerPage,
-        hasNextPage,
-        hasPreviousPage,
-        nextPage,
-        previousPage,
-      },
-    };
+    return PaginationHelper.paginate(query, paginationParams, {
+      entityAlias: 'users',
+      searchableFields: userFindOptions,
+    });
   }
 
   async getUserById(userId: string): Promise<UserOrNull> {

@@ -2,8 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { UserService } from '../services/userService.ts';
 import { ResponseHandler } from '../utils/responseHandler.ts';
 import { RESPONSE_MESSAGES } from '../constants/responseMessages.ts';
-import { UserPaginationQuery } from '../validators/paginationValidator.ts';
-import { importOrRequireFile } from 'typeorm/util/ImportUtils.js';
+
 export class UserController {
   private userService = new UserService();
 
@@ -46,11 +45,7 @@ export class UserController {
   deleteUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
       await this.userService.deleteUser(req.params.userId);
-      return ResponseHandler.success(
-        res,
-        { id: req.params.userId },
-        RESPONSE_MESSAGES.USER.DELETE.SUCCESS,
-      );
+      return ResponseHandler.noContent(res);
     } catch (error) {
       next(error);
     }
