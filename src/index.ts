@@ -6,8 +6,9 @@ import { routeNotFoundMiddleware } from './middlewares/notFoundMiddleware.ts';
 import logger from './utils/logger.ts';
 import { LOG_MESSAGES } from './constants/logMessages.ts';
 import storyRouter from './routes/storyRoutes.ts';
+import { ENV } from './config/environment.ts';
 
-const PORT = process.env.PORT || 3000;
+const PORT = ENV.PORT || 3000;
 
 const app = express();
 
