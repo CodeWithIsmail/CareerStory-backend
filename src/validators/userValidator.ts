@@ -30,16 +30,8 @@ export class UserValidator {
     })
     .strict();
 
-  static updateUserSchema = z
-    .object({
-      name: z
-        .string()
-        .trim()
-        .min(3, VALIDATION_MESSAGES.USER.NAME.MIN)
-        .max(100, VALIDATION_MESSAGES.USER.NAME.MAX)
-        .optional(),
-      role: z.enum(UserRole, { message: VALIDATION_MESSAGES.USER.ROLE.INVALID }).optional(),
-    })
+  static updateUserSchema = this.createUserSchema
+    .pick({ name: true })
     .strict()
     .refine((data) => Object.keys(data).length > 0, {
       message: VALIDATION_MESSAGES.COMMON.AT_LEAST_ONE_FIELD,

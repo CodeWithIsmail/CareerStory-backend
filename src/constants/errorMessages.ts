@@ -12,6 +12,12 @@ export const HTTP_STATUS_CODES = {
 };
 
 export const ERROR_MESSAGES = {
+  AUTH: {
+    INVALID_CREDENTIALS: 'Invalid username or password',
+    NO_TOKEN: 'No authentication token provided',
+    INVALID_TOKEN: 'Invalid authentication token',
+    UNAUTHORIZED: 'You do not have permission to perform this action',
+  },
   COMMON: {
     INVALID_INPUT: 'Invalid input data',
     UNAUTHORIZED: 'Unauthorized access',

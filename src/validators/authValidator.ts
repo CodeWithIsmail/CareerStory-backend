@@ -69,6 +69,13 @@ export class AuthValidator {
     })
     .strict();
 
+  static createAuthSchema = z.object({
+    userId: z.uuidv4(),
+    passwordHash: z.string(),
+  }).strict();
+
+
+
   static validateSignup(data: unknown): SignupDto {
     return this.signupSchema.parse(data);
   }

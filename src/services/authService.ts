@@ -1,67 +1,71 @@
 import bcrypt from 'bcrypt';
-import { AppDataSource } from '../dataSource.ts';
-import { User } from '../entities/User.ts';
-import { Auth } from '../entities/Auth.ts';
-import { SignupDto, LoginDto } from '../dto/authDto.ts';
-import { UserRepository } from '../repositories/userRepository.ts';
+import jwt, { SignOptions } from 'jsonwebtoken';
+import { SignupDto, LoginDto, AuthResponse, TokenPayload } from '../dto/authDto.ts';
+import { mapSignupToCreateUser } from '../mappers/authMapper.ts';
+import { UserService } from './userService.ts';
+import { UserResponseDto } from '../dto/userDto.ts';
+import { ENV } from '../config/environment.ts';
 import { ErrorFactory } from '../errors/errorFactory.ts';
 import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
-import { UserResponseDto } from '../dto/userDto.ts';
-import { mapSignupToCreateUser } from '../mappers/authMapper.ts';
-import { mapUserToDto } from '../mappers/userMapper.ts';
-const SALT_ROUNDS = 10;
 
 export class AuthService {
-  private userRepository = new UserRepository();
-  private authRepository = AppDataSource.getRepository(Auth);
+  private userService = new UserService();
+  private saltRounds = 10;
+  private jwtSecret = ENV.JWT_SECRET || 'secret';
+  private tokenExpiry = '30d'; // 1 month
 
-  async signup(data: SignupDto): Promise<UserResponseDto> {
-    const existingUserByEmail = await this.userRepository.getUserByEmail(data.email);
-    if (existingUserByEmail) {
-      throw ErrorFactory.createConflictError(ERROR_MESSAGES.USER.DUPLICATE_EMAIL, 'signup');
-    }
+  async signup(signupDto: SignupDto): Promise<UserResponseDto> {
+    const createUserDto = mapSignupToCreateUser(signupDto);
 
-    const existingUserByUsername = await this.userRepository.getUserByUsername(data.userName);
-    if (existingUserByUsername) {
-      throw ErrorFactory.createConflictError(ERROR_MESSAGES.USER.DUPLICATE_USERNAME, 'signup');
-    }
+    const hashedPassword = await bcrypt.hash(signupDto.password, this.saltRounds);
 
-    const createUserData = mapSignupToCreateUser(data);
-    const newUser = await this.userRepository.createUser(createUserData);
+    const newUser = await this.userService.createUser(createUserDto);
 
-    const hashedPassword = await bcrypt.hash(data.password, SALT_ROUNDS);
-
-    const auth = this.authRepository.create({
+    // Save hashed password in Auth repository
+    await this.userService.createAuth({
       userId: newUser.userId,
       hashedPassword,
     });
-    await this.authRepository.save(auth);
 
-    return mapUserToDto(newUser);
+    return newUser;
   }
 
-  async login(data: LoginDto): Promise<UserResponseDto> {
-    const user = await this.userRepository.getUserByUsername(data.userName);
+  async login(loginDto: LoginDto): Promise<AuthResponse> {
+    // Get user by username
+    const user = await this.userService.getUserByUsername(loginDto.userName);
     if (!user) {
-      throw ErrorFactory.createNotFoundError(
-        ERROR_MESSAGES.USER.NOT_FOUND,
-        'login: username not found',
-      );
+      throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS, 'login');
     }
 
-    const auth = await this.authRepository.findOne({ where: { userId: user.userId } });
+    // Get password hash from Auth table
+    const auth = await this.userService.getAuthByUserId(user.userId);
     if (!auth) {
-      throw ErrorFactory.createNotFoundError(
-        ERROR_MESSAGES.USER.NOT_FOUND,
-        'login: auth entry not found',
-      );
+      throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS, 'login');
     }
 
-    const isMatch = await bcrypt.compare(data.password, auth.hashedPassword);
-    if (!isMatch) {
-      throw ErrorFactory.createConflictError(ERROR_MESSAGES.PASSWORD.INCORRECT, 'login');
+    // Compare passwords
+    const isValid = await bcrypt.compare(loginDto.password, auth.hashedPassword);
+    if (!isValid) {
+      throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS, 'login');
     }
 
-    return mapUserToDto(user);
+    // Generate JWT token
+    const payload: TokenPayload = {
+      userId: user.userId,
+      userName: user.userName,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    };
+
+    const accessToken = jwt.sign(payload, this.jwtSecret, {
+      expiresIn: this.tokenExpiry,
+    } as SignOptions);
+
+    return {
+      accessToken,
+      expiresIn: 30 * 24 * 60 * 60, // in seconds
+      user,
+    };
   }
 }

@@ -16,12 +16,6 @@ export class StoryService {
   async createStory(story: CreateStoryDto): Promise<StoryResponseDto> {
     logger.debug(LOG_MESSAGES.STORY.CREATE.START, { story });
 
-    const user = await this.userRepository.getUserById(story.userId);
-    if (!user) {
-      logger.warn(LOG_MESSAGES.STORY.CREATE.USER_NOT_FOUND, { userId: story.userId });
-      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, 'creating story');
-    }
-
     const newStory = await this.storyRepository.createStory(story);
     if (!newStory) {
       logger.error(LOG_MESSAGES.STORY.CREATE.FAILED, { story });
@@ -111,5 +105,17 @@ export class StoryService {
     }
 
     logger.info(LOG_MESSAGES.STORY.DELETE.SUCCESS, { storyId });
+  }
+
+  async storyAuthorUserId(storyId: string): Promise<string> {
+    const story = await this.storyRepository.getStoryById(storyId);
+    if (!story) {
+      logger.warn(LOG_MESSAGES.STORY.FETCH.BY_ID_NOT_FOUND, { storyId });
+      throw ErrorFactory.createNotFoundError(
+        ERROR_MESSAGES.STORY.NOT_FOUND,
+        `fetching story ${storyId}`,
+      );
+    }
+    return story.userId;
   }
 }

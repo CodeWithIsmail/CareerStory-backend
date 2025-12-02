@@ -36,10 +36,10 @@ export class UserRepository {
   }
 
   async getUserByEmail(email: string): Promise<UserOrNull> {
-    return this.userRepository.findOneBy({ email });
+    return this.userRepository.findOne({ where: { email }, withDeleted: true });
   }
 
   async getUserByUsername(userName: string): Promise<UserOrNull> {
-    return this.userRepository.findOneBy({ userName });
+    return this.userRepository.findOne({ where: { userName }, withDeleted: true });
   }
 }

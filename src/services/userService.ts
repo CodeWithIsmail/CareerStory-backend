@@ -7,9 +7,12 @@ import logger from '../utils/logger.ts';
 import { LOG_MESSAGES } from '../constants/logMessages.ts';
 import { UserPaginationQuery } from '../validators/paginationValidator.ts';
 import { PaginatedResponse } from '../types/customTypes.ts';
+import { LoginDto } from '../dto/authDto.ts';
+import { AuthRepository } from '../repositories/authRepository.ts';
 
 export class UserService {
   private userRepository = new UserRepository();
+  private authRepository = new AuthRepository();
 
   async createUser(user: CreateUserDto): Promise<UserResponseDto> {
     logger.debug(LOG_MESSAGES.USER.CREATE.START, { user });
@@ -96,5 +99,17 @@ export class UserService {
       );
     }
     logger.info(LOG_MESSAGES.USER.DELETE.SUCCESS, { userId });
+  }
+
+  async createAuth(authData: { userId: string; hashedPassword: string }) {
+    return this.authRepository.createAuth(authData);
+  }
+
+  async getAuthByUserId(userId: string) {
+    return this.authRepository.getAuthByUserId(userId);
+  }
+
+  async getUserByUsername(userName: string) {
+    return this.userRepository.getUserByUsername(userName);
   }
 }
