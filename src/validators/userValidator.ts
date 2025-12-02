@@ -23,7 +23,10 @@ export class UserValidator {
         .trim()
         .max(255, VALIDATION_MESSAGES.USER.EMAIL.MAX)
         .transform((email) => email.toLowerCase()),
-      role: z.enum(UserRole, { message: VALIDATION_MESSAGES.USER.ROLE.INVALID }),
+
+      role: z
+        .enum(UserRole, { message: VALIDATION_MESSAGES.USER.ROLE.INVALID })
+        .default(UserRole.USER),
     })
     .strict();
 

@@ -33,4 +33,7 @@ export const ERROR_MESSAGES = {
     ROUTE_NOT_FOUND: 'Route not found',
     SERVICE_UNAVAILABLE: 'Service temporarily unavailable',
   },
+  PASSWORD: {
+    INCORRECT: 'Incorrect password',
+  },
 };

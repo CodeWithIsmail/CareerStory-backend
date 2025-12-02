@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { VALIDATION_MESSAGES } from '../constants/validationMessages.ts';
 import { UserRole } from '../entities/User.ts';
-import { SignupDto } from '../dto/authDto.ts';
+import { LoginDto, SignupDto } from '../dto/authDto.ts';
 
 export class AuthValidator {
   static signupSchema = z
@@ -71,5 +71,8 @@ export class AuthValidator {
 
   static validateSignup(data: unknown): SignupDto {
     return this.signupSchema.parse(data);
+  }
+  static validateLogin(data: unknown): LoginDto {
+    return this.loginSchema.parse(data);
   }
 }

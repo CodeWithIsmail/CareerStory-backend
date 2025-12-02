@@ -1,4 +1,9 @@
 export const RESPONSE_MESSAGES = {
+  AUTH: {
+    LOGIN: {
+      SUCCESS: 'User logged in successfully',
+    },
+  },
   USER: {
     CREATE: {
       SUCCESS: 'User created successfully',
