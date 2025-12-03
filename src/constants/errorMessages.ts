@@ -13,6 +13,7 @@ export const HTTP_STATUS_CODES = {
 
 export const ERROR_MESSAGES = {
   AUTH: {
+    NOT_FOUND: 'Authentication data not found',
     INVALID_CREDENTIALS: 'Invalid username or password',
     NO_TOKEN: 'No authentication token provided',
     INVALID_TOKEN: 'Invalid authentication token',
@@ -27,6 +28,7 @@ export const ERROR_MESSAGES = {
     INTERNAL_SERVER_ERROR: 'Internal server error',
   },
   USER: {
+    UNAUTHORIZED: 'Unauthorized user',
     NOT_FOUND: 'User not found',
     DUPLICATE_EMAIL: 'Email already exists',
     DUPLICATE_USERNAME: 'Username already exists',

@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { UserService } from '../services/userService.ts';
 import { ResponseHandler } from '../utils/responseHandler.ts';
 import { RESPONSE_MESSAGES } from '../constants/responseMessages.ts';

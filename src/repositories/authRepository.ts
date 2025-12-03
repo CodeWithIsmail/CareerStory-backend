@@ -1,15 +1,21 @@
+import { EntityManager, IsNull } from 'typeorm';
 import { AppDataSource } from '../dataSource.ts';
+import { CreateAuthDto } from '../dto/authDto.ts';
 import { Auth } from '../entities/Auth.ts';
+import { AuthOrNull } from '../types/customTypes.ts';
+import { DeleteResult } from 'typeorm';
+import { CreateUserDto } from '../dto/userDto.ts';
+import { User } from '../entities/User.ts';
 
 export class AuthRepository {
-  private authRepo = AppDataSource.getRepository(Auth);
+  private authRepository = AppDataSource.getRepository(Auth);
 
-  async createAuth(authData: { userId: string; hashedPassword: string }) {
-    const auth = this.authRepo.create(authData);
-    return this.authRepo.save(auth);
+  async createAuth(authData: CreateAuthDto, entityManager: EntityManager): Promise<Auth> {
+    const auth = entityManager.create(Auth, authData);
+    return entityManager.save(auth);
   }
 
-  async getAuthByUserId(userId: string) {
-    return this.authRepo.findOneBy({ userId });
+  async getAuthByUserId(userId: string): Promise<AuthOrNull> {
+    return this.authRepository.findOneBy({ userId });
   }
 }

@@ -1,71 +1,57 @@
 import bcrypt from 'bcrypt';
-import jwt, { SignOptions } from 'jsonwebtoken';
-import { SignupDto, LoginDto, AuthResponse, TokenPayload } from '../dto/authDto.ts';
+import { SignupDto, LoginDto, AuthResponse, CreateAuthDto } from '../dto/authDto.ts';
 import { mapSignupToCreateUser } from '../mappers/authMapper.ts';
 import { UserService } from './userService.ts';
 import { UserResponseDto } from '../dto/userDto.ts';
 import { ENV } from '../config/environment.ts';
 import { ErrorFactory } from '../errors/errorFactory.ts';
 import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
+import { generateAccessToken } from '../utils/tokenUtils.ts';
+import { AuthRepository } from '../repositories/authRepository.ts';
+import { AuthOrNull } from '../types/customTypes.ts';
+import { AppDataSource } from '../dataSource.ts';
+import { EntityManager } from 'typeorm';
 
 export class AuthService {
   private userService = new UserService();
-  private saltRounds = 10;
-  private jwtSecret = ENV.JWT_SECRET || 'secret';
-  private tokenExpiry = '30d'; // 1 month
+  private authRepository = new AuthRepository();
 
   async signup(signupDto: SignupDto): Promise<UserResponseDto> {
-    const createUserDto = mapSignupToCreateUser(signupDto);
+    return AppDataSource.transaction(async (entityManager) => {
+      const createUserDto = mapSignupToCreateUser(signupDto);
+      const newUser = await this.userService.createUser(createUserDto, entityManager);
 
-    const hashedPassword = await bcrypt.hash(signupDto.password, this.saltRounds);
-
-    const newUser = await this.userService.createUser(createUserDto);
-
-    // Save hashed password in Auth repository
-    await this.userService.createAuth({
-      userId: newUser.userId,
-      hashedPassword,
+      const hashedPassword = await bcrypt.hash(signupDto.password, ENV.SALT_ROUNDS);
+      const authData: CreateAuthDto = { userId: newUser.userId, hashedPassword };
+      await this.authRepository.createAuth(authData, entityManager);
+      return newUser;
     });
-
-    return newUser;
   }
 
   async login(loginDto: LoginDto): Promise<AuthResponse> {
-    // Get user by username
-    const user = await this.userService.getUserByUsername(loginDto.userName);
-    if (!user) {
-      throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS, 'login');
-    }
-
-    // Get password hash from Auth table
-    const auth = await this.userService.getAuthByUserId(user.userId);
-    if (!auth) {
-      throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS, 'login');
-    }
-
-    // Compare passwords
+    const user = await this.userService.getUserByUsername(loginDto.userName, true);
+    const auth = await this.getAuthByUserId(user.userId);
     const isValid = await bcrypt.compare(loginDto.password, auth.hashedPassword);
     if (!isValid) {
-      throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS, 'login');
+      throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS, 'during login');
     }
-
-    // Generate JWT token
-    const payload: TokenPayload = {
-      userId: user.userId,
-      userName: user.userName,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-    };
-
-    const accessToken = jwt.sign(payload, this.jwtSecret, {
-      expiresIn: this.tokenExpiry,
-    } as SignOptions);
-
+    const accessToken = generateAccessToken(user);
     return {
       accessToken,
-      expiresIn: 30 * 24 * 60 * 60, // in seconds
+      expiresIn: ENV.JWT_EXPIRES_IN,
       user,
     };
+  }
+
+
+  async getAuthByUserId(userId: string): Promise<AuthOrNull> {
+    const auth = await this.authRepository.getAuthByUserId(userId);
+    if (!auth) {
+      throw ErrorFactory.createUnauthorizedError(
+        ERROR_MESSAGES.USER.UNAUTHORIZED,
+        `fetching auth for user ID ${userId}`,
+      );
+    }
+    return auth;
   }
 }

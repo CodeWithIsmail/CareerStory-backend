@@ -1,11 +1,11 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   OneToOne,
   PrimaryColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 import { User } from './User.ts';
 
@@ -23,8 +23,8 @@ export class Auth {
   @CreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn()
-  updatedAt: Date;
+  @DeleteDateColumn()
+  deletedAt: Date;
 
   @OneToOne(() => User, {
     onDelete: 'CASCADE',

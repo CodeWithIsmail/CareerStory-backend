@@ -4,10 +4,8 @@ import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
-  OneToOne,
   UpdateDateColumn,
 } from 'typeorm';
-import { Auth } from './Auth.ts';
 
 export enum UserRole {
   ADMIN = 'ADMIN',

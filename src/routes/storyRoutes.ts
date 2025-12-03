@@ -8,18 +8,12 @@ import {
 import { StoryValidator } from '../validators/storyValidator.ts';
 import { PaginationValidator } from '../validators/paginationValidator.ts';
 import { authenticate } from '../middlewares/authenticationMiddleware.ts';
-import { ENV } from '../config/environment.ts';
 import { authorizeStoryOwnerOrAdmin } from '../middlewares/authorizationMiddleware.ts';
 const storyRouter = Router();
 const storyController = new StoryController();
 
 storyRouter
-  .post(
-    '/',
-    authenticate(ENV.JWT_SECRET),
-    validateReqBody(StoryValidator.createStorySchema),
-    storyController.createStory,
-  )
+  .post('/', authenticate, validateReqBody(StoryValidator.createStorySchema), storyController.createStory)
   .get(
     '/',
     validateReqQuery(PaginationValidator.validateStoryPagination.bind(PaginationValidator)),
@@ -37,7 +31,7 @@ storyRouter
   )
   .patch(
     '/:storyId',
-    authenticate(ENV.JWT_SECRET),
+    authenticate,
     validateParamId('storyId', StoryValidator.validateStoryIdParam),
     authorizeStoryOwnerOrAdmin,
     validateReqBody(StoryValidator.updateStorySchema),
@@ -45,7 +39,7 @@ storyRouter
   )
   .delete(
     '/:storyId',
-    authenticate(ENV.JWT_SECRET),
+    authenticate,
     validateParamId('storyId', StoryValidator.validateStoryIdParam),
     authorizeStoryOwnerOrAdmin,
     storyController.deleteStory,

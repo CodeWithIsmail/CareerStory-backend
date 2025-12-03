@@ -8,7 +8,6 @@ import {
 import { UserValidator } from '../validators/userValidator.ts';
 import { PaginationValidator } from '../validators/paginationValidator.ts';
 import { authenticate } from '../middlewares/authenticationMiddleware.ts';
-import { ENV } from '../config/environment.ts';
 import { authorizeOwnerOrAdmin } from '../middlewares/authorizationMiddleware.ts';
 const userRouter = Router();
 const userController = new UserController();
@@ -16,19 +15,19 @@ const userController = new UserController();
 userRouter
   .get(
     '/',
-    authenticate(ENV.JWT_SECRET),
+    authenticate,
     validateReqQuery(PaginationValidator.validateUserPagination.bind(PaginationValidator)),
     userController.getAllUsers,
   )
   .get(
     '/:userId',
-    authenticate(ENV.JWT_SECRET),
+    authenticate,
     validateParamId('userId', UserValidator.validateUserIdParam),
     userController.getUserById,
   )
   .patch(
     '/:userId',
-    authenticate(ENV.JWT_SECRET),
+    authenticate,
     validateParamId('userId', UserValidator.validateUserIdParam),
     authorizeOwnerOrAdmin,
     validateReqBody(UserValidator.updateUserSchema),
@@ -36,7 +35,7 @@ userRouter
   )
   .delete(
     '/:userId',
-    authenticate(ENV.JWT_SECRET),
+    authenticate,
     validateParamId('userId', UserValidator.validateUserIdParam),
     authorizeOwnerOrAdmin,
     userController.deleteUser,
