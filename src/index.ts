@@ -9,7 +9,7 @@ import storyRouter from './routes/storyRoutes.ts';
 import authRouter from './routes/authRoutes.ts';
 import { ENV } from './config/environment.ts';
 
-const PORT = ENV.PORT || 3000;
+const PORT = ENV.PORT;
 
 const app = express();
 

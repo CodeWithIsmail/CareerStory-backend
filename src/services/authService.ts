@@ -1,6 +1,5 @@
-import bcrypt from 'bcrypt';
-import { SignupDto, LoginDto, AuthResponse, CreateAuthDto } from '../dto/authDto.ts';
-import { mapSignupToCreateUser } from '../mappers/authMapper.ts';
+import { SignupDto, LoginDto, AuthResponseDto, CreateAuthDto } from '../dto/authDto.ts';
+import { mapSignUpToCreateAuth, mapSignupToCreateUser } from '../mappers/authMapper.ts';
 import { UserService } from './userService.ts';
 import { UserResponseDto } from '../dto/userDto.ts';
 import { ENV } from '../config/environment.ts';
@@ -10,7 +9,7 @@ import { generateAccessToken } from '../utils/tokenUtils.ts';
 import { AuthRepository } from '../repositories/authRepository.ts';
 import { AuthOrNull } from '../types/customTypes.ts';
 import { AppDataSource } from '../dataSource.ts';
-import { EntityManager } from 'typeorm';
+import { validateUserPassword } from '../utils/passwordUtils.ts';
 
 export class AuthService {
   private userService = new UserService();
@@ -20,20 +19,18 @@ export class AuthService {
     return AppDataSource.transaction(async (entityManager) => {
       const createUserDto = mapSignupToCreateUser(signupDto);
       const newUser = await this.userService.createUser(createUserDto, entityManager);
-
-      const hashedPassword = await bcrypt.hash(signupDto.password, ENV.SALT_ROUNDS);
-      const authData: CreateAuthDto = { userId: newUser.userId, hashedPassword };
+      const authData: CreateAuthDto = await mapSignUpToCreateAuth(newUser.userId, signupDto.password);
       await this.authRepository.createAuth(authData, entityManager);
       return newUser;
     });
   }
 
-  async login(loginDto: LoginDto): Promise<AuthResponse> {
-    const user = await this.userService.getUserByUsername(loginDto.userName, true);
+  async login(loginDto: LoginDto): Promise<AuthResponseDto> {
+    const user = await this.userService.getUserForAuthByUsername(loginDto.userName);
     const auth = await this.getAuthByUserId(user.userId);
-    const isValid = await bcrypt.compare(loginDto.password, auth.hashedPassword);
+    const isValid = await validateUserPassword(loginDto.password, auth.hashedPassword);
     if (!isValid) {
-      throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS, 'during login');
+      throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.INCORRECT_PASSWORD, 'during login');
     }
     const accessToken = generateAccessToken(user);
     return {
@@ -42,7 +39,6 @@ export class AuthService {
       user,
     };
   }
-
 
   async getAuthByUserId(userId: string): Promise<AuthOrNull> {
     const auth = await this.authRepository.getAuthByUserId(userId);

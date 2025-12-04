@@ -26,20 +26,23 @@ export class UserRepository {
     return this.userRepository.findOneBy({ userId });
   }
 
+  async getUserByUsername(userName: string): Promise<UserOrNull> {
+    return this.userRepository.findOne({ where: { userName }, withDeleted: true });
+  }
+
+  async getUserByUsernameOrEmail(email: string, userName: string): Promise<UserOrNull> {
+    return this.userRepository.findOne({
+      where: [{ email }, { userName }],
+      withDeleted: true,
+    });
+  }
+
   async updateUser(userId: string, updateData: UpdateUserDto): Promise<UserOrNull> {
     await this.userRepository.update(userId, updateData);
     return this.getUserById(userId);
   }
 
-  async deleteUser(userId: string, entityManager: EntityManager): Promise<DeleteResult> {
-    return entityManager.softDelete(User, { userId, deletedAt: IsNull() });
-  }
-
-  async getUserByEmail(email: string): Promise<UserOrNull> {
-    return this.userRepository.findOne({ where: { email }, withDeleted: true });
-  }
-
-  async getUserByUsername(userName: string): Promise<UserOrNull> {
-    return this.userRepository.findOne({ where: { userName }, withDeleted: true });
+  async deleteUser(userId: string): Promise<DeleteResult> {
+    return this.userRepository.softDelete({ userId, deletedAt: IsNull() });
   }
 }

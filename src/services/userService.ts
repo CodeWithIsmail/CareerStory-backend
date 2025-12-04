@@ -6,26 +6,18 @@ import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
 import { UserPaginationQuery } from '../validators/paginationValidator.ts';
 import { PaginatedResponse } from '../types/customTypes.ts';
 import { EntityManager } from 'typeorm';
-import { AppDataSource } from '../dataSource.ts';
-import { Auth } from '../entities/Auth.ts';
-import { AuthService } from './authService.ts';
-import { User } from '../entities/User.ts';
+import { checkForDuplicateUser } from '../utils/userUtils.ts';
 
 export class UserService {
   private userRepository = new UserRepository();
 
   async createUser(user: CreateUserDto, entityManager: EntityManager): Promise<UserResponseDto> {
-    const existingEmailUser = await this.userRepository.getUserByEmail(user.email);
-    if (existingEmailUser) {
-      throw ErrorFactory.createConflictError(ERROR_MESSAGES.USER.DUPLICATE_EMAIL, 'creating user');
-    }
-    const existingUsernameUser = await this.userRepository.getUserByUsername(user.userName);
-    if (existingUsernameUser) {
-      throw ErrorFactory.createConflictError(ERROR_MESSAGES.USER.DUPLICATE_USERNAME, 'creating user');
-    }
+    const context = 'creating user';
+    const isExistingUser = await this.userRepository.getUserByUsernameOrEmail(user.email, user.userName);
+    checkForDuplicateUser(isExistingUser, user, context);
     const newUser = await this.userRepository.createUser(user, entityManager);
     if (!newUser) {
-      throw ErrorFactory.createDatabaseError(ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR, 'creating user');
+      throw ErrorFactory.createDatabaseError(ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR, context);
     }
     return mapUserToDto(newUser);
   }
@@ -39,60 +31,37 @@ export class UserService {
   }
 
   async getUserById(userId: string): Promise<UserResponseDto> {
+    const context = `fetching user with ID ${userId}`;
     const user = await this.userRepository.getUserById(userId);
     if (!user) {
-      throw ErrorFactory.createNotFoundError(
-        ERROR_MESSAGES.USER.NOT_FOUND,
-        `fetching user with ID ${userId}`,
-      );
+      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, context);
+    }
+    return mapUserToDto(user);
+  }
+
+  async getUserForAuthByUsername(userName: string): Promise<UserResponseDto> {
+    const user = await this.userRepository.getUserByUsername(userName);
+    const context = `fetching user with username ${userName}`;
+    if (!user) {
+      throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.USER.UNAUTHORIZED, context);
     }
     return mapUserToDto(user);
   }
 
   async updateUser(userId: string, updateData: UpdateUserDto): Promise<UserResponseDto> {
+    const context = `updating user with ID ${userId}`;
     const updatedUser = await this.userRepository.updateUser(userId, updateData);
     if (!updatedUser) {
-      throw ErrorFactory.createNotFoundError(
-        ERROR_MESSAGES.USER.NOT_FOUND,
-        `updating user with ID ${userId}`,
-      );
+      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, context);
     }
     return mapUserToDto(updatedUser);
   }
 
   async deleteUser(userId: string): Promise<void> {
-    await AppDataSource.transaction(async (entityManager) => {
-      const userRepo = entityManager.getRepository(User);
-
-      const user = await userRepo.findOne({
-        where: { userId },
-        relations: ['auth'],
-      });
-
-      if (!user) {
-        throw ErrorFactory.createNotFoundError(
-          ERROR_MESSAGES.USER.NOT_FOUND,
-          `deleting user with ID ${userId}`,
-        );
-      }
-
-      await userRepo.softRemove(user);
-    });
-  }
-
-  async getUserByUsername(userName: string, forAuth = false): Promise<UserResponseDto> {
-    const user = await this.userRepository.getUserByUsername(userName);
-    if (!user) {
-      throw forAuth
-        ? ErrorFactory.createUnauthorizedError(
-            ERROR_MESSAGES.USER.UNAUTHORIZED,
-            `fetching user with username ${userName}`,
-          )
-        : ErrorFactory.createNotFoundError(
-            ERROR_MESSAGES.USER.NOT_FOUND,
-            `fetching user with username ${userName}`,
-          );
+    const context = `deleting user with ID ${userId}`;
+    const result = await this.userRepository.deleteUser(userId);
+    if (result.affected === 0) {
+      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, context);
     }
-    return user;
   }
 }

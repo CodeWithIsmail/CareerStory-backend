@@ -1,11 +1,8 @@
-import { EntityManager, IsNull } from 'typeorm';
+import { EntityManager } from 'typeorm';
 import { AppDataSource } from '../dataSource.ts';
 import { CreateAuthDto } from '../dto/authDto.ts';
 import { Auth } from '../entities/Auth.ts';
 import { AuthOrNull } from '../types/customTypes.ts';
-import { DeleteResult } from 'typeorm';
-import { CreateUserDto } from '../dto/userDto.ts';
-import { User } from '../entities/User.ts';
 
 export class AuthRepository {
   private authRepository = AppDataSource.getRepository(Auth);
