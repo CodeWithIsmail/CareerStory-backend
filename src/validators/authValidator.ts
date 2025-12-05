@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { VALIDATION_MESSAGES } from '../constants/validationMessages.ts';
 import { LoginDto, SignupDto } from '../dto/authDto.ts';
 import { basePasswordSchema, baseUserSchema } from './baseSchema.ts';
-import { UserValidator } from '../validators/userValidator.ts';
 import { UserRole } from '../entities/User.ts';
 import { TOKEN_TYPE } from '../types/customTypes.ts';
 export class AuthValidator {

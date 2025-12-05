@@ -14,7 +14,7 @@ export class UserValidator {
     })
     .strict();
 
-  static updateUserSchema = this.createUserSchema.pick({ name: true }).strict();
+  static updateUserSchema = baseUserSchema.pick({ name: true }).strict();
 
   static validateCreateUser(data: unknown): CreateUserDto {
     return this.createUserSchema.parse(data);

@@ -22,10 +22,9 @@ export class AuthController {
     return ResponseHandler.success(res, confirmedUser, RESPONSE_MESSAGES.AUTH.EMAIL_CONFIRMATION.SUCCESS);
   };
 
-
   resendConfirmationEmail = async (req: Request, res: Response) => {
-    const userName= req.query.userName;
-    await this.authService.rese
-   
-  }
+    const userName = req.query.userName as string;
+    await this.authService.resendConfirmationEmail(userName);
+    return ResponseHandler.success(res, null, RESPONSE_MESSAGES.AUTH.EMAIL_CONFIRMATION.RESEND);
+  };
 }
