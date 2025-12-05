@@ -19,4 +19,6 @@ export class UserResponseDto {
   joinDate: Date;
   @Expose()
   role: UserRole;
+  @Expose()
+  isEmailVerified: boolean;
 }

@@ -5,9 +5,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   UpdateDateColumn,
-  OneToOne,
 } from 'typeorm';
-import { Auth } from './Auth.ts';
 
 export enum UserRole {
   ADMIN = 'ADMIN',
@@ -27,6 +25,9 @@ export class User {
 
   @Column({ unique: true, length: 255 })
   email: string;
+
+  @Column({ default: false })
+  isEmailVerified: boolean;
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
   role: UserRole;

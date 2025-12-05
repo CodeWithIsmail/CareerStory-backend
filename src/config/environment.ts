@@ -7,7 +7,16 @@ export const ENV = {
   DB_DATABASE: process.env.DB_DATABASE,
   NODE_ENV: process.env.NODE_ENV,
   LOG_LEVEL: process.env.LOG_LEVEL,
+
   JWT_SECRET: process.env.JWT_SECRET,
-  JWT_EXPIRES_IN: parseInt(process.env.JWT_EXPIRES_IN),
+  AUTH_JWT_EXPIRES_IN: parseInt(process.env.AUTH_JWT_EXPIRES_IN),
+  EMAIL_VERIFICATION_TOKEN_EXPIRES_IN: parseInt(process.env.EMAIL_VERIFICATION_TOKEN_EXPIRES_IN),
+  PASSWORD_RESET_TOKEN_EXPIRES_IN: parseInt(process.env.PASSWORD_RESET_TOKEN_EXPIRES_IN),
   SALT_ROUNDS: parseInt(process.env.SALT_ROUNDS),
+
+  EMAIL_HOST: process.env.EMAIL_HOST,
+  EMAIL_PORT: parseInt(process.env.EMAIL_PORT),
+  EMAIL_USER: process.env.EMAIL_USER,
+  EMAIL_PASS: process.env.EMAIL_PASS,
+  BACKEND_URL: process.env.BACKEND_URL,
 };

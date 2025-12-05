@@ -1,5 +1,8 @@
 export const RESPONSE_MESSAGES = {
   AUTH: {
+    EMAIL_CONFIRMATION: {
+      SUCCESS: 'Email confirmed successfully',
+    },
     LOGIN: {
       SUCCESS: 'User logged in successfully',
     },

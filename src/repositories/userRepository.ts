@@ -42,6 +42,11 @@ export class UserRepository {
     return this.getUserById(userId);
   }
 
+  async updateEmailVerificationStatus(userId: string): Promise<UserOrNull> {
+    await this.userRepository.update(userId, { isEmailVerified: true });
+    return this.getUserById(userId);
+  }
+
   async deleteUser(userId: string): Promise<DeleteResult> {
     return this.userRepository.softDelete({ userId, deletedAt: IsNull() });
   }

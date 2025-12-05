@@ -3,6 +3,8 @@ import { VALIDATION_MESSAGES } from '../constants/validationMessages.ts';
 import { LoginDto, SignupDto } from '../dto/authDto.ts';
 import { basePasswordSchema, baseUserSchema } from './baseSchema.ts';
 import { UserValidator } from '../validators/userValidator.ts';
+import { UserRole } from '../entities/User.ts';
+import { TOKEN_TYPE } from '../types/customTypes.ts';
 export class AuthValidator {
   static signupSchema = baseUserSchema
     .extend({
@@ -17,9 +19,11 @@ export class AuthValidator {
 
   static loginSchema = this.signupSchema.pick({ userName: true, password: true }).strict();
 
-  static tokenPayloadSchema = UserValidator.createUserSchema
-    .extend({
+  static tokenPayloadSchema = z
+    .object({
       userId: z.uuidv4(),
+      role: z.enum(UserRole),
+      tokenType: z.enum(TOKEN_TYPE),
     })
     .strict();
 
@@ -27,7 +31,7 @@ export class AuthValidator {
     .object({
       accessToken: z.string(),
       expiresIn: z.number(),
-      user: this.tokenPayloadSchema,
+      user: this.tokenPayloadSchema.omit({ tokenType: true }),
     })
     .strict();
 

@@ -4,7 +4,7 @@ import { mapUsersToDtoList, mapUserToDto } from '../mappers/userMapper.ts';
 import { ErrorFactory } from '../errors/errorFactory.ts';
 import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
 import { UserPaginationQuery } from '../validators/paginationValidator.ts';
-import { PaginatedResponse } from '../types/customTypes.ts';
+import { PaginatedResponse, UserOrNull } from '../types/customTypes.ts';
 import { EntityManager } from 'typeorm';
 import { checkForDuplicateUser } from '../utils/userUtils.ts';
 
@@ -51,6 +51,15 @@ export class UserService {
   async updateUser(userId: string, updateData: UpdateUserDto): Promise<UserResponseDto> {
     const context = `updating user with ID ${userId}`;
     const updatedUser = await this.userRepository.updateUser(userId, updateData);
+    if (!updatedUser) {
+      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, context);
+    }
+    return mapUserToDto(updatedUser);
+  }
+
+  async updateEmailVerificationStatus(userId: string): Promise<UserResponseDto> {
+    const context = `updating email verification status for user with ID ${userId}`;
+    const updatedUser = await this.userRepository.updateEmailVerificationStatus(userId);
     if (!updatedUser) {
       throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, context);
     }

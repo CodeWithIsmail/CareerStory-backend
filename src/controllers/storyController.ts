@@ -7,7 +7,7 @@ export class StoryController {
   private storyService = new StoryService();
 
   createStory = async (req: Request, res: Response) => {
-    const newStory = await this.storyService.createStory({ ...req.body, userId: req.user.userId });
+    const newStory = await this.storyService.createStory({ ...req.body, userId: req.userId });
     return ResponseHandler.created(res, newStory, RESPONSE_MESSAGES.STORY.CREATE.SUCCESS);
   };
 

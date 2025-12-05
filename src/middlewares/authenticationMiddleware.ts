@@ -5,11 +5,13 @@ import { ERROR_MESSAGES } from '../constants/errorMessages.js';
 import { TokenPayloadDto } from '../dto/authDto.ts';
 import { ENV } from '../config/environment.ts';
 import { UserService } from '../services/userService.ts';
+import { UserRole } from '../entities/User.ts';
 
 declare global {
   namespace Express {
     interface Request {
-      user?: TokenPayloadDto;
+      userId: string;
+      role: UserRole;
     }
   }
 }
@@ -31,7 +33,8 @@ export const authenticate = async (req: Request, _res: Response, next: NextFunct
     if (!user) {
       throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.USER.NOT_FOUND, 'during authentication');
     }
-    req.user = decoded;
+    req.userId = decoded.userId;
+    req.role = decoded.role;
     next();
   } catch (err) {
     throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.INVALID_TOKEN, 'during authentication');

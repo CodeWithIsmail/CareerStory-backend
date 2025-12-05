@@ -7,11 +7,14 @@ import { baseUserSchema } from './baseSchema.ts';
 export class UserValidator {
   static createUserSchema = baseUserSchema
     .extend({
-      role: z.enum(UserRole, { message: VALIDATION_MESSAGES.USER.ROLE.INVALID }).default(UserRole.USER),
+      role: z.enum(UserRole).default(UserRole.USER),
+    })
+    .extend({
+      isEmailVerified: z.boolean().default(false),
     })
     .strict();
 
-  static updateUserSchema = baseUserSchema.pick({ name: true }).strict();
+  static updateUserSchema = this.createUserSchema.pick({ name: true }).strict();
 
   static validateCreateUser(data: unknown): CreateUserDto {
     return this.createUserSchema.parse(data);
