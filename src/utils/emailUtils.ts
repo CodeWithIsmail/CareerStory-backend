@@ -5,7 +5,6 @@ import { UserResponseDto } from '../dto/userDto.ts';
 const transporter = nodemailer.createTransport({
   host: ENV.EMAIL_HOST,
   port: ENV.EMAIL_PORT,
-  secure: false,
   auth: {
     user: ENV.EMAIL_USER,
     pass: ENV.EMAIL_PASS,
@@ -30,7 +29,7 @@ function createEmailTemplate(newUser: UserResponseDto, verificationLink: string)
       <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
         <h2 style="color: #2a6df4; margin-bottom: 16px;">CareerStory</h2>
 
-        <p>Hi ${newUser.name},</p>
+        <p>Hi ${newUser.userName},</p>
 
         <p>Welcome to CareerStory. Please confirm your email address to activate your account.</p>
 

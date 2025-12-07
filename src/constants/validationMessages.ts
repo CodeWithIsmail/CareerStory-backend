@@ -2,6 +2,11 @@ export const VALIDATION_MESSAGES = {
   COMMON: {
     AT_LEAST_ONE_FIELD: 'At least one field must be provided for update',
   },
+  AUTH: {
+    TOKEN: {
+      INVALID: 'Token is invalid',
+    },
+  },
 
   USER: {
     USER_ID: {
@@ -51,6 +56,7 @@ export const VALIDATION_MESSAGES = {
     REQUIRED: 'Password is required',
     MIN: 'Password must be at least 6 characters',
     MAX: 'Password must be at most 128 characters',
+    LOWERCASE: 'Password must contain at least one lowercase letter',
     UPPERCASE: 'Password must contain at least one uppercase letter',
     NUMBER: 'Password must contain at least one number',
     SPECIAL: 'Password must contain at least one special character (!@#$%^&*)',

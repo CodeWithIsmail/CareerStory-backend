@@ -6,6 +6,8 @@ import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
 import { StoryPaginationQuery } from '../validators/paginationValidator.ts';
 import { PaginatedResponse } from '../types/customTypes.ts';
 import { UserService } from './userService.ts';
+import { mapPaginatedResponse } from '../mappers/paginationMapper.ts';
+import { Story } from '../entities/Story.ts';
 
 export class StoryService {
   private storyRepository = new StoryRepository();
@@ -16,15 +18,20 @@ export class StoryService {
     if (!newStory) {
       throw ErrorFactory.createDatabaseError(ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR, 'creating story');
     }
+    console.log('New Story Created:', newStory);
     return mapStoryToDto(newStory);
   }
 
-  async getAllStories(paginationParams: StoryPaginationQuery): Promise<PaginatedResponse<StoryResponseDto>> {
-    const paginatedStories = await this.storyRepository.getAllStories(paginationParams);
-    return {
-      data: mapStoriesToDtoList(paginatedStories.data),
-      pagination: paginatedStories.pagination,
-    };
+  async getStories(
+    paginationParams: StoryPaginationQuery,
+    userId?: string,
+  ): Promise<PaginatedResponse<StoryResponseDto>> {
+    let paginatedStories;
+    if (userId) {
+      await this.userService.getUserById(userId);
+      paginatedStories = await this.storyRepository.getStories(paginationParams, userId);
+    } else paginatedStories = await this.storyRepository.getStories(paginationParams);
+    return mapPaginatedResponse(paginatedStories, mapStoriesToDtoList);
   }
 
   async getStoryById(storyId: string): Promise<StoryResponseDto> {
@@ -33,12 +40,6 @@ export class StoryService {
       throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.STORY.NOT_FOUND, `fetching story ${storyId}`);
     }
     return mapStoryToDto(story);
-  }
-
-  async getStoriesByUserId(userId: string): Promise<StoryResponseDto[]> {
-    await this.userService.getUserById(userId);
-    const stories = await this.storyRepository.getStoriesByUserId(userId);
-    return mapStoriesToDtoList(stories);
   }
 
   async updateStory(storyId: string, updateData: UpdateStoryDto): Promise<StoryResponseDto> {
@@ -63,4 +64,18 @@ export class StoryService {
     }
     return story.userId;
   }
+
+  // async getAllStories(paginationParams: StoryPaginationQuery): Promise<PaginatedResponse<StoryResponseDto>> {
+  //   const paginatedStories = await this.storyRepository.getStories(paginationParams);
+  //   return mapPaginatedResponse<Story, StoryResponseDto>(paginatedStories, mapStoriesToDtoList);
+  // }
+
+  // async getStoriesByUserId(
+  //   userId: string,
+  //   paginationParams: StoryPaginationQuery,
+  // ): Promise<PaginatedResponse<StoryResponseDto>> {
+  //   await this.userService.getUserById(userId);
+  //   const paginatedStories = await this.storyRepository.getStories(paginationParams, userId);
+  //   return mapPaginatedResponse<Story, StoryResponseDto>(paginatedStories, mapStoriesToDtoList);
+  // }
 }

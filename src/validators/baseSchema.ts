@@ -26,7 +26,11 @@ export const basePasswordSchema = z
   .string({ message: VALIDATION_MESSAGES.PASSWORD.REQUIRED })
   .trim()
   .min(6, VALIDATION_MESSAGES.PASSWORD.MIN)
-  .max(128, VALIDATION_MESSAGES.PASSWORD.MAX);
+  .max(128, VALIDATION_MESSAGES.PASSWORD.MAX)
+  .regex(/[a-z]/, VALIDATION_MESSAGES.PASSWORD.LOWERCASE)
+  .regex(/[A-Z]/, VALIDATION_MESSAGES.PASSWORD.UPPERCASE)
+  .regex(/[0-9]/, VALIDATION_MESSAGES.PASSWORD.NUMBER)
+  .regex(/[^A-Za-z0-9]/, VALIDATION_MESSAGES.PASSWORD.SPECIAL);
 
 export const baseStorySchema = z.object({
   title: z

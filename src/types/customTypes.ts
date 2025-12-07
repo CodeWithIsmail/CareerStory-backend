@@ -13,6 +13,12 @@ export enum TOKEN_TYPE {
   PASSWORD_RESET = 'PASSWORD_RESET',
 }
 
+export enum REQ_SOURCE {
+  BODY = 'body',
+  PARAM = 'param',
+  QUERY = 'query',
+}
+
 export const tokenExpiryMap: Record<TOKEN_TYPE, number> = {
   [TOKEN_TYPE.AUTH]: ENV.AUTH_JWT_EXPIRES_IN,
   [TOKEN_TYPE.EMAIL_VERIFICATION]: ENV.EMAIL_VERIFICATION_TOKEN_EXPIRES_IN,

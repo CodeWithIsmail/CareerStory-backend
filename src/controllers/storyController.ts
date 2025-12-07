@@ -12,7 +12,7 @@ export class StoryController {
   };
 
   getAllStories = async (req: Request, res: Response) => {
-    const stories = await this.storyService.getAllStories(req.validatedQuery);
+    const stories = await this.storyService.getStories(req.validatedQuery);
     return ResponseHandler.success(res, stories, RESPONSE_MESSAGES.STORY.FETCH.ALL_SUCCESS);
   };
 
@@ -22,7 +22,7 @@ export class StoryController {
   };
 
   getStoriesByUserId = async (req: Request, res: Response) => {
-    const stories = await this.storyService.getStoriesByUserId(req.params.userId);
+    const stories = await this.storyService.getStories(req.validatedQuery, req.params.userId);
     return ResponseHandler.success(res, stories, RESPONSE_MESSAGES.STORY.FETCH.BY_USER_SUCCESS);
   };
 

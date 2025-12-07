@@ -28,7 +28,7 @@ export class PaginationHelper {
 
     const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-    if (page > totalPages) {
+    if (totalItems > 0 && page > totalPages) {
       throw new NotFoundError(
         `Page ${page} does not exist. Total pages: ${totalPages}.`,
         `fetching ${entityAlias}s`,

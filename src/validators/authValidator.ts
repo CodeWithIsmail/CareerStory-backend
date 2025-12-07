@@ -1,50 +1,45 @@
 import { z } from 'zod';
 import { VALIDATION_MESSAGES } from '../constants/validationMessages.ts';
-import { LoginDto, SignupDto } from '../dto/authDto.ts';
 import { basePasswordSchema, baseUserSchema } from './baseSchema.ts';
 import { UserRole } from '../entities/User.ts';
 import { TOKEN_TYPE } from '../types/customTypes.ts';
-export class AuthValidator {
-  static signupSchema = baseUserSchema
-    .extend({
-      password: basePasswordSchema,
-      confirmPassword: basePasswordSchema,
-    })
-    .strict()
-    .refine((data) => data.password === data.confirmPassword, {
-      message: VALIDATION_MESSAGES.PASSWORD.MISMATCH,
-      path: ['confirmPassword'],
-    });
 
-  static loginSchema = this.signupSchema.pick({ userName: true, password: true }).strict();
+export const signupSchema = baseUserSchema
+  .extend({
+    password: basePasswordSchema,
+    confirmPassword: basePasswordSchema,
+  })
+  .strict()
+  .refine((data) => data.password === data.confirmPassword, {
+    message: VALIDATION_MESSAGES.PASSWORD.MISMATCH,
+    path: ['confirmPassword'],
+  });
 
-  static tokenPayloadSchema = z
-    .object({
-      userId: z.uuidv4(),
-      role: z.enum(UserRole),
-      tokenType: z.enum(TOKEN_TYPE),
-    })
-    .strict();
+export const loginSchema = signupSchema.pick({ userName: true, password: true }).strict();
 
-  static authResponseSchema = z
-    .object({
-      accessToken: z.string(),
-      expiresIn: z.number(),
-      user: this.tokenPayloadSchema.omit({ tokenType: true }),
-    })
-    .strict();
+export const emailResendSchema = z.string().min(3, VALIDATION_MESSAGES.USER.EMAIL.REQUIRED);
 
-  static createAuthSchema = z
-    .object({
-      userId: z.uuidv4(),
-      hashedPassword: z.string(),
-    })
-    .strict();
+export const tokenPayloadSchema = z
+  .object({
+    userId: z.uuidv4(),
+    role: z.enum(UserRole),
+    tokenType: z.enum(TOKEN_TYPE),
+  })
+  .strict();
 
-  static validateSignup(data: unknown): SignupDto {
-    return this.signupSchema.parse(data);
-  }
-  static validateLogin(data: unknown): LoginDto {
-    return this.loginSchema.parse(data);
-  }
-}
+export const tokenParamSchema = z.jwt(VALIDATION_MESSAGES.AUTH.TOKEN.INVALID);
+
+export const authResponseSchema = z
+  .object({
+    accessToken: z.string(),
+    expiresIn: z.number(),
+    user: tokenPayloadSchema.omit({ tokenType: true }),
+  })
+  .strip();
+
+export const createAuthSchema = z
+  .object({
+    userId: z.uuidv4(),
+    hashedPassword: z.string(),
+  })
+  .strict();

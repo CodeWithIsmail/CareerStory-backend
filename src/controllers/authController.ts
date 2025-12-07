@@ -17,13 +17,12 @@ export class AuthController {
   };
 
   confirmEmail = async (req: Request, res: Response) => {
-    const token = req.params.token;
-    const confirmedUser = await this.authService.confirmEmail(token);
+    const confirmedUser = await this.authService.confirmEmail(req.params.token);
     return ResponseHandler.success(res, confirmedUser, RESPONSE_MESSAGES.AUTH.EMAIL_CONFIRMATION.SUCCESS);
   };
 
   resendConfirmationEmail = async (req: Request, res: Response) => {
-    const userName = req.query.userName as string;
+    const userName = req.params.userName;
     await this.authService.resendConfirmationEmail(userName);
     return ResponseHandler.success(res, null, RESPONSE_MESSAGES.AUTH.EMAIL_CONFIRMATION.RESEND);
   };

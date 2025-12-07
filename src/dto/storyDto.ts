@@ -1,24 +1,6 @@
 import { z } from 'zod';
-import { StoryValidator } from '../validators/storyValidator.ts';
-import { Expose, Type } from 'class-transformer';
-import { UserResponseDto } from './userDto.ts';
+import { createStorySchema, updateStorySchema, storyResponseSchema } from '../validators/storyValidator.ts';
 
-export type CreateStoryDto = z.infer<typeof StoryValidator.createStorySchema>;
-export type UpdateStoryDto = z.infer<typeof StoryValidator.updateStorySchema>;
-
-export class StoryResponseDto {
-  @Expose()
-  storyId: string;
-  @Expose()
-  title: string;
-  @Expose()
-  body: string;
-  @Expose()
-  createdAt: Date;
-  @Expose()
-  updatedAt: Date;
-
-  @Expose({ name: 'user' })
-  @Type(() => UserResponseDto)
-  author: UserResponseDto | null;
-}
+export type CreateStoryDto = z.infer<typeof createStorySchema>;
+export type UpdateStoryDto = z.infer<typeof updateStorySchema>;
+export type StoryResponseDto = z.infer<typeof storyResponseSchema>;
