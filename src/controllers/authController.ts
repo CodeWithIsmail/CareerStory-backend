@@ -22,8 +22,7 @@ export class AuthController {
   };
 
   resendConfirmationEmail = async (req: Request, res: Response) => {
-    const userName = req.params.userName;
-    await this.authService.resendConfirmationEmail(userName);
+    await this.authService.resendConfirmationEmail(req.params.userName);
     return ResponseHandler.success(res, null, RESPONSE_MESSAGES.AUTH.EMAIL_CONFIRMATION.RESEND);
   };
 }

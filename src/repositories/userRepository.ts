@@ -4,7 +4,7 @@ import { User } from '../entities/User.ts';
 import { CreateUserDto, UpdateUserDto } from '../dto/userDto.ts';
 import { PaginatedResponse, UserOrNull } from '../types/customTypes.ts';
 import { UserPaginationQuery } from '../validators/paginationValidator.ts';
-import { PaginationHelper } from '../utils/paginationHelper.ts';
+import { PaginationHelper } from '../utils/paginationUtils.ts';
 import { userFindOptions } from '../constants/paginationFields.ts';
 import { mapPaginationConfig } from '../mappers/paginationMapper.ts';
 

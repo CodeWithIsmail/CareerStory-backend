@@ -4,13 +4,13 @@ import { basePaginationSchema } from './baseSchema.ts';
 
 export const userPaginationSchema = basePaginationSchema
   .extend({
-    orderBy: z.enum(['userId', 'userName', 'name', 'email', 'joinDate']).default('userName'),
+    orderBy: z.enum(userOrderByOptions).default('userName'),
   })
   .strict();
 
 export const storyPaginationSchema = basePaginationSchema
   .extend({
-    orderBy: z.enum(['userId', 'userName', 'name', 'email', 'joinDate']).default('userId'),
+    orderBy: z.enum(storyOrderByOptions).default('userId'),
   })
   .strict();
 

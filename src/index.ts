@@ -17,8 +17,8 @@ app.use(express.json());
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/stories', storyRouter);
-app.use(globalErrorMiddleware);
 app.use(routeNotFoundMiddleware);
+app.use(globalErrorMiddleware);
 
 await AppDataSource.initialize();
 logger.info(LOG_MESSAGES.DATABASE.CONNECTION.SUCCESS);

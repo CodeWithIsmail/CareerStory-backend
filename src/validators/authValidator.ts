@@ -17,7 +17,7 @@ export const signupSchema = baseUserSchema
 
 export const loginSchema = signupSchema.pick({ userName: true, password: true }).strict();
 
-export const emailResendSchema = z.string().min(3, VALIDATION_MESSAGES.USER.EMAIL.REQUIRED);
+export const emailResendSchema = z.string().min(3, VALIDATION_MESSAGES.USER.USERNAME.REQUIRED);
 
 export const tokenPayloadSchema = z
   .object({

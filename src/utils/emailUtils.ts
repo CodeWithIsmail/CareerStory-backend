@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
 });
 
 export const sendVerificationEmail = async (newUser: UserResponseDto, token: string) => {
-  const verificationLink = `${ENV.BACKEND_URL}/api/v1/auth/confirm-email/${token}`;
+  const verificationLink = `${ENV.BACKEND_URL}/auth/confirm-email/${token}`;
 
   const mailOptions = {
     from: `"CareerStory" <${ENV.EMAIL_USER}>`,

@@ -9,7 +9,6 @@ import {
   tokenParamSchema,
 } from '../validators/authValidator.ts';
 import { REQ_SOURCE } from '../types/customTypes.ts';
-import { userParamSchema } from '../validators/userValidator.ts';
 
 const router = Router();
 const authController = new AuthController();
@@ -25,7 +24,7 @@ router
     authController.confirmEmail,
   )
 
-  .get(
+  .post(
     '/resend-confirm-email/:userName',
     reqValidation(REQ_SOURCE.PARAM, emailResendSchema, 'userName'),
     resendEmailLimiter,

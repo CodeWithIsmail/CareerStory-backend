@@ -21,11 +21,6 @@ export class StoryController {
     return ResponseHandler.success(res, story, RESPONSE_MESSAGES.STORY.FETCH.BY_ID_SUCCESS);
   };
 
-  getStoriesByUserId = async (req: Request, res: Response) => {
-    const stories = await this.storyService.getStories(req.validatedQuery, req.params.userId);
-    return ResponseHandler.success(res, stories, RESPONSE_MESSAGES.STORY.FETCH.BY_USER_SUCCESS);
-  };
-
   updateStory = async (req: Request, res: Response) => {
     const updatedStory = await this.storyService.updateStory(req.params.storyId, req.body);
     return ResponseHandler.success(res, updatedStory, RESPONSE_MESSAGES.STORY.UPDATE.SUCCESS);

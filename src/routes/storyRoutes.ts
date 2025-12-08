@@ -16,13 +16,6 @@ storyRouter
   .get('/', reqValidation(REQ_SOURCE.QUERY, storyPaginationSchema), storyController.getAllStories)
 
   .get(
-    '/user/:userId',
-    reqValidation(REQ_SOURCE.PARAM, storyParamSchema, 'userId'),
-    reqValidation(REQ_SOURCE.QUERY, storyPaginationSchema),
-    storyController.getStoriesByUserId,
-  )
-
-  .get(
     '/:storyId',
     reqValidation(REQ_SOURCE.PARAM, storyParamSchema, 'storyId'),
     storyController.getStoryById,

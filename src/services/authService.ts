@@ -5,12 +5,13 @@ import { UserResponseDto } from '../dto/userDto.ts';
 import { ENV } from '../config/environment.ts';
 import { ErrorFactory } from '../errors/errorFactory.ts';
 import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
-import { generateToken } from '../utils/tokenUtils.ts';
+import { generateToken, generateTokenError } from '../utils/tokenUtils.ts';
 import { AuthRepository } from '../repositories/authRepository.ts';
 import { AuthOrNull, TOKEN_TYPE } from '../types/customTypes.ts';
 import { validateUserPassword } from '../utils/passwordUtils.ts';
 import { sendVerificationEmail } from '../utils/emailUtils.ts';
 import jwt from 'jsonwebtoken';
+import { CONTEXT } from '../constants/context.ts';
 
 export class AuthService {
   private userService = new UserService();
@@ -39,28 +40,27 @@ export class AuthService {
     try {
       const decoded = jwt.verify(token, ENV.JWT_SECRET) as TokenPayloadDto;
       if (decoded.tokenType !== TOKEN_TYPE.EMAIL_VERIFICATION) {
-        throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.INVALID_TOKEN, 'confirming email');
+        throw ErrorFactory.createUnauthorizedError(
+          ERROR_MESSAGES.AUTH.INVALID_TOKEN,
+          CONTEXT.AUTH.CONFIRM_EMAIL,
+        );
       }
       const userId = decoded.userId;
       await this.userService.updateEmailVerificationStatus(userId);
     } catch (error) {
-      if (error instanceof jwt.TokenExpiredError)
-        throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.TOKEN_EXPIRED, 'confirming email');
-      if (error instanceof jwt.JsonWebTokenError)
-        throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.INVALID_TOKEN, 'confirming email');
-      else throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.INVALID_TOKEN, 'confirming email');
+      generateTokenError(error);
     }
   }
 
   async login(loginDto: LoginDto): Promise<AuthResponseDto> {
     const user = await this.userService.getUserByUsername(loginDto.userName);
     if (!user.isEmailVerified) {
-      throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.EMAIL_NOT_VERIFIED, 'login');
+      throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.EMAIL_NOT_VERIFIED, CONTEXT.AUTH.LOGIN);
     }
     const auth = await this.getAuthByUserId(user.userId);
     const isValid = await validateUserPassword(loginDto.password, auth.hashedPassword);
     if (!isValid) {
-      throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.INCORRECT_PASSWORD, 'login');
+      throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.INCORRECT_PASSWORD, CONTEXT.AUTH.LOGIN);
     }
     const accessToken = generateToken(user, TOKEN_TYPE.AUTH);
     return {
@@ -73,10 +73,7 @@ export class AuthService {
   async getAuthByUserId(userId: string): Promise<AuthOrNull> {
     const auth = await this.authRepository.getAuthByUserId(userId);
     if (!auth) {
-      throw ErrorFactory.createUnauthorizedError(
-        ERROR_MESSAGES.USER.UNAUTHORIZED,
-        `fetching auth for user ID ${userId}`,
-      );
+      throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.USER.UNAUTHORIZED, CONTEXT.AUTH.LOGIN);
     }
     return auth;
   }

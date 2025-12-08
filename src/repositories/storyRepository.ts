@@ -4,7 +4,7 @@ import { Story } from '../entities/Story.ts';
 import { CreateStoryDto, UpdateStoryDto } from '../dto/storyDto.ts';
 import { PaginatedResponse, StoryOrNull } from '../types/customTypes.ts';
 import { StoryPaginationQuery } from '../validators/paginationValidator.ts';
-import { PaginationHelper } from '../utils/paginationHelper.ts';
+import { PaginationHelper } from '../utils/paginationUtils.ts';
 import { storyFindOptions } from '../constants/paginationFields.ts';
 import { mapPaginationConfig } from '../mappers/paginationMapper.ts';
 
@@ -28,7 +28,6 @@ export class StoryRepository {
     }
 
     const paginationConfig = mapPaginationConfig('stories', storyFindOptions);
-
     return PaginationHelper.paginate(query, paginationParams, paginationConfig);
   }
 
@@ -47,28 +46,4 @@ export class StoryRepository {
   async deleteStory(storyId: string): Promise<DeleteResult> {
     return this.storyRepository.softDelete({ storyId, deletedAt: IsNull() });
   }
-
-  // async getAllStories(paginationParams: StoryPaginationQuery): Promise<PaginatedResponse<Story>> {
-  //   const query = this.storyRepository
-  //     .createQueryBuilder('stories')
-  //     .leftJoinAndSelect('stories.user', 'users');
-
-  //   const paginationConfig = mapPaginationConfig('stories', storyFindOptions);
-
-  //   return PaginationHelper.paginate(query, paginationParams, paginationConfig);
-  // }
-
-  // async getStoriesByUserId(
-  //   userId: string,
-  //   paginationParams: StoryPaginationQuery,
-  // ): Promise<PaginatedResponse<Story>> {
-  //   const query = this.storyRepository
-  //     .createQueryBuilder('stories')
-  //     .leftJoinAndSelect('stories.user', 'users')
-  //     .where('users.userId = :userId', { userId });
-
-  //   const paginationConfig = mapPaginationConfig('stories', storyFindOptions);
-
-  //   return PaginationHelper.paginate(query, paginationParams, paginationConfig);
-  // }
 }
