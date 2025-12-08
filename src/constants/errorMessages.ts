@@ -42,4 +42,12 @@ export const ERROR_MESSAGES = {
     ROUTE_NOT_FOUND: 'Route not found',
     SERVICE_UNAVAILABLE: 'Service temporarily unavailable',
   },
+  CATEGORY: {
+    DUPLICATE_NAME: 'Category with this name already exists',
+    CREATE: 'Failed to create category',
+    FETCH: 'Category not found',
+    UPDATE: 'Failed to update category',
+    DELETE: 'Failed to delete category',
+  },
+
 };

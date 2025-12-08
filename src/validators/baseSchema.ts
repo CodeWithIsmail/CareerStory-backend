@@ -53,3 +53,11 @@ export const basePaginationSchema = z.object({
     .enum(['ASC', 'DESC'], { message: VALIDATION_MESSAGES.SORT_DIRECTION.INVALID })
     .default('ASC'),
 });
+
+export const baseCategorySchema = z.object({
+  name: z
+    .string()
+    .min(1, VALIDATION_MESSAGES.CATEGORY.NAME.REQUIRED)
+    .max(50, VALIDATION_MESSAGES.CATEGORY.NAME.MAX),
+  description: z.string().max(255, VALIDATION_MESSAGES.CATEGORY.DESCRIPTION.MAX).optional(),
+});

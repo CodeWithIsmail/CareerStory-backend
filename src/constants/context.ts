@@ -17,5 +17,11 @@ export const CONTEXT = {
     SIGNUP: 'user signup',
     CONFIRM_EMAIL: 'confirming email',
     RESEND_CONFIRMATION_EMAIL: 'resending confirmation email',
-  }
+  },
+  CATEGORY: {
+    CREATE: 'creating category',
+    FETCH: 'fetching category',
+    UPDATE: 'updating category',
+    DELETE: 'deleting category',
+  },
 };
