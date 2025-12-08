@@ -2,6 +2,7 @@ import { DeleteResult, IsNull } from 'typeorm';
 import { AppDataSource } from '../dataSource.ts';
 import { CreateCategoryDto, UpdateCategoryDto } from '../dto/categoryDto.ts';
 import { Category } from '../entities/Category.ts';
+import { tr } from 'zod/locales';
 
 export class CategoryRepository {
   private categoryRepository = AppDataSource.getRepository(Category);
@@ -25,7 +26,7 @@ export class CategoryRepository {
   }
 
   async getCategoryByName(name: string): Promise<Category | null> {
-    return this.categoryRepository.findOneBy({ name, deletedAt: IsNull() });
+    return this.categoryRepository.findOne({ where: { name }, withDeleted: true });
   }
 
   async deleteCategory(categoryId: string): Promise<DeleteResult> {

@@ -11,17 +11,11 @@ import { authenticate } from '../middlewares/authenticationMiddleware.ts';
 import { authorizeRoles } from '../middlewares/authorizationMiddleware.ts';
 import { UserRole } from '../entities/User.ts';
 
+const categoryRouter = Router();
 const categoryController = new CategoryController();
-const router = Router();
 
-router
+categoryRouter
   .get('/', categoryController.getAllCategories)
-
-  .get(
-    '/:id',
-    reqValidation(REQ_SOURCE.PARAM, categoryParamSchema, 'categoryId'),
-    categoryController.getCategoryById,
-  )
 
   .post(
     '/',
@@ -32,7 +26,7 @@ router
   )
 
   .patch(
-    '/:id',
+    '/:categoryId',
     authenticate,
     authorizeRoles(UserRole.ADMIN),
     reqValidation(REQ_SOURCE.PARAM, categoryParamSchema, 'categoryId'),
@@ -41,11 +35,11 @@ router
   )
 
   .delete(
-    '/:id',
+    '/:categoryId',
     authenticate,
     authorizeRoles(UserRole.ADMIN),
     reqValidation(REQ_SOURCE.PARAM, categoryParamSchema, 'categoryId'),
     categoryController.deleteCategory,
   );
 
-export default router;
+export default categoryRouter;

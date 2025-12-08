@@ -8,12 +8,23 @@ import { PaginatedResponse } from '../types/customTypes.ts';
 import { UserService } from './userService.ts';
 import { mapPaginatedResponse } from '../mappers/paginationMapper.ts';
 import { CONTEXT } from '../constants/context.ts';
+import { CategoryService } from './categoryService.ts';
 export class StoryService {
   private storyRepository = new StoryRepository();
   private userService = new UserService();
+  private categoryService = new CategoryService();
 
   async createStory(story: CreateStoryDto): Promise<StoryResponseDto> {
+    if (story.categoryIds && story.categoryIds.length > 0) {
+      for (const categoryId of story.categoryIds) {
+        const category = await this.categoryService.getCategoryById(categoryId);
+        if (!category) {
+          throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.CATEGORY.FETCH, CONTEXT.STORY.CREATE);
+        }
+      }
+    }
     const newStory = await this.storyRepository.createStory(story);
+
     if (!newStory) {
       throw ErrorFactory.createDatabaseError(
         ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR,
@@ -30,8 +41,13 @@ export class StoryService {
     let paginatedStories;
     if (userId) {
       await this.userService.getUserById(userId);
-      paginatedStories = await this.storyRepository.getStories(paginationParams, userId);
-    } else paginatedStories = await this.storyRepository.getStories(paginationParams);
+    }
+
+    paginatedStories = await this.storyRepository.getStories(
+      paginationParams,
+      userId,
+      paginationParams.category,
+    );
     return mapPaginatedResponse(paginatedStories, mapStoriesToDtoList);
   }
 

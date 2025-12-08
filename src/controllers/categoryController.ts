@@ -16,16 +16,6 @@ export class CategoryController {
     return ResponseHandler.success(res, categories, RESPONSE_MESSAGES.CATEGORY.FETCH.ALL_SUCCESS);
   };
 
-  getCategoryById = async (req: Request, res: Response) => {
-    const category = await this.categoryService.getCategoryById(req.params.categoryId);
-    return ResponseHandler.success(res, category, RESPONSE_MESSAGES.CATEGORY.FETCH.BY_ID_SUCCESS);
-  };
-
-  getCategoryByName = async (req: Request, res: Response) => {
-    const category = await this.categoryService.getCategoryByName(req.params.name);
-    return ResponseHandler.success(res, category, RESPONSE_MESSAGES.CATEGORY.FETCH.BY_NAME_SUCCESS);
-  };
-
   updateCategory = async (req: Request, res: Response) => {
     const updatedCategory = await this.categoryService.updateCategory(req.params.categoryId, req.body);
     return ResponseHandler.success(res, updatedCategory, RESPONSE_MESSAGES.CATEGORY.UPDATE.SUCCESS);

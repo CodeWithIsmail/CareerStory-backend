@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { VALIDATION_MESSAGES } from '../constants/validationMessages.ts';
 import { baseStorySchema } from './baseSchema.ts';
 import { userResponseSchema } from './userValidator.ts';
+import { categoryResponseSchema } from './categoryValidator.ts';
 
 export const createStorySchema = baseStorySchema.strict();
 
@@ -13,10 +14,15 @@ export const updateStorySchema = createStorySchema
   });
 
 export const storyResponseSchema = baseStorySchema
+  .omit({ categoryIds: true })
   .extend({
     storyId: z.uuidv4(),
     createdAt: z.date(),
     updatedAt: z.date(),
+    categories: categoryResponseSchema
+      .pick({ categoryId: true, name: true, description: true })
+      .array()
+      .default([]),
     user: userResponseSchema.pick({ userId: true, userName: true, name: true }).nullable().optional(),
   })
   .strip();

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { VALIDATION_MESSAGES } from '../constants/validationMessages.ts';
+import { ca } from 'zod/locales';
 
 export const baseUserSchema = z.object({
   userName: z
@@ -43,6 +44,7 @@ export const baseStorySchema = z.object({
     .trim()
     .min(10, VALIDATION_MESSAGES.STORY.BODY.MIN)
     .max(5000, VALIDATION_MESSAGES.STORY.BODY.MAX),
+  categoryIds: z.array(z.uuid(VALIDATION_MESSAGES.CATEGORY.INVALID)).default([]),
 });
 
 export const basePaginationSchema = z.object({
@@ -56,8 +58,8 @@ export const basePaginationSchema = z.object({
 
 export const baseCategorySchema = z.object({
   name: z
-    .string()
+    .string({ message: VALIDATION_MESSAGES.CATEGORY.NAME.REQUIRED })
     .min(1, VALIDATION_MESSAGES.CATEGORY.NAME.REQUIRED)
     .max(50, VALIDATION_MESSAGES.CATEGORY.NAME.MAX),
-  description: z.string().max(255, VALIDATION_MESSAGES.CATEGORY.DESCRIPTION.MAX).optional(),
+  description: z.string().max(255, VALIDATION_MESSAGES.CATEGORY.DESCRIPTION.MAX).optional().nullable(),
 });

@@ -41,6 +41,10 @@ export class Story {
   user: User;
 
   @ManyToMany(() => Category, (category) => category.stories)
-  @JoinTable({ name: 'story_categories' })
+  @JoinTable({
+    name: 'story_categories',
+    joinColumn: { name: 'storyId', referencedColumnName: 'storyId' },
+    inverseJoinColumn: { name: 'categoryId', referencedColumnName: 'categoryId' },
+  })
   categories: Category[];
 }

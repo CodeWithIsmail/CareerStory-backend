@@ -10,6 +10,10 @@ export const userPaginationSchema = basePaginationSchema
 
 export const storyPaginationSchema = basePaginationSchema
   .extend({
+    category: z.preprocess((val) => {
+      if (Array.isArray(val)) return val;
+      return [val];
+    }, z.array(z.string()).optional()),
     orderBy: z.enum(storyOrderByOptions).default('userId'),
   })
   .strict();
