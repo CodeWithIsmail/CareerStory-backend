@@ -4,6 +4,7 @@ import { mapCategoriesToDtoList, mapCategoryToDto } from '../mappers/categoryMap
 import { ErrorFactory } from '../errors/errorFactory.ts';
 import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
 import { CONTEXT } from '../constants/context.ts';
+import { Category } from '../entities/Category.ts';
 export class CategoryService {
   private categoryRepository = new CategoryRepository();
 
@@ -30,6 +31,11 @@ export class CategoryService {
       throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.CATEGORY.FETCH, CONTEXT.CATEGORY.FETCH);
     }
     return mapCategoryToDto(category);
+  }
+
+  async getCategoriesByIds(categoryIds: string[]): Promise<Category[]> {
+    const categories = await this.categoryRepository.getCategoriesByIds(categoryIds);
+    return categories;
   }
 
   async getCategoryByName(name: string): Promise<CategoryResponseDto> {

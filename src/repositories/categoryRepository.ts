@@ -1,8 +1,8 @@
-import { DeleteResult, IsNull } from 'typeorm';
+import { DeleteResult, In, IsNull } from 'typeorm';
 import { AppDataSource } from '../dataSource.ts';
 import { CreateCategoryDto, UpdateCategoryDto } from '../dto/categoryDto.ts';
 import { Category } from '../entities/Category.ts';
-import { tr } from 'zod/locales';
+import { CategoryOrNull } from '../types/customTypes.ts';
 
 export class CategoryRepository {
   private categoryRepository = AppDataSource.getRepository(Category);
@@ -12,7 +12,7 @@ export class CategoryRepository {
     return this.categoryRepository.save(newCategory);
   }
 
-  async updateCategory(categoryId: string, updateData: UpdateCategoryDto): Promise<Category | null> {
+  async updateCategory(categoryId: string, updateData: UpdateCategoryDto): Promise<CategoryOrNull> {
     await this.categoryRepository.update(categoryId, updateData);
     return this.getCategoryById(categoryId);
   }
@@ -21,11 +21,15 @@ export class CategoryRepository {
     return this.categoryRepository.find({ where: { deletedAt: IsNull() }, order: { name: 'ASC' } });
   }
 
-  async getCategoryById(categoryId: string): Promise<Category | null> {
+  async getCategoryById(categoryId: string): Promise<CategoryOrNull> {
     return this.categoryRepository.findOneBy({ categoryId, deletedAt: IsNull() });
   }
 
-  async getCategoryByName(name: string): Promise<Category | null> {
+  async getCategoriesByIds(categoryIds: string[]): Promise<Category[]> {
+    return this.categoryRepository.findBy({ categoryId: In(categoryIds), deletedAt: IsNull() });
+  }
+
+  async getCategoryByName(name: string): Promise<CategoryOrNull> {
     return this.categoryRepository.findOne({ where: { name }, withDeleted: true });
   }
 

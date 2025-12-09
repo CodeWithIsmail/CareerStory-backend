@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { VALIDATION_MESSAGES } from '../constants/validationMessages.ts';
-import { ca } from 'zod/locales';
 
 export const baseUserSchema = z.object({
   userName: z
@@ -44,7 +43,7 @@ export const baseStorySchema = z.object({
     .trim()
     .min(10, VALIDATION_MESSAGES.STORY.BODY.MIN)
     .max(5000, VALIDATION_MESSAGES.STORY.BODY.MAX),
-  categoryIds: z.array(z.uuid(VALIDATION_MESSAGES.CATEGORY.INVALID)).default([]),
+  categoryIds: z.array(z.uuid(VALIDATION_MESSAGES.CATEGORY.INVALID)),
 });
 
 export const basePaginationSchema = z.object({

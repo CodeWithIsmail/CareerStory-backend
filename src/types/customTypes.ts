@@ -2,10 +2,12 @@ import { User } from '../entities/User.ts';
 import { Story } from '../entities/Story.ts';
 import { Auth } from '../entities/Auth.ts';
 import { ENV } from '../config/environment.ts';
+import { Category } from '../entities/Category.ts';
 
 export type UserOrNull = User | null;
 export type StoryOrNull = Story | null;
 export type AuthOrNull = Auth | null;
+export type CategoryOrNull = Category | null;
 
 export enum TOKEN_TYPE {
   AUTH = 'AUTH',

@@ -4,9 +4,13 @@ import { baseStorySchema } from './baseSchema.ts';
 import { userResponseSchema } from './userValidator.ts';
 import { categoryResponseSchema } from './categoryValidator.ts';
 
-export const createStorySchema = baseStorySchema.strict();
+export const createStorySchema = baseStorySchema
+  .extend({
+    categoryIds: baseStorySchema.shape.categoryIds.default([]),
+  })
+  .strict();
 
-export const updateStorySchema = createStorySchema
+export const updateStorySchema = baseStorySchema
   .partial()
   .strict()
   .refine((data) => Object.keys(data).length > 0, {

@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import { TOKEN_TYPE, tokenExpiryMap } from '../types/customTypes.ts';
 import { ErrorFactory } from '../errors/errorFactory.ts';
 import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
+import { CONTEXT } from '../constants/context.ts';
 
 export function generateToken(user: UserResponseDto, tokenType: TOKEN_TYPE): string {
   const payload: TokenPayloadDto = {
@@ -17,6 +18,17 @@ export function generateToken(user: UserResponseDto, tokenType: TOKEN_TYPE): str
     expiresIn: tokenExpiryMap[tokenType],
   });
   return token;
+}
+
+export function verifyToken(token: string): TokenPayloadDto {
+  try {
+    return jwt.verify(token, ENV.JWT_SECRET) as TokenPayloadDto;
+  } catch (err) {
+    throw ErrorFactory.createUnauthorizedError(
+      ERROR_MESSAGES.AUTH.INVALID_TOKEN,
+      CONTEXT.MIDDLEWARE.AUTHENTICATION,
+    );
+  }
 }
 
 export function generateTokenError(error: any) {

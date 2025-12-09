@@ -10,10 +10,10 @@ import {
 } from '../validators/authValidator.ts';
 import { REQ_SOURCE } from '../types/customTypes.ts';
 
-const router = Router();
+const authRouter = Router();
 const authController = new AuthController();
 
-router
+authRouter
   .post('/signup', reqValidation(REQ_SOURCE.BODY, signupSchema), authController.signup)
 
   .post('/login', reqValidation(REQ_SOURCE.BODY, loginSchema), authController.login)
@@ -31,4 +31,4 @@ router
     authController.resendConfirmationEmail,
   );
 
-export default router;
+export default authRouter;

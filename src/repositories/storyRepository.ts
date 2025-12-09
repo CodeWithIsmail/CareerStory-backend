@@ -11,20 +11,10 @@ import { Category } from '../entities/Category.ts';
 
 export class StoryRepository {
   private storyRepository = AppDataSource.getRepository(Story);
-  private categoryRepository = AppDataSource.getRepository(Category);
 
-  async createStory(storyData: CreateStoryDto): Promise<Story> {
-    const { categoryIds, ...restStoryData } = storyData;
-
-    const newStory = this.storyRepository.create(storyData);
-    const savedStory = await this.storyRepository.save(newStory);
-
-    if (categoryIds && categoryIds.length > 0) {
-      const categories = await this.categoryRepository.find({ where: { categoryId: In(categoryIds) } });
-      savedStory.categories = categories;
-      await this.storyRepository.save(savedStory);
-    }
-    return savedStory;
+  async createStory(storyData: CreateStoryDto, categories: Category[]): Promise<Story> {
+    const newStory = this.storyRepository.create({ ...storyData, categories });
+    return this.storyRepository.save(newStory);
   }
 
   async getStories(
@@ -57,26 +47,23 @@ export class StoryRepository {
     });
   }
 
-  async updateStory(storyId: string, updateData: UpdateStoryDto): Promise<StoryOrNull> {
+  async updateStory(
+    storyId: string,
+    updateData: UpdateStoryDto,
+    categories?: Category[],
+  ): Promise<StoryOrNull> {
     const { categoryIds, ...restUpdateData } = updateData;
     if (Object.keys(restUpdateData).length > 0) {
       await this.storyRepository.update(storyId, restUpdateData);
     }
 
-    if (categoryIds !== undefined) {
+    if (categories !== undefined) {
       const story = await this.storyRepository.findOne({
         where: { storyId },
         relations: ['categories'],
       });
-      if (story) {
-        if (categoryIds.length > 0) {
-          const categories = await this.categoryRepository.find({ where: { categoryId: In(categoryIds) } });
-          story.categories = categories;
-        } else {
-          story.categories = [];
-        }
-        await this.storyRepository.save(story);
-      }
+      story.categories = categories;
+      await this.storyRepository.save(story);
     }
     return this.getStoryById(storyId);
   }

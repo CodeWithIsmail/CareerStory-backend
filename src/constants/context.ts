@@ -1,4 +1,13 @@
 export const CONTEXT = {
+  MIDDLEWARE: {
+    AUTHENTICATION: 'authentication',
+    AUTHORIZATION: 'authorization',
+    VALIDATION: 'Validation error',
+    APPLICATION: 'application error',
+    DATABASE: 'database error',
+    UNEXPECTED: 'unexpected error',
+    UNKNOWN: 'unknown error',
+  },
   USER: {
     CREATE: 'creating user',
     FETCH: 'fetching user',
@@ -6,13 +15,13 @@ export const CONTEXT = {
     DELETE: 'deleting user',
     EMAIL_VERIFICATION: 'updating email verification status',
   },
-  STORY:{
+  STORY: {
     CREATE: 'creating story',
     FETCH: 'fetching story',
     UPDATE: 'updating story',
     DELETE: 'deleting story',
   },
-  AUTH:{
+  AUTH: {
     LOGIN: 'user login',
     SIGNUP: 'user signup',
     CONFIRM_EMAIL: 'confirming email',
