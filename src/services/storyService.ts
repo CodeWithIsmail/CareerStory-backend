@@ -10,10 +10,12 @@ import { mapPaginatedResponse } from '../mappers/paginationMapper.ts';
 import { CONTEXT } from '../constants/context.ts';
 import { CategoryService } from './categoryService.ts';
 import { Category } from '../entities/Category.ts';
+import { AIService } from './aiService.ts';
 export class StoryService {
   private storyRepository = new StoryRepository();
   private userService = new UserService();
   private categoryService = new CategoryService();
+  private aiService = new AIService();
 
   async createStory(story: CreateStoryDto): Promise<StoryResponseDto> {
     let categories: Category[] = [];
@@ -31,7 +33,13 @@ export class StoryService {
       }
     }
 
-    const newStory = await this.storyRepository.createStory(story, categories);
+    let summary: string | null = null;
+    if (story.generateSummary) {
+      summary = await this.aiService.generateStorySummary(story.title, story.body);
+    }
+    const newStoryData = { ...story, summary };
+
+    const newStory = await this.storyRepository.createStory(newStoryData, categories);
     if (!newStory) {
       throw ErrorFactory.createDatabaseError(
         ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR,
@@ -72,6 +80,14 @@ export class StoryService {
       throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.STORY.NOT_FOUND, CONTEXT.STORY.UPDATE);
     }
     let updatedStory: StoryOrNull;
+    const { generateSummary, ...newUpdateData } = updateData;
+    if (generateSummary) {
+      const summary = await this.aiService.generateStorySummary(
+        updateData.title || story.title,
+        updateData.body || story.body,
+      );
+      newUpdateData['summary'] = summary;
+    }
 
     if (updateData.categoryIds !== undefined) {
       const categories = await this.categoryService.getCategoriesByIds(updateData.categoryIds);
@@ -85,8 +101,8 @@ export class StoryService {
           CONTEXT.STORY.UPDATE,
         );
       }
-      updatedStory = await this.storyRepository.updateStory(storyId, updateData, categories);
-    } else updatedStory = await this.storyRepository.updateStory(storyId, updateData);
+      updatedStory = await this.storyRepository.updateStory(storyId, newUpdateData, categories);
+    } else updatedStory = await this.storyRepository.updateStory(storyId, newUpdateData);
 
     if (!updatedStory) {
       throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.STORY.NOT_FOUND, CONTEXT.STORY.UPDATE);

@@ -27,6 +27,9 @@ export class Story {
   @Column({ type: 'text' })
   body: string;
 
+  @Column({ type: 'text', nullable: true })
+  summary?: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

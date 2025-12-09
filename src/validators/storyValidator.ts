@@ -7,10 +7,14 @@ import { categoryResponseSchema } from './categoryValidator.ts';
 export const createStorySchema = baseStorySchema
   .extend({
     categoryIds: baseStorySchema.shape.categoryIds.default([]),
+    generateSummary: z.boolean({ message: VALIDATION_MESSAGES.STORY.SUMMARY.REQUIRED }),
   })
   .strict();
 
 export const updateStorySchema = baseStorySchema
+  .extend({
+    generateSummary: z.boolean(),
+  })
   .partial()
   .strict()
   .refine((data) => Object.keys(data).length > 0, {
@@ -23,6 +27,7 @@ export const storyResponseSchema = baseStorySchema
     storyId: z.uuidv4(),
     createdAt: z.date(),
     updatedAt: z.date(),
+    summary: z.string().nullable().optional(),
     categories: categoryResponseSchema
       .pick({ categoryId: true, name: true, description: true })
       .array()
