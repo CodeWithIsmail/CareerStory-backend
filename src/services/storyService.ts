@@ -20,17 +20,7 @@ export class StoryService {
   async createStory(story: CreateStoryDto): Promise<StoryResponseDto> {
     let categories: Category[] = [];
     if (story.categoryIds.length > 0) {
-      categories = await this.categoryService.getCategoriesByIds(story.categoryIds);
-      const validCategoryIds = categories.map((category) => category.categoryId);
-      const invalidCategoryIds = story.categoryIds.filter(
-        (categoryId) => !validCategoryIds.includes(categoryId),
-      );
-      if (invalidCategoryIds.length > 0) {
-        throw ErrorFactory.createNotFoundError(
-          `${ERROR_MESSAGES.CATEGORY.FETCH}: Invalid category IDs - ${invalidCategoryIds.join(', ')}`,
-          CONTEXT.STORY.CREATE,
-        );
-      }
+      categories = await this.validateAndFetchCategories(story.categoryIds, CONTEXT.STORY.CREATE);
     }
 
     let summary: string | null = null;
@@ -75,10 +65,7 @@ export class StoryService {
   }
 
   async updateStory(storyId: string, updateData: UpdateStoryDto): Promise<StoryResponseDto> {
-    const story = await this.storyRepository.getStoryById(storyId);
-    if (!story) {
-      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.STORY.NOT_FOUND, CONTEXT.STORY.UPDATE);
-    }
+    const story = await this.getStoryById(storyId);
     let updatedStory: StoryOrNull;
     const { generateSummary, ...newUpdateData } = updateData;
     if (generateSummary) {
@@ -90,17 +77,7 @@ export class StoryService {
     }
 
     if (updateData.categoryIds !== undefined) {
-      const categories = await this.categoryService.getCategoriesByIds(updateData.categoryIds);
-      const validCategoryIds = categories.map((category) => category.categoryId);
-      const invalidCategoryIds = updateData.categoryIds.filter(
-        (categoryId) => !validCategoryIds.includes(categoryId),
-      );
-      if (invalidCategoryIds.length > 0) {
-        throw ErrorFactory.createNotFoundError(
-          `${ERROR_MESSAGES.CATEGORY.FETCH}: Invalid category IDs - ${invalidCategoryIds.join(', ')}`,
-          CONTEXT.STORY.UPDATE,
-        );
-      }
+      const categories = await this.validateAndFetchCategories(updateData.categoryIds, CONTEXT.STORY.UPDATE);
       updatedStory = await this.storyRepository.updateStory(storyId, newUpdateData, categories);
     } else updatedStory = await this.storyRepository.updateStory(storyId, newUpdateData);
 
@@ -117,11 +94,21 @@ export class StoryService {
     }
   }
 
-  async storyAuthorUserId(storyId: string): Promise<string> {
-    const story = await this.storyRepository.getStoryById(storyId);
-    if (!story) {
-      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.STORY.NOT_FOUND, CONTEXT.STORY.FETCH);
+  async storyAuthorUserId(storyId: string): Promise<string | null> {
+    const story = await this.getStoryById(storyId);
+    return story.user?.userId;
+  }
+
+  async validateAndFetchCategories(categoryIds: string[], context: string): Promise<Category[]> {
+    const categories = await this.categoryService.getCategoriesByIds(categoryIds);
+    const validCategoryIds = categories.map((category) => category.categoryId);
+    const invalidCategoryIds = categoryIds.filter((categoryId) => !validCategoryIds.includes(categoryId));
+    if (invalidCategoryIds.length > 0) {
+      throw ErrorFactory.createNotFoundError(
+        `${ERROR_MESSAGES.CATEGORY.FETCH}: Invalid category IDs - ${invalidCategoryIds.join(', ')}`,
+        context,
+      );
     }
-    return story.userId;
+    return categories;
   }
 }

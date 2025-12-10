@@ -7,6 +7,7 @@ import logger from '../utils/logger.ts';
 import { ResponseHandler } from '../utils/responseHandler.ts';
 import { formatZodErrors } from '../utils/formatZodErrors.ts';
 import { CONTEXT } from '../constants/context.ts';
+import { AISummaryError } from './CustomErrors.ts';
 export class ErrorHandler {
   static handleError(error: unknown, res: Response, context: string = '') {
     let statusCode = HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
@@ -28,6 +29,15 @@ export class ErrorHandler {
       message = error.message;
 
       logger.error(CONTEXT.MIDDLEWARE.APPLICATION, {
+        context,
+        statusCode,
+        message,
+      });
+    } else if (error instanceof AISummaryError) {
+      statusCode = error.statusCode;
+      message = error.message;
+
+      logger.error(CONTEXT.AI.SUMMARY_GENERATION, {
         context,
         statusCode,
         message,

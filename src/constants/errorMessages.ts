@@ -11,6 +11,10 @@ export const HTTP_STATUS_CODES = {
 };
 
 export const ERROR_MESSAGES = {
+  AI: {
+    SUMMARY_GENERATION_FAILED: 'Failed to generate story summary',
+    OPENROUTER_API_FAILED: 'OpenRouter API failed to generate summary'
+  },
   DATABASE: {
     DUPLICATE_ENTRY: 'Duplicate entry in database',
     FOREIGN_KEY_CONFLICT: 'Foreign key constraint violation',
@@ -26,6 +30,7 @@ export const ERROR_MESSAGES = {
     EMAIL_NOT_VERIFIED: 'Email address not verified',
   },
   COMMON: {
+    ROUTE_NOT_FOUND: 'Requested route not found.',
     INVALID_INPUT: 'Invalid input data',
     UNAUTHORIZED: 'Unauthorized access',
     FORBIDDEN: 'Forbidden',
@@ -47,7 +52,7 @@ export const ERROR_MESSAGES = {
   },
   SERVER: {
     INTERNAL_SERVER_ERROR: 'Internal server error',
-    ROUTE_NOT_FOUND: 'Route not found',
+
     SERVICE_UNAVAILABLE: 'Service temporarily unavailable',
   },
   CATEGORY: {

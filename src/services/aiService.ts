@@ -2,6 +2,9 @@ import { OpenRouter } from '@openrouter/sdk';
 import { ENV } from '../config/environment.ts';
 import { CreateStoryDto } from '../dto/storyDto.ts';
 import logger from '../utils/logger.ts';
+import { ErrorFactory } from '../errors/errorFactory.ts';
+import { CONTEXT } from '../constants/context.ts';
+import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
 
 export class AIService {
   private openRouter = new OpenRouter({
@@ -34,8 +37,15 @@ Summary:`;
       const summary = (response.choices?.[0]?.message?.content as string) || '';
       return summary;
     } catch (error) {
-      logger.error('Error generating story summary:', error);
-      //   throw new Error('Failed to generate story summary.');
+      logger.error(CONTEXT.AI.SUMMARY_GENERATION, {
+        message: 'Error generating story summary',
+        error,
+      });
+      return null;
+      // throw ErrorFactory.createAISummaryError(
+      //   ERROR_MESSAGES.AI.OPENROUTER_API_FAILED,
+      //   CONTEXT.AI.SUMMARY_GENERATION,
+      // );
     }
   }
 }

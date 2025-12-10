@@ -36,3 +36,9 @@ export class ConflictError extends AppError {
     super(message, HTTP_STATUS_CODES.CONFLICT, context);
   }
 }
+
+export class AISummaryError extends AppError {
+  constructor(message: string = ERROR_MESSAGES.AI.SUMMARY_GENERATION_FAILED, context: string = '') {
+    super(message, HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR, context);
+  }
+}
