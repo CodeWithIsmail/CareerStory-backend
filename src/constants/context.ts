@@ -15,6 +15,7 @@ export const CONTEXT = {
     UPDATE: 'updating user',
     DELETE: 'deleting user',
     EMAIL_VERIFICATION: 'updating email verification status',
+    UPDATE_ROLE: 'updating user role',
   },
   STORY: {
     CREATE: 'creating story',

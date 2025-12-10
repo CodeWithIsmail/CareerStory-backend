@@ -28,6 +28,7 @@ export const RESPONSE_MESSAGES = {
     },
     UPDATE: {
       SUCCESS: 'User updated successfully',
+      ROLE: 'User role updated successfully',
     },
   },
 
