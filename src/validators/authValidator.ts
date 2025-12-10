@@ -43,3 +43,30 @@ export const createAuthSchema = z
     hashedPassword: z.string(),
   })
   .strict();
+
+export const changePasswordInitiationSchema = z
+  .object({
+    currentPassword: basePasswordSchema,
+  })
+  .strict();
+
+export const verifyPasswordChangeCodeSchema = z
+  .object({
+    confirmationCode: z.string().length(6, VALIDATION_MESSAGES.AUTH.CHANGE_PASSWORD.CODE_REQUIRED),
+  })
+  .strict();
+
+export const setNewPasswordSchema = signupSchema
+  .pick({ password: true, confirmPassword: true })
+  .strict()
+  .refine((data) => data.password === data.confirmPassword, {
+    message: VALIDATION_MESSAGES.PASSWORD.MISMATCH,
+    path: ['confirmPassword'],
+  });
+
+export const changePasswordResponseSchema = z
+  .object({
+    message: z.string(),
+    timestamp: z.date(),
+  })
+  .strip();

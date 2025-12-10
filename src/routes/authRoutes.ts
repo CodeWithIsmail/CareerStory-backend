@@ -1,7 +1,12 @@
 import { Router } from 'express';
 import { AuthController } from '../controllers/authController.ts';
 import { reqValidation } from '../middlewares/reqValidationMiddleware.ts';
-import { resendEmailLimiter } from '../middlewares/rateLimitMiddleware.ts';
+import {
+  changePasswordInitiateLimiter,
+  changePasswordSetLimiter,
+  changePasswordVerifyLimiter,
+  resendEmailLimiter,
+} from '../middlewares/rateLimitMiddleware.ts';
 import {
   emailResendSchema,
   loginSchema,
@@ -9,6 +14,7 @@ import {
   tokenParamSchema,
 } from '../validators/authValidator.ts';
 import { REQ_SOURCE } from '../types/customTypes.ts';
+import { authenticate } from '../middlewares/authenticationMiddleware.ts';
 
 const authRouter = Router();
 const authController = new AuthController();
@@ -29,6 +35,27 @@ authRouter
     reqValidation(REQ_SOURCE.PARAM, emailResendSchema, 'userName'),
     resendEmailLimiter,
     authController.resendConfirmationEmail,
+  )
+
+  .post(
+    '/change-password/initiate',
+    authenticate,
+    changePasswordInitiateLimiter,
+    authController.initiatePasswordChange,
+  )
+
+  .post(
+    '/change-password/verify-code',
+    authenticate,
+    changePasswordVerifyLimiter,
+    authController.verifyPasswordChangeCode,
+  )
+
+  .post(
+    '/change-password/set-new-password',
+    authenticate,
+    changePasswordSetLimiter,
+    authController.changePassword,
   );
 
 export default authRouter;

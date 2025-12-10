@@ -1,10 +1,7 @@
 import { OpenRouter } from '@openrouter/sdk';
 import { ENV } from '../config/environment.ts';
-import { CreateStoryDto } from '../dto/storyDto.ts';
 import logger from '../utils/logger.ts';
-import { ErrorFactory } from '../errors/errorFactory.ts';
 import { CONTEXT } from '../constants/context.ts';
-import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
 
 export class AIService {
   private openRouter = new OpenRouter({

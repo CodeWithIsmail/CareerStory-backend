@@ -7,6 +7,7 @@ export const CONTEXT = {
     DATABASE: 'database error',
     UNEXPECTED: 'unexpected error',
     UNKNOWN: 'unknown error',
+    EMAIL_CONFIRMATION: 'email confirmation',
   },
   USER: {
     CREATE: 'creating user',
@@ -26,6 +27,9 @@ export const CONTEXT = {
     SIGNUP: 'user signup',
     CONFIRM_EMAIL: 'confirming email',
     RESEND_CONFIRMATION_EMAIL: 'resending confirmation email',
+    CHANGE_PASSWORD_INITIATE: 'password change initiation',
+    CHANGE_PASSWORD_VERIFY: 'password change verification',
+    CHANGE_PASSWORD_SET: 'setting new password',
   },
   CATEGORY: {
     CREATE: 'creating category',

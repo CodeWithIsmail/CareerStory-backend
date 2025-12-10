@@ -13,7 +13,7 @@ export const HTTP_STATUS_CODES = {
 export const ERROR_MESSAGES = {
   AI: {
     SUMMARY_GENERATION_FAILED: 'Failed to generate story summary',
-    OPENROUTER_API_FAILED: 'OpenRouter API failed to generate summary'
+    OPENROUTER_API_FAILED: 'OpenRouter API failed to generate summary',
   },
   DATABASE: {
     DUPLICATE_ENTRY: 'Duplicate entry in database',
@@ -28,6 +28,17 @@ export const ERROR_MESSAGES = {
     TOKEN_EXPIRED: 'Authentication token has expired',
     UNAUTHORIZED: 'You do not have permission to perform this action',
     EMAIL_NOT_VERIFIED: 'Email address not verified',
+
+    CHANGE_PASSWORD: {
+      CURRENT_PASSWORD_INCORRECT: 'Current password is incorrect',
+      CODE_EXPIRED: 'Confirmation code has expired. Please initiate password change again.',
+      CODE_INVALID: 'Invalid or incorrect confirmation code',
+      CODE_NOT_VERIFIED: 'Please verify the confirmation code first',
+      SAME_AS_CURRENT: 'New password must be different from current password',
+      INITIATION_FAILED: 'Failed to initiate password change',
+      VERIFICATION_FAILED: 'Failed to verify confirmation code',
+      UPDATE_FAILED: 'Failed to update password',
+    },
   },
   COMMON: {
     ROUTE_NOT_FOUND: 'Requested route not found.',

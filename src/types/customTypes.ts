@@ -8,11 +8,12 @@ export type UserOrNull = User | null;
 export type StoryOrNull = Story | null;
 export type AuthOrNull = Auth | null;
 export type CategoryOrNull = Category | null;
+export type DateOrNull = Date | null;
+export type StringOrNull = string | null;
 
 export enum TOKEN_TYPE {
   AUTH = 'AUTH',
   EMAIL_VERIFICATION = 'EMAIL_VERIFICATION',
-  PASSWORD_RESET = 'PASSWORD_RESET',
 }
 
 export enum REQ_SOURCE {
@@ -24,7 +25,6 @@ export enum REQ_SOURCE {
 export const tokenExpiryMap: Record<TOKEN_TYPE, number> = {
   [TOKEN_TYPE.AUTH]: ENV.AUTH_JWT_EXPIRES_IN,
   [TOKEN_TYPE.EMAIL_VERIFICATION]: ENV.EMAIL_VERIFICATION_TOKEN_EXPIRES_IN,
-  [TOKEN_TYPE.PASSWORD_RESET]: ENV.PASSWORD_RESET_TOKEN_EXPIRES_IN,
 };
 
 export interface PaginationMetadata {

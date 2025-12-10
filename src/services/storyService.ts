@@ -1,6 +1,5 @@
 import { CreateStoryDto, UpdateStoryDto, StoryResponseDto } from '../dto/storyDto.ts';
 import { mapStoryToDto, mapStoriesToDtoList } from '../mappers/storyMapper.ts';
-import { ErrorFactory } from '../errors/errorFactory.ts';
 import { StoryRepository } from '../repositories/storyRepository.ts';
 import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
 import { StoryPaginationQuery } from '../validators/paginationValidator.ts';
@@ -11,6 +10,7 @@ import { CONTEXT } from '../constants/context.ts';
 import { CategoryService } from './categoryService.ts';
 import { Category } from '../entities/Category.ts';
 import { AIService } from './aiService.ts';
+import { DatabaseError, NotFoundError } from '../errors/CustomErrors.ts';
 export class StoryService {
   private storyRepository = new StoryRepository();
   private userService = new UserService();
@@ -31,10 +31,7 @@ export class StoryService {
 
     const newStory = await this.storyRepository.createStory(newStoryData, categories);
     if (!newStory) {
-      throw ErrorFactory.createDatabaseError(
-        ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR,
-        CONTEXT.STORY.CREATE,
-      );
+      throw new DatabaseError(ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR, CONTEXT.STORY.CREATE);
     }
     return mapStoryToDto(newStory);
   }
@@ -59,7 +56,7 @@ export class StoryService {
   async getStoryById(storyId: string): Promise<StoryResponseDto> {
     const story = await this.storyRepository.getStoryById(storyId);
     if (!story) {
-      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.STORY.NOT_FOUND, CONTEXT.STORY.FETCH);
+      throw new NotFoundError(ERROR_MESSAGES.STORY.NOT_FOUND, CONTEXT.STORY.FETCH);
     }
     return mapStoryToDto(story);
   }
@@ -82,7 +79,7 @@ export class StoryService {
     } else updatedStory = await this.storyRepository.updateStory(storyId, newUpdateData);
 
     if (!updatedStory) {
-      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.STORY.NOT_FOUND, CONTEXT.STORY.UPDATE);
+      throw new NotFoundError(ERROR_MESSAGES.STORY.NOT_FOUND, CONTEXT.STORY.UPDATE);
     }
     return mapStoryToDto(updatedStory);
   }
@@ -90,7 +87,7 @@ export class StoryService {
   async deleteStory(storyId: string): Promise<void> {
     const result = await this.storyRepository.deleteStory(storyId);
     if (result.affected === 0) {
-      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.STORY.NOT_FOUND, CONTEXT.STORY.DELETE);
+      throw new NotFoundError(ERROR_MESSAGES.STORY.NOT_FOUND, CONTEXT.STORY.DELETE);
     }
   }
 
@@ -104,7 +101,7 @@ export class StoryService {
     const validCategoryIds = categories.map((category) => category.categoryId);
     const invalidCategoryIds = categoryIds.filter((categoryId) => !validCategoryIds.includes(categoryId));
     if (invalidCategoryIds.length > 0) {
-      throw ErrorFactory.createNotFoundError(
+      throw new NotFoundError(
         `${ERROR_MESSAGES.CATEGORY.FETCH}: Invalid category IDs - ${invalidCategoryIds.join(', ')}`,
         context,
       );
