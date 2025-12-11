@@ -28,8 +28,10 @@ export const ERROR_MESSAGES = {
     TOKEN_EXPIRED: 'Authentication token has expired',
     UNAUTHORIZED: 'You do not have permission to perform this action',
     EMAIL_NOT_VERIFIED: 'Email address not verified',
+    EMAIL_ALREADY_VERIFIED: 'Email address is already verified',
 
     CHANGE_PASSWORD: {
+      CODE_NOT_REQUESTED: 'No password change requested',
       CURRENT_PASSWORD_INCORRECT: 'Current password is incorrect',
       CODE_EXPIRED: 'Confirmation code has expired. Please initiate password change again.',
       CODE_INVALID: 'Invalid or incorrect confirmation code',

@@ -17,7 +17,7 @@ export const signupSchema = baseUserSchema
 
 export const loginSchema = signupSchema.pick({ userName: true, password: true }).strict();
 
-export const emailResendSchema = z.string().min(3, VALIDATION_MESSAGES.USER.USERNAME.REQUIRED);
+export const emailResendSchema = z.string().min(3, VALIDATION_MESSAGES.USER.USERNAME.MIN);
 
 export const tokenPayloadSchema = z
   .object({
@@ -52,7 +52,7 @@ export const changePasswordInitiationSchema = z
 
 export const verifyPasswordChangeCodeSchema = z
   .object({
-    confirmationCode: z.string().length(6, VALIDATION_MESSAGES.AUTH.CHANGE_PASSWORD.CODE_REQUIRED),
+    code: z.string().length(6, VALIDATION_MESSAGES.AUTH.CHANGE_PASSWORD.CODE_REQUIRED),
   })
   .strict();
 

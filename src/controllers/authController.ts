@@ -37,7 +37,7 @@ export class AuthController {
   };
 
   changePassword = async (req: Request, res: Response) => {
-    await this.authService.setNewPassword(req.userId, req.body.newPassword);
+    await this.authService.setNewPassword(req.userId, req.body.password);
     return ResponseHandler.success(res, null, RESPONSE_MESSAGES.AUTH.PASSWORD_CHANGE.PASSWORD_CHANGED);
   };
 }

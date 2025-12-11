@@ -3,7 +3,7 @@ import { ENV } from '../config/environment.ts';
 import { UserResponseDto } from '../dto/userDto.ts';
 import { createPasswordChangeConfirmation } from '../emails/passwordChange.ts';
 import { createPasswordChangeCode } from '../emails/verificationCode.ts';
-import { createVerificationEmail } from '../emails/EmailVerification.ts';
+import { createVerificationEmail } from '../emails/emailVerification.ts';
 
 const transporter = nodemailer.createTransport({
   host: ENV.EMAIL_HOST,

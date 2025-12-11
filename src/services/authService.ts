@@ -20,7 +20,8 @@ import {
 } from '../utils/emailUtils.ts';
 import jwt from 'jsonwebtoken';
 import { CONTEXT } from '../constants/context.ts';
-import { DatabaseError, UnauthorizedError } from '../errors/CustomErrors.ts';
+import { BadRequestError, DatabaseError, UnauthorizedError } from '../errors/CustomErrors.ts';
+import { generateExpiryTimestamp } from '../utils/timeUtils.ts';
 
 export class AuthService {
   private userService = new UserService();
@@ -42,6 +43,12 @@ export class AuthService {
 
   async resendConfirmationEmail(userName: string): Promise<void> {
     const user = await this.userService.getUserByUsername(userName);
+    if (user.isEmailVerified) {
+      throw new BadRequestError(
+        ERROR_MESSAGES.AUTH.EMAIL_ALREADY_VERIFIED,
+        CONTEXT.AUTH.RESEND_CONFIRMATION_EMAIL,
+      );
+    }
     await this.sendVerificationEmail(user);
   }
 
@@ -87,7 +94,7 @@ export class AuthService {
     await validateUserPassword(currentPassword, auth.hashedPassword, CONTEXT.AUTH.CHANGE_PASSWORD_INITIATE);
 
     const verificationCode = generatePasswordChangeCode();
-    const expiresAt = new Date(Date.now() + ENV.PASSWORD_CHANGE_CODE_EXPIRES_IN * 1000);
+    const expiresAt = generateExpiryTimestamp();
 
     const result = await this.authRepository.storePasswordChangeCode(userId, verificationCode, expiresAt);
 
@@ -102,28 +109,26 @@ export class AuthService {
     await sendPasswordChangeCodeEmail(user.userName, user.email, verificationCode);
   }
 
-  async verifyPasswordChangeCode(userId: string, code: string): Promise<void> {
+  async verifyPasswordChangeCode(userId: string, passwordChangeCode: string): Promise<void> {
     const auth = await this.getAuthByUserId(userId, CONTEXT.AUTH.CHANGE_PASSWORD_VERIFY);
-    console.log(auth);
     if (!auth.passwordChangeCode || !auth.passwordChangeCodeExpiresAt) {
-      throw new UnauthorizedError(
-        ERROR_MESSAGES.AUTH.CHANGE_PASSWORD.CODE_INVALID,
+      throw new BadRequestError(
+        ERROR_MESSAGES.AUTH.CHANGE_PASSWORD.CODE_NOT_REQUESTED,
         CONTEXT.AUTH.CHANGE_PASSWORD_VERIFY,
       );
     }
 
-    const isExpired = isPasswordChangeCodeExpired(auth.passwordChangeCodeExpiresAt);
-    if (isExpired) {
+    if (isPasswordChangeCodeExpired(auth.passwordChangeCodeExpiresAt)) {
       await this.authRepository.clearPasswordChangeCode(userId);
-      throw new UnauthorizedError(
+      throw new BadRequestError(
         ERROR_MESSAGES.AUTH.CHANGE_PASSWORD.CODE_EXPIRED,
         CONTEXT.AUTH.CHANGE_PASSWORD_VERIFY,
       );
     }
 
-    const isCodeValid = auth.passwordChangeCode === code;
+    const isCodeValid = auth.passwordChangeCode === passwordChangeCode;
     if (!isCodeValid) {
-      throw new UnauthorizedError(
+      throw new BadRequestError(
         ERROR_MESSAGES.AUTH.CHANGE_PASSWORD.CODE_INVALID,
         CONTEXT.AUTH.CHANGE_PASSWORD_VERIFY,
       );
@@ -142,14 +147,14 @@ export class AuthService {
     const auth = await this.getAuthByUserId(userId, CONTEXT.AUTH.CHANGE_PASSWORD_SET);
 
     if (!auth.passwordChangeCodeVerified) {
-      throw new UnauthorizedError(
+      throw new BadRequestError(
         ERROR_MESSAGES.AUTH.CHANGE_PASSWORD.CODE_NOT_VERIFIED,
         CONTEXT.AUTH.CHANGE_PASSWORD_SET,
       );
     }
 
     if (isPasswordChangeCodeExpired(auth.passwordChangeCodeExpiresAt!)) {
-      throw new UnauthorizedError(
+      throw new BadRequestError(
         ERROR_MESSAGES.AUTH.CHANGE_PASSWORD.CODE_EXPIRED,
         CONTEXT.AUTH.CHANGE_PASSWORD_SET,
       );
