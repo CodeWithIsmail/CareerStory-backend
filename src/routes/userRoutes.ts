@@ -25,6 +25,7 @@ userRouter
     reqValidation(REQ_SOURCE.BODY, updateUserProfileSchema),
     userController.updateUserProfile,
   )
+
   .patch(
     '/change-role/:userId',
     authenticate,
