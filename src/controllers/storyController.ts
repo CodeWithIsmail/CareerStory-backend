@@ -2,16 +2,17 @@ import { Request, Response } from 'express';
 import { StoryService } from '../services/storyService.ts';
 import { ResponseHandler } from '../utils/responseHandler.ts';
 import { RESPONSE_MESSAGES } from '../constants/responseMessages.ts';
+import { AuthRequest } from '../middlewares/authenticationMiddleware.ts';
 
 export class StoryController {
   private storyService = new StoryService();
 
-  createStory = async (req: Request, res: Response) => {
+  createStory = async (req: AuthRequest, res: Response) => {
     const newStory = await this.storyService.createStory({ ...req.body, userId: req.userId });
     return ResponseHandler.created(res, newStory, RESPONSE_MESSAGES.STORY.CREATE.SUCCESS);
   };
 
-  getAllStories = async (req: Request, res: Response) => {
+  getAllStories = async (req: AuthRequest, res: Response) => {
     const stories = await this.storyService.getStories(req.validatedQuery, req.userId);
     return ResponseHandler.success(res, stories, RESPONSE_MESSAGES.STORY.FETCH.ALL_SUCCESS);
   };

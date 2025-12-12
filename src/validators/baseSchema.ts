@@ -1,7 +1,14 @@
 import { z } from 'zod';
 import { VALIDATION_MESSAGES } from '../constants/validationMessages.ts';
+import { UserRole } from '../types/customTypes.ts';
+
+export const baseUrlSchema = z
+  .url({ message: VALIDATION_MESSAGES.URL.INVALID })
+  .trim()
+  .max(255, VALIDATION_MESSAGES.URL.MAX);
 
 export const baseUserSchema = z.object({
+  userId: z.uuidv4(VALIDATION_MESSAGES.USER.USER_ID.INVALID),
   userName: z
     .string({ message: VALIDATION_MESSAGES.USER.USERNAME.REQUIRED })
     .regex(/^[a-z0-9_]+$/, VALIDATION_MESSAGES.USER.USERNAME.INVALID)
@@ -20,6 +27,28 @@ export const baseUserSchema = z.object({
     .trim()
     .min(3, VALIDATION_MESSAGES.USER.NAME.MIN)
     .max(100, VALIDATION_MESSAGES.USER.NAME.MAX),
+
+  bio: z.string().trim().max(1000).nullable().optional(),
+
+  organization: z.string().trim().max(255).nullable().optional(),
+
+  photoUrl: baseUrlSchema.nullable().optional(),
+
+  linkedInUrl: baseUrlSchema.nullable().optional(),
+
+  githubUrl: baseUrlSchema.nullable().optional(),
+
+  portfolioUrl: baseUrlSchema.nullable().optional(),
+
+  isEmailVerified: z.boolean().default(false),
+
+  role: z.enum(UserRole, { message: VALIDATION_MESSAGES.USER.ROLE.INVALID }).default(UserRole.USER),
+
+  joinDate: z.date(),
+
+  updatedAt: z.date(),
+
+  deletedAt: z.date().nullable().optional(),
 });
 
 export const basePasswordSchema = z

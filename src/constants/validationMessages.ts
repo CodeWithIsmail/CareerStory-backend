@@ -1,4 +1,8 @@
 export const VALIDATION_MESSAGES = {
+  URL: {
+    INVALID: 'URL must be a valid URL',
+    MAX: 'URL must be at most 255 characters',
+  },
   COMMON: {
     AT_LEAST_ONE_FIELD: 'At least one field must be provided for update',
   },

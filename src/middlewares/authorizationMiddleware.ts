@@ -4,9 +4,10 @@ import { ERROR_MESSAGES } from '../constants/errorMessages.js';
 import { StoryService } from '../services/storyService.ts';
 import { CONTEXT } from '../constants/context.ts';
 import { ForbiddenError } from '../errors/CustomErrors.ts';
+import { AuthRequest } from './authenticationMiddleware.ts';
 
 export const authorizeRoles = (...roles: UserRole[]) => {
-  return (req: Request, _res: Response, next: NextFunction) => {
+  return (req: AuthRequest, _res: Response, next: NextFunction) => {
     if (!roles.includes(req.role)) {
       throw new ForbiddenError(ERROR_MESSAGES.AUTH.UNAUTHORIZED, CONTEXT.MIDDLEWARE.AUTHORIZATION);
     }
@@ -14,7 +15,7 @@ export const authorizeRoles = (...roles: UserRole[]) => {
   };
 };
 
-export const authorizeStoryOwnerOrAdmin = async (req: Request, _res: Response, next: NextFunction) => {
+export const authorizeStoryOwnerOrAdmin = async (req: AuthRequest, _res: Response, next: NextFunction) => {
   const storyService = new StoryService();
   const storyId = req.params.storyId;
   const storyAuthorUserId = await storyService.storyAuthorUserId(storyId);
@@ -25,7 +26,7 @@ export const authorizeStoryOwnerOrAdmin = async (req: Request, _res: Response, n
   next();
 };
 
-export const authorizeOwnerOrAdmin = (req: Request, _res: Response, next: NextFunction) => {
+export const authorizeOwnerOrAdmin = (req: AuthRequest, _res: Response, next: NextFunction) => {
   const resourceOwnerId = req.params.userId;
 
   if (req.userId !== resourceOwnerId && req.role !== UserRole.ADMIN) {

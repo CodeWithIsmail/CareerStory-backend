@@ -1,7 +1,7 @@
 import { SignupDto, LoginDto, AuthResponseDto, CreateAuthDto, TokenPayloadDto } from '../dto/authDto.ts';
 import { mapSignUpToCreateAuth, mapSignupToCreateUser } from '../mappers/authMapper.ts';
 import { UserService } from './userService.ts';
-import { UserResponseDto } from '../dto/userDto.ts';
+// import { UserResponseDto } from '../dto/userDto.ts';
 import { ENV } from '../config/environment.ts';
 import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
 import { generateToken, generateTokenError } from '../utils/tokenUtils.ts';
@@ -22,12 +22,13 @@ import jwt from 'jsonwebtoken';
 import { CONTEXT } from '../constants/context.ts';
 import { BadRequestError, DatabaseError, UnauthorizedError } from '../errors/CustomErrors.ts';
 import { generateExpiryTimestamp } from '../utils/timeUtils.ts';
+import { UserProfileDto } from '../dto/userDto.ts';
 
 export class AuthService {
   private userService = new UserService();
   private authRepository = new AuthRepository();
 
-  async signup(signupDto: SignupDto): Promise<UserResponseDto> {
+  async signup(signupDto: SignupDto): Promise<UserProfileDto> {
     const createUserDto = mapSignupToCreateUser(signupDto);
     const newUser = await this.userService.createUser(createUserDto);
     const authData: CreateAuthDto = await mapSignUpToCreateAuth(newUser.userId, signupDto.password);
@@ -36,7 +37,7 @@ export class AuthService {
     return newUser;
   }
 
-  async sendVerificationEmail(newUser: UserResponseDto): Promise<void> {
+  async sendVerificationEmail(newUser: UserProfileDto): Promise<void> {
     const emailVerificationToken = generateToken(newUser, TOKEN_TYPE.EMAIL_VERIFICATION);
     await sendVerificationEmail(newUser, emailVerificationToken);
   }
@@ -59,7 +60,7 @@ export class AuthService {
         throw new UnauthorizedError(ERROR_MESSAGES.AUTH.INVALID_TOKEN, CONTEXT.AUTH.CONFIRM_EMAIL);
       }
       const userId = decoded.userId;
-      await this.userService.updateEmailVerificationStatus(userId);
+      await this.userService.updateUser(userId, { isEmailVerified: true });
     } catch (error) {
       generateTokenError(error);
     }

@@ -1,6 +1,6 @@
-import { UserResponseDto } from '../dto/userDto.ts';
+import { UserProfileDto } from '../dto/userDto.ts';
 
-export function createVerificationEmail(newUser: UserResponseDto, verificationLink: string): string {
+export function createVerificationEmail(newUser: UserProfileDto, verificationLink: string): string {
   return `
     <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
       <h2 style="color: #2a6df4; margin-bottom: 16px;">CareerStory</h2>

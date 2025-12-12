@@ -25,6 +25,7 @@ export const RESPONSE_MESSAGES = {
     FETCH: {
       ALL_SUCCESS: 'Users retrieved successfully',
       BY_ID_SUCCESS: 'User retrieved successfully',
+      PROFILE_SUCCESS: 'User profile retrieved successfully',
     },
     UPDATE: {
       SUCCESS: 'User updated successfully',

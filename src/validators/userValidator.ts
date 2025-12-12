@@ -1,28 +1,49 @@
 import { z } from 'zod';
-import { UserRole } from '../entities/User.ts';
 import { VALIDATION_MESSAGES } from '../constants/validationMessages.ts';
 import { baseUserSchema } from './baseSchema.ts';
+import { UserRole } from '../types/customTypes.ts';
 
 export const createUserSchema = baseUserSchema
-  .extend({
-    role: z.enum(UserRole, { message: VALIDATION_MESSAGES.USER.ROLE.INVALID }).default(UserRole.USER),
-    isEmailVerified: z.boolean().default(false),
+  .pick({
+    userName: true,
+    email: true,
+    name: true,
   })
   .strict();
 
-export const updateUserSchema = baseUserSchema.pick({ name: true }).strict();
+export const updateUserProfileSchema = baseUserSchema
+  .pick({
+    name: true,
+    bio: true,
+    organization: true,
+    photoUrl: true,
+    linkedInUrl: true,
+    githubUrl: true,
+    portfolioUrl: true,
+  })
+  .strict()
+  .partial()
+  .refine((data) => Object.keys(data).length > 0, {
+    message: VALIDATION_MESSAGES.COMMON.AT_LEAST_ONE_FIELD,
+  });
+
+export const userProfileSchema = baseUserSchema.omit({ deletedAt: true }).strip();
+
+export const updateUserStatusSchema = baseUserSchema
+  .pick({
+    isEmailVerified: true,
+    role: true,
+  })
+  .strict()
+  .partial()
+  .refine((data) => Object.keys(data).length > 0, {
+    message: VALIDATION_MESSAGES.COMMON.AT_LEAST_ONE_FIELD,
+  });
 
 export const updateUserRoleSchema = z
   .object({
     role: z.enum(UserRole, { message: VALIDATION_MESSAGES.USER.ROLE.INVALID }),
   })
   .strict();
-
-export const userResponseSchema = createUserSchema
-  .extend({
-    userId: z.uuidv4(),
-    joinDate: z.date(),
-  })
-  .strip();
 
 export const userParamSchema = z.uuidv4(VALIDATION_MESSAGES.USER.USER_ID.INVALID);

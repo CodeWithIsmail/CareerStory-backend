@@ -6,11 +6,8 @@ import {
   DeleteDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-
-export enum UserRole {
-  ADMIN = 'ADMIN',
-  USER = 'USER',
-}
+import { UrlNullableColumn } from '../utils/columnUtils.ts';
+import { UserRole } from '../types/customTypes.ts';
 
 @Entity({ name: 'users' })
 export class User {
@@ -25,6 +22,24 @@ export class User {
 
   @Column({ unique: true, length: 255 })
   email: string;
+
+  @Column({ length: 1000, nullable: true })
+  bio: string | null;
+
+  @Column({ length: 255, nullable: true })
+  organization: string | null;
+
+  @UrlNullableColumn()
+  photoUrl: string | null;
+
+  @UrlNullableColumn()
+  linkedInUrl: string | null;
+
+  @UrlNullableColumn()
+  githubUrl: string | null;
+
+  @UrlNullableColumn()
+  portfolioUrl: string | null;
 
   @Column({ default: false })
   isEmailVerified: boolean;
@@ -41,3 +56,4 @@ export class User {
   @DeleteDateColumn()
   deletedAt?: Date;
 }
+export { UserRole };
