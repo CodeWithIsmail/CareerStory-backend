@@ -15,7 +15,7 @@ const userRouter = Router();
 const userController = new UserController();
 
 userRouter
-  .get('/', authenticate, reqValidation(REQ_SOURCE.QUERY, userPaginationSchema), userController.getAllUsers)
+  .get('/', reqValidation(REQ_SOURCE.QUERY, userPaginationSchema), userController.getAllUsers)
 
   .get('/profile', authenticate, userController.getCurrentUserProfile)
 
@@ -35,12 +35,7 @@ userRouter
     userController.updateUser,
   )
 
-  .get(
-    '/:userId',
-    authenticate,
-    reqValidation(REQ_SOURCE.PARAM, userParamSchema, 'userId'),
-    userController.getUserById,
-  )
+  .get('/:userId', reqValidation(REQ_SOURCE.PARAM, userParamSchema, 'userId'), userController.getUserById)
 
   .delete(
     '/:userId',

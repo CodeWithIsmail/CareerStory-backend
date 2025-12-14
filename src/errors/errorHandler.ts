@@ -14,7 +14,15 @@ export class ErrorHandler {
     let message = ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR;
     let errorDetails: any;
 
-    if (error instanceof z.ZodError) {
+    if (error instanceof SyntaxError && 'body' in error) {
+      statusCode = HTTP_STATUS_CODES.BAD_REQUEST;
+      message = ERROR_MESSAGES.COMMON.INVALID_JSON;
+
+      logger.error(CONTEXT.MIDDLEWARE.SYNTAX, {
+        context,
+        errorMessage: error.message,
+      });
+    } else if (error instanceof z.ZodError) {
       statusCode = HTTP_STATUS_CODES.BAD_REQUEST;
       message = ERROR_MESSAGES.COMMON.INVALID_INPUT;
       errorDetails = formatZodErrors(error);
@@ -24,20 +32,20 @@ export class ErrorHandler {
         errorCount: errorDetails.length,
         details: errorDetails,
       });
-    } else if (error instanceof AppError) {
-      statusCode = error.statusCode;
-      message = error.message;
-
-      logger.error(CONTEXT.MIDDLEWARE.APPLICATION, {
-        context,
-        statusCode,
-        message,
-      });
     } else if (error instanceof AISummaryError) {
       statusCode = error.statusCode;
       message = error.message;
 
       logger.error(CONTEXT.AI.SUMMARY_GENERATION, {
+        context,
+        statusCode,
+        message,
+      });
+    } else if (error instanceof AppError) {
+      statusCode = error.statusCode;
+      message = error.message;
+
+      logger.error(CONTEXT.MIDDLEWARE.APPLICATION, {
         context,
         statusCode,
         message,

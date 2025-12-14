@@ -10,7 +10,7 @@ import storyRouter from './routes/storyRoutes.ts';
 import authRouter from './routes/authRoutes.ts';
 import { ENV } from './config/environment.ts';
 import categoryRouter from './routes/categoryRoutes.ts';
-import { specs } from './swagger/swaggerConfig.ts';
+import { specs, swaggerUiOptions } from './swagger/swaggerConfig.ts';
 
 const PORT = ENV.PORT;
 
@@ -18,7 +18,7 @@ const app = express();
 
 app.use(express.json());
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs,swaggerUiOptions));
 
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', userRouter);

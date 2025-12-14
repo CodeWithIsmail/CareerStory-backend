@@ -7,8 +7,6 @@
  *     summary: Get all users with pagination
  *     description: Retrieve a paginated list of all users with optional search and sorting.
  *     operationId: getAllUsers
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - name: find
  *         in: query
@@ -50,11 +48,68 @@
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/SuccessResponse'
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     statusCode:
+ *                       type: integer
+ *                       example: 200
+ *                     message:
+ *                       type: string
+ *                       example: Users retrieved successfully
+ *                     result:
+ *                       type: object
+ *                       properties:
+ *                         data:
+ *                           type: array
+ *                           items:
+ *                             $ref: '#/components/schemas/User'
+ *                         pagination:
+ *                           $ref: '#/components/schemas/PaginationMetadata'
  *       400:
- *         $ref: '#/components/responses/ValidationError'
+ *         description: Validation error - Invalid query parameters
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 400
+ *               message: Validation failed
+ *               details:
+ *                 - field: page
+ *                   message: Page must be a positive number
+ *                   code: too_small
  *       401:
- *         $ref: '#/components/responses/UnauthorizedError'
+ *         description: Unauthorized - Missing or invalid token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               noToken:
+ *                 summary: No token provided
+ *                 value:
+ *                   success: false
+ *                   statusCode: 401
+ *                   message: No authentication token provided
+ *               invalidToken:
+ *                 summary: Invalid token
+ *                 value:
+ *                   success: false
+ *                   statusCode: 401
+ *                   message: Invalid authentication token
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 500
+ *               message: Internal server error
  */
 
 /**
@@ -74,9 +129,47 @@
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/SuccessResponse'
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     statusCode:
+ *                       type: integer
+ *                       example: 200
+ *                     message:
+ *                       type: string
+ *                       example: User profile retrieved successfully
+ *                     result:
+ *                       $ref: '#/components/schemas/User'
  *       401:
- *         $ref: '#/components/responses/UnauthorizedError'
+ *         description: Unauthorized - Missing or invalid token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               noToken:
+ *                 summary: No token provided
+ *                 value:
+ *                   success: false
+ *                   statusCode: 401
+ *                   message: No authentication token provided
+ *               invalidToken:
+ *                 summary: Invalid token
+ *                 value:
+ *                   success: false
+ *                   statusCode: 401
+ *                   message: Invalid authentication token
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 500
+ *               message: Internal server error
  *   patch:
  *     tags:
  *       - Users
@@ -90,48 +183,78 @@
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 minLength: 3
- *                 maxLength: 100
- *                 example: John Doe Updated
- *               bio:
- *                 type: string
- *                 maxLength: 1000
- *                 example: A passionate software engineer
- *               organization:
- *                 type: string
- *                 maxLength: 255
- *                 example: Tech Company Inc
- *               photoUrl:
- *                 type: string
- *                 format: uri
- *                 maxLength: 255
- *               linkedInUrl:
- *                 type: string
- *                 format: uri
- *                 maxLength: 255
- *               githubUrl:
- *                 type: string
- *                 format: uri
- *                 maxLength: 255
- *               portfolioUrl:
- *                 type: string
- *                 format: uri
- *                 maxLength: 255
+ *             $ref: '#/components/schemas/UpdateUserProfileRequest'
  *     responses:
  *       200:
  *         description: User profile updated successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/SuccessResponse'
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     statusCode:
+ *                       type: integer
+ *                       example: 200
+ *                     message:
+ *                       type: string
+ *                       example: User updated successfully
+ *                     result:
+ *                       $ref: '#/components/schemas/User'
  *       400:
- *         $ref: '#/components/responses/ValidationError'
+ *         description: Validation error - Invalid request body
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 400
+ *               message: Validation failed
+ *               details:
+ *                 - field: name
+ *                   message: Name must be at least 3 characters
+ *                   code: too_small
  *       401:
- *         $ref: '#/components/responses/UnauthorizedError'
+ *         description: Unauthorized - Missing or invalid token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               noToken:
+ *                 summary: No token provided
+ *                 value:
+ *                   success: false
+ *                   statusCode: 401
+ *                   message: No authentication token provided
+ *               invalidToken:
+ *                 summary: Invalid token
+ *                 value:
+ *                   success: false
+ *                   statusCode: 401
+ *                   message: Invalid authentication token
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 404
+ *               message: User not found
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 500
+ *               message: Internal server error
  */
 
 /**
@@ -143,8 +266,6 @@
  *     summary: Get user by ID
  *     description: Retrieve a specific user's profile by their user ID.
  *     operationId: getUserById
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - name: userId
  *         in: path
@@ -159,13 +280,71 @@
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/SuccessResponse'
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     statusCode:
+ *                       type: integer
+ *                       example: 200
+ *                     message:
+ *                       type: string
+ *                       example: User retrieved successfully
+ *                     result:
+ *                       $ref: '#/components/schemas/User'
  *       400:
- *         $ref: '#/components/responses/ValidationError'
+ *         description: Validation error - Invalid userId format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 400
+ *               message: Validation failed
+ *               details:
+ *                 - field: userId
+ *                   message: Invalid uuid
+ *                   code: invalid_string
  *       401:
- *         $ref: '#/components/responses/UnauthorizedError'
+ *         description: Unauthorized - Missing or invalid token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               noToken:
+ *                 summary: No token provided
+ *                 value:
+ *                   success: false
+ *                   statusCode: 401
+ *                   message: No authentication token provided
+ *               invalidToken:
+ *                 summary: Invalid token
+ *                 value:
+ *                   success: false
+ *                   statusCode: 401
+ *                   message: Invalid authentication token
  *       404:
- *         $ref: '#/components/responses/NotFoundError'
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 404
+ *               message: User not found
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 500
+ *               message: Internal server error
  *   delete:
  *     tags:
  *       - Users
@@ -186,13 +365,68 @@
  *       204:
  *         description: User deleted successfully
  *       400:
- *         $ref: '#/components/responses/ValidationError'
+ *         description: Validation error - Invalid userId format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 400
+ *               message: Validation failed
+ *               details:
+ *                 - field: userId
+ *                   message: Invalid uuid
+ *                   code: invalid_string
  *       401:
- *         $ref: '#/components/responses/UnauthorizedError'
+ *         description: Unauthorized - Missing or invalid token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               noToken:
+ *                 summary: No token provided
+ *                 value:
+ *                   success: false
+ *                   statusCode: 401
+ *                   message: No authentication token provided
+ *               invalidToken:
+ *                 summary: Invalid token
+ *                 value:
+ *                   success: false
+ *                   statusCode: 401
+ *                   message: Invalid authentication token
  *       403:
- *         $ref: '#/components/responses/ForbiddenError'
+ *         description: Forbidden - Cannot delete other user's account
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 403
+ *               message: You do not have permission to perform this action
  *       404:
- *         $ref: '#/components/responses/NotFoundError'
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 404
+ *               message: User not found
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 500
+ *               message: Internal server error
  */
 
 /**
@@ -219,27 +453,99 @@
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - role
- *             properties:
- *               role:
- *                 type: string
- *                 enum: [USER, ADMIN]
- *                 example: ADMIN
+ *             $ref: '#/components/schemas/UpdateUserRoleRequest'
  *     responses:
  *       200:
  *         description: User role updated successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/SuccessResponse'
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     statusCode:
+ *                       type: integer
+ *                       example: 200
+ *                     message:
+ *                       type: string
+ *                       example: User role updated successfully
+ *                     result:
+ *                       $ref: '#/components/schemas/User'
  *       400:
- *         $ref: '#/components/responses/ValidationError'
+ *         description: Validation error - Invalid request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               invalidUuid:
+ *                 summary: Invalid userId format
+ *                 value:
+ *                   success: false
+ *                   statusCode: 400
+ *                   message: Validation failed
+ *                   details:
+ *                     - field: userId
+ *                       message: Invalid uuid
+ *                       code: invalid_string
+ *               invalidRole:
+ *                 summary: Invalid role value
+ *                 value:
+ *                   success: false
+ *                   statusCode: 400
+ *                   message: Validation failed
+ *                   details:
+ *                     - field: role
+ *                       message: "Invalid enum value. Expected 'USER' | 'ADMIN'"
+ *                       code: invalid_enum_value
  *       401:
- *         $ref: '#/components/responses/UnauthorizedError'
+ *         description: Unauthorized - Missing or invalid token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               noToken:
+ *                 summary: No token provided
+ *                 value:
+ *                   success: false
+ *                   statusCode: 401
+ *                   message: No authentication token provided
+ *               invalidToken:
+ *                 summary: Invalid token
+ *                 value:
+ *                   success: false
+ *                   statusCode: 401
+ *                   message: Invalid authentication token
  *       403:
- *         $ref: '#/components/responses/ForbiddenError'
+ *         description: Forbidden - Admin access required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 403
+ *               message: You do not have permission to perform this action
  *       404:
- *         $ref: '#/components/responses/NotFoundError'
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 404
+ *               message: User not found
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 500
+ *               message: Internal server error
  */

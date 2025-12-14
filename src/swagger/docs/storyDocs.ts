@@ -14,46 +14,90 @@
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - title
- *               - body
- *               - generateSummary
- *             properties:
- *               title:
- *                 type: string
- *                 minLength: 5
- *                 maxLength: 255
- *                 example: My Career Journey in Tech
- *                 description: Story title
- *               body:
- *                 type: string
- *                 minLength: 10
- *                 maxLength: 5000
- *                 example: After graduating, I started my career...
- *                 description: Story content
- *               categoryIds:
- *                 type: array
- *                 items:
- *                   type: string
- *                   format: uuid
- *                 description: Array of category IDs
- *                 default: []
- *               generateSummary:
- *                 type: boolean
- *                 example: true
- *                 description: Whether to generate AI summary
+ *             $ref: '#/components/schemas/CreateStoryRequest'
  *     responses:
  *       201:
  *         description: Story created successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/SuccessResponse'
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     statusCode:
+ *                       type: integer
+ *                       example: 201
+ *                     message:
+ *                       type: string
+ *                       example: Story created successfully
+ *                     result:
+ *                       $ref: '#/components/schemas/Story'
  *       400:
- *         $ref: '#/components/responses/ValidationError'
+ *         description: Validation error - Invalid request body
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 400
+ *               message: Validation failed
+ *               details:
+ *                 - field: title
+ *                   message: Title must be at least 5 characters
+ *                   code: too_small
+ *                 - field: body
+ *                   message: Body must be at least 10 characters
+ *                   code: too_small
  *       401:
- *         $ref: '#/components/responses/UnauthorizedError'
+ *         description: Unauthorized - Missing or invalid token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               noToken:
+ *                 summary: No token provided
+ *                 value:
+ *                   success: false
+ *                   statusCode: 401
+ *                   message: No authentication token provided
+ *               invalidToken:
+ *                 summary: Invalid token
+ *                 value:
+ *                   success: false
+ *                   statusCode: 401
+ *                   message: Invalid authentication token
+ *       404:
+ *         description: Category not found - Invalid category IDs
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 404
+ *               message: "Category not found: Invalid category IDs - 550e8400-e29b-41d4-a716-446655440000"
+ *       500:
+ *         description: Internal server error - Database or AI service failure
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               databaseError:
+ *                 summary: Database error
+ *                 value:
+ *                   success: false
+ *                   statusCode: 500
+ *                   message: Internal server error
+ *               aiError:
+ *                 summary: AI summary generation failed
+ *                 value:
+ *                   success: false
+ *                   statusCode: 500
+ *                   message: Failed to generate story summary
  *   get:
  *     tags:
  *       - Stories
@@ -110,9 +154,49 @@
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/SuccessResponse'
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     statusCode:
+ *                       type: integer
+ *                       example: 200
+ *                     message:
+ *                       type: string
+ *                       example: Stories retrieved successfully
+ *                     result:
+ *                       type: object
+ *                       properties:
+ *                         data:
+ *                           type: array
+ *                           items:
+ *                             $ref: '#/components/schemas/Story'
+ *                         pagination:
+ *                           $ref: '#/components/schemas/PaginationMetadata'
  *       400:
- *         $ref: '#/components/responses/ValidationError'
+ *         description: Validation error - Invalid query parameters
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 400
+ *               message: Validation failed
+ *               details:
+ *                 - field: page
+ *                   message: Page must be a positive number
+ *                   code: too_small
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 500
+ *               message: Internal server error
  */
 
 /**
@@ -138,11 +222,52 @@
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/SuccessResponse'
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     statusCode:
+ *                       type: integer
+ *                       example: 200
+ *                     message:
+ *                       type: string
+ *                       example: Story retrieved successfully
+ *                     result:
+ *                       $ref: '#/components/schemas/Story'
  *       400:
- *         $ref: '#/components/responses/ValidationError'
+ *         description: Validation error - Invalid storyId format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 400
+ *               message: Validation failed
+ *               details:
+ *                 - field: storyId
+ *                   message: Invalid uuid
+ *                   code: invalid_string
  *       404:
- *         $ref: '#/components/responses/NotFoundError'
+ *         description: Story not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 404
+ *               message: Story not found
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 500
+ *               message: Internal server error
  *   patch:
  *     tags:
  *       - Stories
@@ -164,38 +289,110 @@
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               title:
- *                 type: string
- *                 minLength: 5
- *                 maxLength: 255
- *               body:
- *                 type: string
- *                 minLength: 10
- *                 maxLength: 5000
- *               categoryIds:
- *                 type: array
- *                 items:
- *                   type: string
- *                   format: uuid
- *               generateSummary:
- *                 type: boolean
+ *             $ref: '#/components/schemas/UpdateStoryRequest'
  *     responses:
  *       200:
  *         description: Story updated successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/SuccessResponse'
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     statusCode:
+ *                       type: integer
+ *                       example: 200
+ *                     message:
+ *                       type: string
+ *                       example: Story updated successfully
+ *                     result:
+ *                       $ref: '#/components/schemas/Story'
  *       400:
- *         $ref: '#/components/responses/ValidationError'
+ *         description: Validation error - Invalid request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               invalidUuid:
+ *                 summary: Invalid storyId format
+ *                 value:
+ *                   success: false
+ *                   statusCode: 400
+ *                   message: Validation failed
+ *                   details:
+ *                     - field: storyId
+ *                       message: Invalid uuid
+ *                       code: invalid_string
+ *               invalidBody:
+ *                 summary: Invalid request body
+ *                 value:
+ *                   success: false
+ *                   statusCode: 400
+ *                   message: Validation failed
+ *                   details:
+ *                     - field: title
+ *                       message: Title must be at least 5 characters
+ *                       code: too_small
  *       401:
- *         $ref: '#/components/responses/UnauthorizedError'
+ *         description: Unauthorized - Missing or invalid token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               noToken:
+ *                 summary: No token provided
+ *                 value:
+ *                   success: false
+ *                   statusCode: 401
+ *                   message: No authentication token provided
+ *               invalidToken:
+ *                 summary: Invalid token
+ *                 value:
+ *                   success: false
+ *                   statusCode: 401
+ *                   message: Invalid authentication token
  *       403:
- *         $ref: '#/components/responses/ForbiddenError'
+ *         description: Forbidden - Not story owner or admin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 403
+ *               message: You do not have permission to perform this action
  *       404:
- *         $ref: '#/components/responses/NotFoundError'
+ *         description: Story or category not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               storyNotFound:
+ *                 summary: Story not found
+ *                 value:
+ *                   success: false
+ *                   statusCode: 404
+ *                   message: Story not found
+ *               categoryNotFound:
+ *                 summary: Invalid category IDs
+ *                 value:
+ *                   success: false
+ *                   statusCode: 404
+ *                   message: "Category not found: Invalid category IDs - 550e8400-e29b-41d4-a716-446655440000"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 500
+ *               message: Internal server error
  *   delete:
  *     tags:
  *       - Stories
@@ -216,11 +413,66 @@
  *       204:
  *         description: Story deleted successfully
  *       400:
- *         $ref: '#/components/responses/ValidationError'
+ *         description: Validation error - Invalid storyId format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 400
+ *               message: Validation failed
+ *               details:
+ *                 - field: storyId
+ *                   message: Invalid uuid
+ *                   code: invalid_string
  *       401:
- *         $ref: '#/components/responses/UnauthorizedError'
+ *         description: Unauthorized - Missing or invalid token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               noToken:
+ *                 summary: No token provided
+ *                 value:
+ *                   success: false
+ *                   statusCode: 401
+ *                   message: No authentication token provided
+ *               invalidToken:
+ *                 summary: Invalid token
+ *                 value:
+ *                   success: false
+ *                   statusCode: 401
+ *                   message: Invalid authentication token
  *       403:
- *         $ref: '#/components/responses/ForbiddenError'
+ *         description: Forbidden - Not story owner or admin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 403
+ *               message: You do not have permission to perform this action
  *       404:
- *         $ref: '#/components/responses/NotFoundError'
+ *         description: Story not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 404
+ *               message: Story not found
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               statusCode: 500
+ *               message: Internal server error
  */
