@@ -198,6 +198,21 @@ describe('StoryService', () => {
   });
 
   describe('updateStory', () => {
+    it('should generate summary using existing story fields if updateData.title/body are missing', async () => {
+      const mockExistingStory = createMockStory({ title: 'Original Title', body: 'Original Body' });
+      const mockUpdatedStory = createMockStory({ summary: 'Fallback summary' });
+      const updateData = { generateSummary: true };
+
+      mockStoryRepository.getStoryById = jest.fn().mockResolvedValue(mockExistingStory);
+      mockAIService.generateStorySummary = jest.fn().mockResolvedValue('Fallback summary');
+      mockStoryRepository.updateStory = jest.fn().mockResolvedValue(mockUpdatedStory);
+
+      const result = await storyService.updateStory(MOCK_STORY_ID, updateData as any);
+
+      expect(mockAIService.generateStorySummary).toHaveBeenCalledWith('Original Title', 'Original Body');
+      expect(result.summary).toBe('Fallback summary');
+    });
+
     it('should update story successfully without categories', async () => {
       const updateData = createUpdateStoryDto();
       const mockExistingStory = createMockStory();

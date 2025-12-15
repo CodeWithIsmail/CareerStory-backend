@@ -4,7 +4,6 @@ import { UserService } from '../../../services/userService.ts';
 import { UnauthorizedError, BadRequestError, DatabaseError } from '../../../errors/CustomErrors.ts';
 import { ERROR_MESSAGES } from '../../../constants/errorMessages.ts';
 import {
-  createMockUser,
   createMockUserProfile,
   createMockAuth,
   createMockAuthWithPasswordChangeCode,
@@ -17,24 +16,29 @@ import {
 
 // Mock dependencies
 jest.mock('../../../repositories/authRepository.ts');
+
 jest.mock('../../../services/userService.ts');
+
 jest.mock('../../../utils/emailUtils.ts', () => ({
   sendVerificationEmail: jest.fn().mockResolvedValue(undefined),
   sendPasswordChangeCodeEmail: jest.fn().mockResolvedValue(undefined),
   sendPasswordChangeConfirmationEmail: jest.fn().mockResolvedValue(undefined),
 }));
+
 jest.mock('../../../utils/tokenUtils.ts', () => ({
   generateToken: jest.fn().mockReturnValue('mock-jwt-token'),
   generateTokenError: jest.fn().mockImplementation(() => {
     throw new UnauthorizedError('Invalid token');
   }),
 }));
+
 jest.mock('../../../utils/passwordUtils.ts', () => ({
   generateHashedPassword: jest.fn().mockResolvedValue('$2b$10$hashedpassword'),
   generatePasswordChangeCode: jest.fn().mockReturnValue('123456'),
   isPasswordChangeCodeExpired: jest.fn().mockReturnValue(false),
   validateUserPassword: jest.fn().mockResolvedValue(true),
 }));
+
 jest.mock('../../../mappers/authMapper.ts', () => ({
   mapSignUpToCreateAuth: jest.fn().mockResolvedValue({
     userId: 'user-uuid-123',
@@ -49,6 +53,8 @@ jest.mock('../../../mappers/authMapper.ts', () => ({
 
 import * as passwordUtils from '../../../utils/passwordUtils.ts';
 import * as emailUtils from '../../../utils/emailUtils.ts';
+import { ENV } from '../../../config/environment.ts';
+import { TOKEN_TYPE } from '../../../types/customTypes.ts';
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -166,15 +172,52 @@ describe('AuthService', () => {
     });
   });
 
+  describe('confirmEmail', () => {
+    const mockToken = 'mock.jwt.token';
+    const mockUserId = MOCK_USER_ID;
+    const mockDecoded = {
+      userId: mockUserId,
+      tokenType: TOKEN_TYPE.EMAIL_VERIFICATION,
+    };
+    let verifySpy;
+    beforeEach(() => {
+      verifySpy = jest.spyOn(require('jsonwebtoken'), 'verify').mockReturnValue(mockDecoded);
+    });
+
+    it('should verify token and update user as verified', async () => {
+      mockUserService.updateUser = jest.fn().mockResolvedValue({});
+      await expect(authService.confirmEmail(mockToken)).resolves.toBeUndefined();
+      expect(verifySpy).toHaveBeenCalledWith(mockToken, ENV.JWT_SECRET);
+      expect(mockUserService.updateUser).toHaveBeenCalledWith(mockUserId, { isEmailVerified: true });
+    });
+
+    it('should call generateTokenError if token type is not EMAIL_VERIFICATION', async () => {
+      verifySpy.mockReturnValue({ userId: mockUserId, tokenType: 'INVALID' });
+      const generateTokenError = require('../../../utils/tokenUtils.ts').generateTokenError;
+      await expect(authService.confirmEmail(mockToken)).resolves.toBeUndefined();
+      expect(generateTokenError).toHaveBeenCalled();
+    });
+
+    it('should call generateTokenError if jwt.verify throws', async () => {
+      const error = new Error('jwt error');
+      verifySpy.mockImplementation(() => {
+        throw error;
+      });
+      const generateTokenError = require('../../../utils/tokenUtils.ts').generateTokenError;
+      await expect(authService.confirmEmail(mockToken)).resolves.toBeUndefined();
+      expect(generateTokenError).toHaveBeenCalledWith(error);
+    });
+  });
+
   describe('getAuthByUserId', () => {
     it('should return auth record when found', async () => {
       const mockAuth = createMockAuth();
       mockAuthRepository.getAuthByUserId = jest.fn().mockResolvedValue(mockAuth);
 
-      const result = await authService.getAuthByUserId('user-uuid-123', 'test-context');
+      const result = await authService.getAuthByUserId(MOCK_USER_ID, 'test-context');
 
       expect(result).toEqual(mockAuth);
-      expect(mockAuthRepository.getAuthByUserId).toHaveBeenCalledWith('user-uuid-123');
+      expect(mockAuthRepository.getAuthByUserId).toHaveBeenCalledWith(MOCK_USER_ID);
     });
 
     it('should throw UnauthorizedError when auth not found', async () => {
@@ -195,7 +238,7 @@ describe('AuthService', () => {
       mockAuthRepository.storePasswordChangeCode = jest.fn().mockResolvedValue(mockAuth);
       mockUserService.getUserById = jest.fn().mockResolvedValue(mockUser);
 
-      await authService.initiatePasswordChange('user-uuid-123', 'currentPassword');
+      await authService.initiatePasswordChange(MOCK_USER_ID, 'currentPassword');
 
       expect(mockAuthRepository.storePasswordChangeCode).toHaveBeenCalled();
       expect(emailUtils.sendPasswordChangeCodeEmail).toHaveBeenCalled();
@@ -207,7 +250,7 @@ describe('AuthService', () => {
       mockAuthRepository.getAuthByUserId = jest.fn().mockResolvedValue(mockAuth);
       mockAuthRepository.storePasswordChangeCode = jest.fn().mockResolvedValue(null);
 
-      await expect(authService.initiatePasswordChange('user-uuid-123', 'currentPassword')).rejects.toThrow(
+      await expect(authService.initiatePasswordChange(MOCK_USER_ID, 'currentPassword')).rejects.toThrow(
         DatabaseError,
       );
     });
@@ -219,19 +262,19 @@ describe('AuthService', () => {
       mockAuthRepository.getAuthByUserId = jest.fn().mockResolvedValue(mockAuth);
       mockAuthRepository.verifyPasswordChangeCode = jest.fn().mockResolvedValue(mockAuth);
 
-      await authService.verifyPasswordChangeCode('user-uuid-123', '123456');
+      await authService.verifyPasswordChangeCode(MOCK_USER_ID, '123456');
 
-      expect(mockAuthRepository.verifyPasswordChangeCode).toHaveBeenCalledWith('user-uuid-123');
+      expect(mockAuthRepository.verifyPasswordChangeCode).toHaveBeenCalledWith(MOCK_USER_ID);
     });
 
     it('should throw BadRequestError when no code requested', async () => {
       const mockAuth = createMockAuth(); // No password change code
       mockAuthRepository.getAuthByUserId = jest.fn().mockResolvedValue(mockAuth);
 
-      await expect(authService.verifyPasswordChangeCode('user-uuid-123', '123456')).rejects.toThrow(
+      await expect(authService.verifyPasswordChangeCode(MOCK_USER_ID, '123456')).rejects.toThrow(
         BadRequestError,
       );
-      await expect(authService.verifyPasswordChangeCode('user-uuid-123', '123456')).rejects.toThrow(
+      await expect(authService.verifyPasswordChangeCode(MOCK_USER_ID, '123456')).rejects.toThrow(
         ERROR_MESSAGES.AUTH.CHANGE_PASSWORD.CODE_NOT_REQUESTED,
       );
     });
@@ -242,7 +285,7 @@ describe('AuthService', () => {
       mockAuthRepository.clearPasswordChangeCode = jest.fn().mockResolvedValue(undefined);
       (passwordUtils.isPasswordChangeCodeExpired as jest.Mock).mockReturnValueOnce(true);
 
-      await expect(authService.verifyPasswordChangeCode('user-uuid-123', '123456')).rejects.toThrow(
+      await expect(authService.verifyPasswordChangeCode(MOCK_USER_ID, '123456')).rejects.toThrow(
         BadRequestError,
       );
     });
@@ -251,10 +294,10 @@ describe('AuthService', () => {
       const mockAuth = createMockAuthWithPasswordChangeCode();
       mockAuthRepository.getAuthByUserId = jest.fn().mockResolvedValue(mockAuth);
 
-      await expect(authService.verifyPasswordChangeCode('user-uuid-123', 'wrong-code')).rejects.toThrow(
+      await expect(authService.verifyPasswordChangeCode(MOCK_USER_ID, 'wrong-code')).rejects.toThrow(
         BadRequestError,
       );
-      await expect(authService.verifyPasswordChangeCode('user-uuid-123', 'wrong-code')).rejects.toThrow(
+      await expect(authService.verifyPasswordChangeCode(MOCK_USER_ID, 'wrong-code')).rejects.toThrow(
         ERROR_MESSAGES.AUTH.CHANGE_PASSWORD.CODE_INVALID,
       );
     });
@@ -264,7 +307,7 @@ describe('AuthService', () => {
       mockAuthRepository.getAuthByUserId = jest.fn().mockResolvedValue(mockAuth);
       mockAuthRepository.verifyPasswordChangeCode = jest.fn().mockResolvedValue(null);
 
-      await expect(authService.verifyPasswordChangeCode('user-uuid-123', '123456')).rejects.toThrow(
+      await expect(authService.verifyPasswordChangeCode(MOCK_USER_ID, '123456')).rejects.toThrow(
         DatabaseError,
       );
     });
@@ -279,7 +322,7 @@ describe('AuthService', () => {
       mockAuthRepository.updatePassword = jest.fn().mockResolvedValue(mockAuth);
       mockUserService.getUserById = jest.fn().mockResolvedValue(mockUser);
 
-      await authService.setNewPassword('user-uuid-123', 'newPassword123');
+      await authService.setNewPassword(MOCK_USER_ID, 'newPassword123');
 
       expect(mockAuthRepository.updatePassword).toHaveBeenCalled();
       expect(emailUtils.sendPasswordChangeConfirmationEmail).toHaveBeenCalled();
@@ -289,10 +332,8 @@ describe('AuthService', () => {
       const mockAuth = createMockAuthWithPasswordChangeCode(); // Not verified
       mockAuthRepository.getAuthByUserId = jest.fn().mockResolvedValue(mockAuth);
 
-      await expect(authService.setNewPassword('user-uuid-123', 'newPassword')).rejects.toThrow(
-        BadRequestError,
-      );
-      await expect(authService.setNewPassword('user-uuid-123', 'newPassword')).rejects.toThrow(
+      await expect(authService.setNewPassword(MOCK_USER_ID, 'newPassword')).rejects.toThrow(BadRequestError);
+      await expect(authService.setNewPassword(MOCK_USER_ID, 'newPassword')).rejects.toThrow(
         ERROR_MESSAGES.AUTH.CHANGE_PASSWORD.CODE_NOT_VERIFIED,
       );
     });
@@ -302,9 +343,7 @@ describe('AuthService', () => {
       mockAuthRepository.getAuthByUserId = jest.fn().mockResolvedValue(mockAuth);
       (passwordUtils.isPasswordChangeCodeExpired as jest.Mock).mockReturnValueOnce(true);
 
-      await expect(authService.setNewPassword('user-uuid-123', 'newPassword')).rejects.toThrow(
-        BadRequestError,
-      );
+      await expect(authService.setNewPassword(MOCK_USER_ID, 'newPassword')).rejects.toThrow(BadRequestError);
     });
 
     it('should throw DatabaseError when password update fails', async () => {
@@ -312,7 +351,7 @@ describe('AuthService', () => {
       mockAuthRepository.getAuthByUserId = jest.fn().mockResolvedValue(mockAuth);
       mockAuthRepository.updatePassword = jest.fn().mockResolvedValue(null);
 
-      await expect(authService.setNewPassword('user-uuid-123', 'newPassword')).rejects.toThrow(DatabaseError);
+      await expect(authService.setNewPassword(MOCK_USER_ID, 'newPassword')).rejects.toThrow(DatabaseError);
     });
   });
 });
