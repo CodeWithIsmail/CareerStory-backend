@@ -17,7 +17,7 @@ export const signupSchema = baseUserSchema
 
 export const loginSchema = signupSchema.pick({ userName: true, password: true }).strict();
 
-export const emailResendSchema = z.string().min(3, VALIDATION_MESSAGES.USER.USERNAME.REQUIRED);
+export const emailResendSchema = z.string().min(3, VALIDATION_MESSAGES.USER.USERNAME.MIN);
 
 export const tokenPayloadSchema = z
   .object({
@@ -43,3 +43,30 @@ export const createAuthSchema = z
     hashedPassword: z.string(),
   })
   .strict();
+
+export const changePasswordInitiationSchema = z
+  .object({
+    currentPassword: basePasswordSchema,
+  })
+  .strict();
+
+export const verifyPasswordChangeCodeSchema = z
+  .object({
+    code: z.string().length(6, VALIDATION_MESSAGES.AUTH.CHANGE_PASSWORD.CODE_REQUIRED),
+  })
+  .strict();
+
+export const setNewPasswordSchema = signupSchema
+  .pick({ password: true, confirmPassword: true })
+  .strict()
+  .refine((data) => data.password === data.confirmPassword, {
+    message: VALIDATION_MESSAGES.PASSWORD.MISMATCH,
+    path: ['confirmPassword'],
+  });
+
+export const changePasswordResponseSchema = z
+  .object({
+    message: z.string(),
+    timestamp: z.date(),
+  })
+  .strip();

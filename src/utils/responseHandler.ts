@@ -4,12 +4,12 @@ export class SuccessResponse<T> {
   success = true;
   statusCode: number;
   message: string;
-  result: T;
+  result?: T;
 
-  constructor(statusCode: number, message: string, result: T) {
+  constructor(statusCode: number, message: string, result?: T) {
     this.statusCode = statusCode;
     this.message = message;
-    this.result = result;
+    if (result !== undefined && result !== null) this.result = result;
   }
 }
 export class ErrorDetail {

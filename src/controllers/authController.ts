@@ -25,4 +25,19 @@ export class AuthController {
     await this.authService.resendConfirmationEmail(req.params.userName);
     return ResponseHandler.success(res, null, RESPONSE_MESSAGES.AUTH.EMAIL_CONFIRMATION.RESEND);
   };
+
+  initiatePasswordChange = async (req: Request, res: Response) => {
+    await this.authService.initiatePasswordChange(req.userId, req.body.currentPassword);
+    return ResponseHandler.success(res, null, RESPONSE_MESSAGES.AUTH.PASSWORD_CHANGE.INITIATE);
+  };
+
+  verifyPasswordChangeCode = async (req: Request, res: Response) => {
+    await this.authService.verifyPasswordChangeCode(req.userId, req.body.code);
+    return ResponseHandler.success(res, null, RESPONSE_MESSAGES.AUTH.PASSWORD_CHANGE.CODE_VERIFIED);
+  };
+
+  changePassword = async (req: Request, res: Response) => {
+    await this.authService.setNewPassword(req.userId, req.body.password);
+    return ResponseHandler.success(res, null, RESPONSE_MESSAGES.AUTH.PASSWORD_CHANGE.PASSWORD_CHANGED);
+  };
 }

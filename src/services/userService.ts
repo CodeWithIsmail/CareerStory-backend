@@ -1,7 +1,6 @@
 import { UserRepository } from '../repositories/userRepository.ts';
 import { CreateUserDto, UpdateUserDto, UserResponseDto } from '../dto/userDto.ts';
 import { mapUsersToDtoList, mapUserToDto } from '../mappers/userMapper.ts';
-import { ErrorFactory } from '../errors/errorFactory.ts';
 import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
 import { UserPaginationQuery } from '../validators/paginationValidator.ts';
 import { PaginatedResponse } from '../types/customTypes.ts';
@@ -9,6 +8,7 @@ import { checkForDuplicateUser } from '../utils/userUtils.ts';
 import { CONTEXT } from '../constants/context.ts';
 import { mapPaginatedResponse } from '../mappers/paginationMapper.ts';
 import { User } from '../entities/User.ts';
+import { DatabaseError, NotFoundError } from '../errors/CustomErrors.ts';
 
 export class UserService {
   private userRepository = new UserRepository();
@@ -18,10 +18,7 @@ export class UserService {
     checkForDuplicateUser(isExistingUser, user, CONTEXT.USER.CREATE);
     const newUser = await this.userRepository.createUser(user);
     if (!newUser) {
-      throw ErrorFactory.createDatabaseError(
-        ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR,
-        CONTEXT.USER.CREATE,
-      );
+      throw new DatabaseError(ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR, CONTEXT.USER.CREATE);
     }
     return mapUserToDto(newUser);
   }
@@ -34,7 +31,7 @@ export class UserService {
   async getUserById(userId: string): Promise<UserResponseDto> {
     const user = await this.userRepository.getUserById(userId);
     if (!user) {
-      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, CONTEXT.USER.FETCH);
+      throw new NotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, CONTEXT.USER.FETCH);
     }
     return mapUserToDto(user);
   }
@@ -42,7 +39,7 @@ export class UserService {
   async getUserByUsername(userName: string): Promise<UserResponseDto> {
     const user = await this.userRepository.getUserByUsername(userName);
     if (!user) {
-      throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.USER.UNAUTHORIZED, CONTEXT.USER.FETCH);
+      throw new NotFoundError(ERROR_MESSAGES.USER.UNAUTHORIZED, CONTEXT.USER.FETCH);
     }
     return mapUserToDto(user);
   }
@@ -50,7 +47,7 @@ export class UserService {
   async updateUser(userId: string, updateData: UpdateUserDto): Promise<UserResponseDto> {
     const updatedUser = await this.userRepository.updateUser(userId, updateData);
     if (!updatedUser) {
-      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, CONTEXT.USER.UPDATE);
+      throw new NotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, CONTEXT.USER.UPDATE);
     }
     return mapUserToDto(updatedUser);
   }
@@ -58,7 +55,7 @@ export class UserService {
   async updateEmailVerificationStatus(userId: string): Promise<UserResponseDto> {
     const updatedUser = await this.userRepository.updateEmailVerificationStatus(userId);
     if (!updatedUser) {
-      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, CONTEXT.USER.EMAIL_VERIFICATION);
+      throw new NotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, CONTEXT.USER.EMAIL_VERIFICATION);
     }
     return mapUserToDto(updatedUser);
   }
@@ -66,7 +63,7 @@ export class UserService {
   async deleteUser(userId: string): Promise<void> {
     const result = await this.userRepository.deleteUser(userId);
     if (result.affected === 0) {
-      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, CONTEXT.USER.DELETE);
+      throw new NotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, CONTEXT.USER.DELETE);
     }
   }
 }

@@ -42,3 +42,9 @@ export class AISummaryError extends AppError {
     super(message, HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR, context);
   }
 }
+
+export class BadRequestError extends AppError {
+  constructor(message: string = ERROR_MESSAGES.COMMON.INVALID_INPUT, context: string = '') {
+    super(message, HTTP_STATUS_CODES.BAD_REQUEST, context);
+  }
+}

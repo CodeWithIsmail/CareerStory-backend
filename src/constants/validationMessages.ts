@@ -6,6 +6,10 @@ export const VALIDATION_MESSAGES = {
     TOKEN: {
       INVALID: 'Token is invalid',
     },
+    CHANGE_PASSWORD: {
+      CURRENT_PASSWORD_REQUIRED: 'Current password is required',
+      CODE_REQUIRED: 'Confirmation code must be 6 digits',
+    },
   },
 
   USER: {

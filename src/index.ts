@@ -9,6 +9,7 @@ import storyRouter from './routes/storyRoutes.ts';
 import authRouter from './routes/authRoutes.ts';
 import { ENV } from './config/environment.ts';
 import categoryRouter from './routes/categoryRoutes.ts';
+import adminRouter from './routes/adminRoutes.ts';
 
 const PORT = ENV.PORT;
 
@@ -19,6 +20,7 @@ app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/stories', storyRouter);
 app.use('/api/v1/categories', categoryRouter);
+app.use('/api/v1/admin', adminRouter);
 app.use(routeNotFoundMiddleware);
 app.use(globalErrorMiddleware);
 

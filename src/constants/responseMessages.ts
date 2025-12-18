@@ -4,8 +4,18 @@ export const RESPONSE_MESSAGES = {
       SUCCESS: 'Email confirmed successfully',
       RESEND: 'Confirmation email resent successfully',
     },
+    PASSWORD_CHANGE: {
+      INITIATE: 'Password change initiated successfully. Please check your email for the confirmation code.',
+      CODE_VERIFIED: 'Confirmation code verified successfully',
+      PASSWORD_CHANGED: 'Password changed successfully',
+    },
     LOGIN: {
       SUCCESS: 'User logged in successfully',
+    },
+    CHANGE_PASSWORD: {
+      INITIATION_SUCCESS: 'Confirmation code sent to your email',
+      CODE_VERIFIED_SUCCESS: 'Code verified successfully',
+      PASSWORD_CHANGED_SUCCESS: 'Password changed successfully',
     },
   },
   USER: {
@@ -18,6 +28,7 @@ export const RESPONSE_MESSAGES = {
     },
     UPDATE: {
       SUCCESS: 'User updated successfully',
+      ROLE: 'User role updated successfully',
     },
   },
 

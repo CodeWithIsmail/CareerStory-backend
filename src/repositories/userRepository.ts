@@ -1,6 +1,6 @@
 import { DeleteResult, IsNull } from 'typeorm';
 import { AppDataSource } from '../dataSource.ts';
-import { User } from '../entities/User.ts';
+import { User, UserRole } from '../entities/User.ts';
 import { CreateUserDto, UpdateUserDto } from '../dto/userDto.ts';
 import { PaginatedResponse, UserOrNull } from '../types/customTypes.ts';
 import { UserPaginationQuery } from '../validators/paginationValidator.ts';
@@ -40,6 +40,11 @@ export class UserRepository {
 
   async updateUser(userId: string, updateData: UpdateUserDto): Promise<UserOrNull> {
     await this.userRepository.update(userId, updateData);
+    return this.getUserById(userId);
+  }
+
+  async updateUserRole(userId: string, role: UserRole): Promise<UserOrNull> {
+    await this.userRepository.update(userId, { role });
     return this.getUserById(userId);
   }
 
