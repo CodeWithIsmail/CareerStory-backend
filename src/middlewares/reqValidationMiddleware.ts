@@ -25,3 +25,36 @@ export const reqValidation = <T>(source: REQ_SOURCE, schema: z.ZodSchema<T>, par
     next();
   };
 };
+
+// export const validateParam = (paramName: string, paramSchema: ) => {
+//   return (req: Request, _res: Response, next: NextFunction) => {
+//     try {
+//       req.params[paramName] = paramSchema.parse(req.params[paramName]);
+//       next();
+//     } catch (err) {
+//       next(err);
+//     }
+//   };
+// };
+
+// export const validateReqBody = (schema: z.ZodSchema) => {
+//   return (req: Request, _res: Response, next: NextFunction) => {
+//     try {
+
+//       next();
+//     } catch (err) {
+//       next(err);
+//     }
+//   };
+// };
+
+// export const validateReqQuery = (schema: z.ZodSchema) => {
+//   return (req: Request, _res: Response, next: NextFunction) => {
+//     try {
+//       req.validatedQuery = schema.parse(req.query);
+//       next();
+//     } catch (err) {
+//       next(err);
+//     }
+//   };
+// };
