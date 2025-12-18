@@ -1,11 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
 import { ErrorFactory } from '../errors/errorFactory.js';
 import { ERROR_MESSAGES } from '../constants/errorMessages.js';
-import { TokenPayloadDto } from '../dto/authDto.ts';
-import { ENV } from '../config/environment.ts';
 import { UserService } from '../services/userService.ts';
 import { UserRole } from '../entities/User.ts';
+import { CONTEXT } from '../constants/context.ts';
+import { verifyToken } from '../utils/tokenUtils.ts';
 
 declare global {
   namespace Express {
@@ -20,23 +19,23 @@ export const authenticate = async (req: Request, _res: Response, next: NextFunct
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.NO_TOKEN, 'during authentication');
+    throw ErrorFactory.createUnauthorizedError(
+      ERROR_MESSAGES.AUTH.NO_TOKEN,
+      CONTEXT.MIDDLEWARE.AUTHENTICATION,
+    );
   }
 
   const token = authHeader.split(' ')[1];
-  const secret = ENV.JWT_SECRET;
-
-  try {
-    const decoded = jwt.verify(token, secret) as TokenPayloadDto;
-    const userService = new UserService();
-    const user = await userService.getUserById(decoded.userId);
-    if (!user) {
-      throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.USER.NOT_FOUND, 'during authentication');
-    }
-    req.userId = decoded.userId;
-    req.role = decoded.role;
-    next();
-  } catch (err) {
-    throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.INVALID_TOKEN, 'during authentication');
+  const decoded = verifyToken(token);
+  const userService = new UserService();
+  const user = await userService.getUserById(decoded.userId);
+  if (!user) {
+    throw ErrorFactory.createUnauthorizedError(
+      ERROR_MESSAGES.USER.NOT_FOUND,
+      CONTEXT.MIDDLEWARE.AUTHENTICATION,
+    );
   }
+  req.userId = decoded.userId;
+  req.role = decoded.role;
+  next();
 };

@@ -43,6 +43,7 @@ export const baseStorySchema = z.object({
     .trim()
     .min(10, VALIDATION_MESSAGES.STORY.BODY.MIN)
     .max(5000, VALIDATION_MESSAGES.STORY.BODY.MAX),
+  categoryIds: z.array(z.uuid(VALIDATION_MESSAGES.CATEGORY.INVALID)),
 });
 
 export const basePaginationSchema = z.object({
@@ -52,4 +53,12 @@ export const basePaginationSchema = z.object({
   sortDirection: z
     .enum(['ASC', 'DESC'], { message: VALIDATION_MESSAGES.SORT_DIRECTION.INVALID })
     .default('ASC'),
+});
+
+export const baseCategorySchema = z.object({
+  name: z
+    .string({ message: VALIDATION_MESSAGES.CATEGORY.NAME.REQUIRED })
+    .min(1, VALIDATION_MESSAGES.CATEGORY.NAME.REQUIRED)
+    .max(50, VALIDATION_MESSAGES.CATEGORY.NAME.MAX),
+  description: z.string().max(255, VALIDATION_MESSAGES.CATEGORY.DESCRIPTION.MAX).optional().nullable(),
 });

@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import z from 'zod';
 import { REQ_SOURCE } from '../types/customTypes.ts';
-import { ErrorFactory } from '../errors/errorFactory.ts';
 declare global {
   namespace Express {
     interface Request {

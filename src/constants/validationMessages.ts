@@ -66,4 +66,15 @@ export const VALIDATION_MESSAGES = {
   SORT_DIRECTION: {
     INVALID: 'Sort direction must be either ASC or DESC',
   },
+
+  CATEGORY: {
+    NAME: {
+      REQUIRED: 'Category name is required',
+      MAX: 'Category name must be at most 50 characters long',
+    },
+    DESCRIPTION: {
+      MAX: 'Description must be at most 255 characters long',
+    },
+    INVALID: 'Category ID must be a valid UUID',
+  },
 };

@@ -11,6 +11,12 @@ export const HTTP_STATUS_CODES = {
 };
 
 export const ERROR_MESSAGES = {
+  DATABASE: {
+    DUPLICATE_ENTRY: 'Duplicate entry in database',
+    FOREIGN_KEY_CONFLICT: 'Foreign key constraint violation',
+    NOT_NULL_VIOLATION: 'Not null constraint violation',
+    INVALID_TYPE: 'Invalid data type provided',
+  },
   AUTH: {
     INCORRECT_PASSWORD: 'Incorrect password',
     NO_TOKEN: 'No authentication token provided',
@@ -26,6 +32,8 @@ export const ERROR_MESSAGES = {
     NOT_FOUND: 'Resource not found',
     CONFLICT: 'Conflict occurred',
     INTERNAL_SERVER_ERROR: 'Internal server error',
+    RATE_LIMIT_EXCEEDED:
+      'Rate limit exceeded: Only 1 resend attempt allowed every 5 minutes. Please try again later.',
   },
   USER: {
     UNAUTHORIZED: 'No authorized user found',
@@ -41,5 +49,12 @@ export const ERROR_MESSAGES = {
     INTERNAL_SERVER_ERROR: 'Internal server error',
     ROUTE_NOT_FOUND: 'Route not found',
     SERVICE_UNAVAILABLE: 'Service temporarily unavailable',
+  },
+  CATEGORY: {
+    DUPLICATE_NAME: 'Category with this name already exists',
+    CREATE: 'Failed to create category',
+    FETCH: 'Category not found',
+    UPDATE: 'Failed to update category',
+    DELETE: 'Failed to delete category',
   },
 };

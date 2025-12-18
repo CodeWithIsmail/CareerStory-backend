@@ -6,6 +6,7 @@ import { QueryFailedError } from 'typeorm';
 import logger from '../utils/logger.ts';
 import { ResponseHandler } from '../utils/responseHandler.ts';
 import { formatZodErrors } from '../utils/formatZodErrors.ts';
+import { CONTEXT } from '../constants/context.ts';
 export class ErrorHandler {
   static handleError(error: unknown, res: Response, context: string = '') {
     let statusCode = HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
@@ -17,7 +18,7 @@ export class ErrorHandler {
       message = ERROR_MESSAGES.COMMON.INVALID_INPUT;
       errorDetails = formatZodErrors(error);
 
-      logger.error('Validation error', {
+      logger.error(CONTEXT.MIDDLEWARE.VALIDATION, {
         context,
         errorCount: errorDetails.length,
         details: errorDetails,
@@ -26,39 +27,39 @@ export class ErrorHandler {
       statusCode = error.statusCode;
       message = error.message;
 
-      logger.error('Application error', {
+      logger.error(CONTEXT.MIDDLEWARE.APPLICATION, {
         context,
         statusCode,
         message,
       });
     } else if (error instanceof QueryFailedError) {
-      statusCode = HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
-      message = ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR;
+      const pgError = error as any;
 
-      logger.error('Database error occurred', {
-        context,
-        errorCode: (error as any).code,
-        driverError: (error as any).driverError,
-      });
+      switch (pgError.code) {
+        case '23505':
+          statusCode = HTTP_STATUS_CODES.CONFLICT;
+          message = ERROR_MESSAGES.DATABASE.DUPLICATE_ENTRY;
+          break;
+        case '23503':
+          statusCode = HTTP_STATUS_CODES.BAD_REQUEST;
+          message = ERROR_MESSAGES.DATABASE.FOREIGN_KEY_CONFLICT;
+          break;
+        case '23502':
+          statusCode = HTTP_STATUS_CODES.BAD_REQUEST;
+          message = ERROR_MESSAGES.DATABASE.NOT_NULL_VIOLATION;
+          break;
+        case '22P02':
+          statusCode = HTTP_STATUS_CODES.BAD_REQUEST;
+          message = ERROR_MESSAGES.DATABASE.INVALID_TYPE;
+          break;
+      }
     } else if (error instanceof Error) {
-      statusCode = HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
-      message = ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR;
-
-      logger.error('Unexpected error', {
+      logger.error(CONTEXT.MIDDLEWARE.UNEXPECTED, {
         context,
         errorMessage: error.message,
         stack: error.stack,
       });
-    } else {
-      statusCode = HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
-      message = ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR;
-
-      logger.error('Unknown error occurred', {
-        context,
-        error: String(error),
-      });
     }
-
     ResponseHandler.error(res, message, statusCode, errorDetails);
   }
 }

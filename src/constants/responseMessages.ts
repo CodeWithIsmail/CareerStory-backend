@@ -34,4 +34,20 @@ export const RESPONSE_MESSAGES = {
       SUCCESS: 'Story updated successfully',
     },
   },
+  CATEGORY: {
+    CREATE: {
+      SUCCESS: 'Category created successfully',
+    },
+    FETCH: {
+      ALL_SUCCESS: 'Categories retrieved successfully',
+      BY_ID_SUCCESS: 'Category retrieved successfully',
+      BY_NAME_SUCCESS: 'Category retrieved successfully',
+    },
+    UPDATE: {
+      SUCCESS: 'Category updated successfully',
+    },
+    DELETE: {
+      SUCCESS: 'Category deleted successfully',
+    },
+  },
 };

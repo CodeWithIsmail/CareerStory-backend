@@ -7,7 +7,10 @@ import {
   ManyToOne,
   JoinColumn,
   DeleteDateColumn,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
+import { Category } from './Category.ts';
 import { User } from './User.ts';
 
 @Entity({ name: 'stories' })
@@ -36,4 +39,12 @@ export class Story {
   @ManyToOne(() => User)
   @JoinColumn({ name: 'userId', referencedColumnName: 'userId' })
   user: User;
+
+  @ManyToMany(() => Category, (category) => category.stories)
+  @JoinTable({
+    name: 'story_categories',
+    joinColumn: { name: 'storyId', referencedColumnName: 'storyId' },
+    inverseJoinColumn: { name: 'categoryId', referencedColumnName: 'categoryId' },
+  })
+  categories: Category[];
 }
