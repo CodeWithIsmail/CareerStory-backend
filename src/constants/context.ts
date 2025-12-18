@@ -1,5 +1,6 @@
 export const CONTEXT = {
   MIDDLEWARE: {
+    SYNTAX: 'syntax error',
     AUTHENTICATION: 'authentication',
     AUTHORIZATION: 'authorization',
     VALIDATION: 'Validation error',

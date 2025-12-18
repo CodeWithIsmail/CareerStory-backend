@@ -43,6 +43,7 @@ export const ERROR_MESSAGES = {
     },
   },
   COMMON: {
+    INVALID_JSON: 'Invalid JSON format',
     ROUTE_NOT_FOUND: 'Requested route not found.',
     INVALID_INPUT: 'Invalid input data',
     UNAUTHORIZED: 'Unauthorized access',

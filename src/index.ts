@@ -1,4 +1,5 @@
 import express from 'express';
+import swaggerUi from 'swagger-ui-express';
 import userRouter from './routes/userRoutes.ts';
 import { AppDataSource } from './dataSource.ts';
 import { globalErrorMiddleware } from './middlewares/globalErrorMiddleware.ts';
@@ -9,12 +10,16 @@ import storyRouter from './routes/storyRoutes.ts';
 import authRouter from './routes/authRoutes.ts';
 import { ENV } from './config/environment.ts';
 import categoryRouter from './routes/categoryRoutes.ts';
+import { specs, swaggerUiOptions } from './swagger/swaggerConfig.ts';
 
 const PORT = ENV.PORT;
 
 const app = express();
 
 app.use(express.json());
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs,swaggerUiOptions));
+
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/stories', storyRouter);
