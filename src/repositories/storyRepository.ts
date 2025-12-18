@@ -1,4 +1,4 @@
-import { DeleteResult, IsNull } from 'typeorm';
+import { DeleteResult, Entity, IsNull } from 'typeorm';
 import { AppDataSource } from '../dataSource.ts';
 import { Story } from '../entities/Story.ts';
 import { CreateStoryDto, UpdateStoryDto } from '../dto/storyDto.ts';
