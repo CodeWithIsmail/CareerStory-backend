@@ -33,4 +33,7 @@ export const CONTEXT = {
     UPDATE: 'updating category',
     DELETE: 'deleting category',
   },
+  AI: {
+    SUMMARY_GENERATION: 'AI summary generation',
+  },
 };

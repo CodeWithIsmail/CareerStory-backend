@@ -5,6 +5,7 @@ import {
   ForbiddenError,
   DatabaseError,
   ConflictError,
+  AISummaryError,
 } from './CustomErrors.ts';
 
 export class ErrorFactory {
@@ -30,5 +31,9 @@ export class ErrorFactory {
 
   static createConflictError = (message?: string, context?: string): ConflictError => {
     return new ConflictError(message, context);
+  };
+
+  static createAISummaryError = (message?: string, context?: string): AISummaryError => {
+    return new AISummaryError(message, context);
   };
 }

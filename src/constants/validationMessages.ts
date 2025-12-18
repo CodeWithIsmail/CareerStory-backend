@@ -34,6 +34,9 @@ export const VALIDATION_MESSAGES = {
   },
 
   STORY: {
+    SUMMARY: {
+      REQUIRED: 'generateSummary must be a boolean value',
+    },
     USER_ID: {
       INVALID: 'userId must be a valid UUID',
     },
