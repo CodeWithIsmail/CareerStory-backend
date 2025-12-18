@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { AuthService } from '../services/authService.ts';
 import { ResponseHandler } from '../utils/responseHandler.ts';
 import { RESPONSE_MESSAGES } from '../constants/responseMessages.ts';
+import { AuthRequest } from '../middlewares/authenticationMiddleware.ts';
 
 export class AuthController {
   private authService = new AuthService();
@@ -26,17 +27,17 @@ export class AuthController {
     return ResponseHandler.success(res, null, RESPONSE_MESSAGES.AUTH.EMAIL_CONFIRMATION.RESEND);
   };
 
-  initiatePasswordChange = async (req: Request, res: Response) => {
+  initiatePasswordChange = async (req: AuthRequest, res: Response) => {
     await this.authService.initiatePasswordChange(req.userId, req.body.currentPassword);
     return ResponseHandler.success(res, null, RESPONSE_MESSAGES.AUTH.PASSWORD_CHANGE.INITIATE);
   };
 
-  verifyPasswordChangeCode = async (req: Request, res: Response) => {
+  verifyPasswordChangeCode = async (req: AuthRequest, res: Response) => {
     await this.authService.verifyPasswordChangeCode(req.userId, req.body.code);
     return ResponseHandler.success(res, null, RESPONSE_MESSAGES.AUTH.PASSWORD_CHANGE.CODE_VERIFIED);
   };
 
-  changePassword = async (req: Request, res: Response) => {
+  changePassword = async (req: AuthRequest, res: Response) => {
     await this.authService.setNewPassword(req.userId, req.body.password);
     return ResponseHandler.success(res, null, RESPONSE_MESSAGES.AUTH.PASSWORD_CHANGE.PASSWORD_CHANGED);
   };

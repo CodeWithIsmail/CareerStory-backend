@@ -6,16 +6,12 @@ import { CONTEXT } from '../constants/context.ts';
 import { verifyToken } from '../utils/tokenUtils.ts';
 import { UnauthorizedError } from '../errors/CustomErrors.ts';
 
-declare global {
-  namespace Express {
-    interface Request {
-      userId: string;
-      role: UserRole;
-    }
-  }
+export interface AuthRequest extends Request {
+  userId: string;
+  role: UserRole;
 }
 
-export const authenticate = async (req: Request, _res: Response, next: NextFunction) => {
+export const authenticate = async (req: AuthRequest, _res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {

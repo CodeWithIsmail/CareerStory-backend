@@ -1,8 +1,8 @@
 import { User } from '../entities/User.ts';
-import { UserResponseDto } from '../dto/userDto.ts';
-import { userResponseSchema } from '../validators/userValidator.ts';
+import { UserProfileDto } from '../dto/userDto.ts';
+import { userProfileSchema } from '../validators/userValidator.ts';
 
-export const mapUserToDto = (user: User): UserResponseDto => userResponseSchema.parse(user);
+export const mapUserToProfileDto = (user: User): UserProfileDto => userProfileSchema.parse(user);
 
-export const mapUsersToDtoList = (users: User[]): UserResponseDto[] =>
-  users.map((user) => mapUserToDto(user));
+export const mapUsersToProfileDtoList = (users: User[]): UserProfileDto[] =>
+  users.map((user) => mapUserToProfileDto(user));

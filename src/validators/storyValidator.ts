@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { VALIDATION_MESSAGES } from '../constants/validationMessages.ts';
 import { baseStorySchema } from './baseSchema.ts';
-import { userResponseSchema } from './userValidator.ts';
+import { userProfileSchema } from './userValidator.ts';
 import { categoryResponseSchema } from './categoryValidator.ts';
 
 export const createStorySchema = baseStorySchema
@@ -32,7 +32,11 @@ export const storyResponseSchema = baseStorySchema
       .pick({ categoryId: true, name: true, description: true })
       .array()
       .default([]),
-    user: userResponseSchema.pick({ userId: true, userName: true, name: true }).nullable().optional(),
+    user: userProfileSchema
+      .pick({ userId: true, userName: true, name: true, organization: true })
+      .strip()
+      .nullable()
+      .optional(),
   })
   .strip();
 

@@ -1,13 +1,13 @@
 import { ENV } from '../config/environment.ts';
 import { TokenPayloadDto } from '../dto/authDto.ts';
-import { UserResponseDto } from '../dto/userDto.ts';
+import { UserProfileDto } from '../dto/userDto.ts';
 import jwt from 'jsonwebtoken';
 import { TOKEN_TYPE, tokenExpiryMap } from '../types/customTypes.ts';
 import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
 import { CONTEXT } from '../constants/context.ts';
 import { UnauthorizedError } from '../errors/CustomErrors.ts';
 
-export function generateToken(user: UserResponseDto, tokenType: TOKEN_TYPE): string {
+export function generateToken(user: UserProfileDto, tokenType: TOKEN_TYPE): string {
   const payload: TokenPayloadDto = {
     userId: user.userId,
     role: user.role,

@@ -1,6 +1,14 @@
 import { z } from 'zod';
-import { createUserSchema, updateUserSchema, userResponseSchema } from '../validators/userValidator.ts';
+import {
+  createUserSchema,
+  userProfileSchema,
+  updateUserProfileSchema,
+  updateUserStatusSchema,
+  updateUserRoleSchema,
+} from '../validators/userValidator.ts';
 
 export type CreateUserDto = z.infer<typeof createUserSchema>;
-export type UpdateUserDto = z.infer<typeof updateUserSchema>;
-export type UserResponseDto = z.infer<typeof userResponseSchema>;
+export type UserProfileDto = z.infer<typeof userProfileSchema>;
+export type UpdateUserProfileDto = z.infer<typeof updateUserProfileSchema>;
+export type UpdateUserStatusDto = z.infer<typeof updateUserStatusSchema>;
+export type UpdateUserRoleDto = z.infer<typeof updateUserRoleSchema>;

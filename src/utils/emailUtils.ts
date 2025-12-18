@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 import { ENV } from '../config/environment.ts';
-import { UserResponseDto } from '../dto/userDto.ts';
+import { UserProfileDto } from '../dto/userDto.ts';
 import { createPasswordChangeConfirmation } from '../emails/passwordChange.ts';
 import { createPasswordChangeCode } from '../emails/verificationCode.ts';
 import { createVerificationEmail } from '../emails/emailVerification.ts';
@@ -44,7 +44,7 @@ export const sendPasswordChangeConfirmationEmail = async (
   await transporter.sendMail(mailOptions);
 };
 
-export const sendVerificationEmail = async (newUser: UserResponseDto, token: string) => {
+export const sendVerificationEmail = async (newUser: UserProfileDto, token: string) => {
   const verificationLink = `${ENV.BACKEND_URL}/auth/confirm-email/${token}`;
 
   const mailOptions = {

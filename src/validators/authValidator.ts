@@ -1,10 +1,12 @@
 import { z } from 'zod';
 import { VALIDATION_MESSAGES } from '../constants/validationMessages.ts';
-import { basePasswordSchema, baseUserSchema } from './baseSchema.ts';
-import { UserRole } from '../entities/User.ts';
+import { basePasswordSchema } from './baseSchema.ts';
+import { UserRole } from '../types/customTypes.ts';
 import { TOKEN_TYPE } from '../types/customTypes.ts';
+import { baseUserSchema } from './baseSchema.ts';
 
 export const signupSchema = baseUserSchema
+  .pick({ userName: true, email: true, name: true })
   .extend({
     password: basePasswordSchema,
     confirmPassword: basePasswordSchema,
