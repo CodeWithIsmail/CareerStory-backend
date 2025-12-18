@@ -1,9 +1,11 @@
-import { DeleteResult, IsNull } from 'typeorm';
+import { DeleteResult, IsNull, Not } from 'typeorm';
 import { AppDataSource } from '../dataSource.ts';
 import { User } from '../entities/User.ts';
 import { CreateUserDto, UpdateUserDto } from '../dto/userDto.ts';
-import { UserOrNull } from '../types/customTypes.ts';
-
+import { PaginatedResponse, UserOrNull } from '../types/customTypes.ts';
+import { UserPaginationQuery } from '../validators/paginationValidator.ts';
+import { PaginationHelper } from '../utils/paginationHelper.ts';
+import { userFindOptions } from '../constants/paginationFields.ts';
 export class UserRepository {
   private userRepository = AppDataSource.getRepository(User);
 
@@ -12,8 +14,12 @@ export class UserRepository {
     return this.userRepository.save(newUser);
   }
 
-  async getAllUsers(): Promise<User[]> {
-    return this.userRepository.find();
+  async getAllUsers(paginationParams: UserPaginationQuery): Promise<PaginatedResponse<User>> {
+    const query = this.userRepository.createQueryBuilder('users');
+    return PaginationHelper.paginate(query, paginationParams, {
+      entityAlias: 'users',
+      searchableFields: userFindOptions,
+    });
   }
 
   async getUserById(userId: string): Promise<UserOrNull> {
@@ -34,14 +40,6 @@ export class UserRepository {
   }
 
   async getUserByUsername(userName: string): Promise<UserOrNull> {
-    return this.userRepository.findOneBy({ userName });
-  }
-
-  async getUserByEmail(email: string): Promise<User | null> {
-    return this.userRepository.findOneBy({ email });
-  }
-
-  async getUserByUsername(userName: string): Promise<User | null> {
     return this.userRepository.findOneBy({ userName });
   }
 }

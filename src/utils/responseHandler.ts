@@ -4,12 +4,12 @@ export class SuccessResponse<T> {
   success = true;
   statusCode: number;
   message: string;
-  data: T;
+  result: T;
 
-  constructor(statusCode: number, message: string, data: T) {
+  constructor(statusCode: number, message: string, result: T) {
     this.statusCode = statusCode;
     this.message = message;
-    this.data = data;
+    this.result = result;
   }
 }
 export class ErrorDetail {
@@ -33,16 +33,16 @@ export class ErrorResponse {
 export class ResponseHandler {
   static success<T>(
     res: Response,
-    data: T,
+    result: T,
     message: string,
     statusCode: number = HTTP_STATUS_CODES.OK,
-  ): void {
-    const response = new SuccessResponse(statusCode, message, data);
+  ) {
+    const response = new SuccessResponse(statusCode, message, result);
     res.status(statusCode).json(response);
   }
 
-  static created<T>(res: Response, data: T, message: string): void {
-    this.success(res, data, message, HTTP_STATUS_CODES.CREATED);
+  static created<T>(res: Response, result: T, message: string) {
+    this.success(res, result, message, HTTP_STATUS_CODES.CREATED);
   }
 
   static error(
@@ -50,12 +50,12 @@ export class ResponseHandler {
     message: string,
     statusCode: number = HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
     details?: ErrorDetail[],
-  ): void {
+  ) {
     const response = new ErrorResponse(statusCode, message, details);
     res.status(statusCode).json(response);
   }
 
-  static noContent(res: Response): void {
-    res.sendStatus(HTTP_STATUS_CODES.NO_CONTENT).send();
+  static noContent(res: Response) {
+    res.sendStatus(HTTP_STATUS_CODES.NO_CONTENT);
   }
 }

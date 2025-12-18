@@ -46,4 +46,8 @@ export const VALIDATION_MESSAGES = {
       INVALID: 'Story ID must be a valid UUID',
     },
   },
+
+  SORT_DIRECTION: {
+    INVALID: 'Sort direction must be either ASC or DESC',
+  },
 };

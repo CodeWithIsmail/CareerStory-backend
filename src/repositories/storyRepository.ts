@@ -1,8 +1,11 @@
-import { DeleteResult, IsNull } from 'typeorm';
+import { DeleteResult, Entity, IsNull } from 'typeorm';
 import { AppDataSource } from '../dataSource.ts';
 import { Story } from '../entities/Story.ts';
 import { CreateStoryDto, UpdateStoryDto } from '../dto/storyDto.ts';
-import { StoryOrNull } from '../types/customTypes.ts';
+import { PaginatedResponse, StoryOrNull } from '../types/customTypes.ts';
+import { StoryPaginationQuery } from '../validators/paginationValidator.ts';
+import { PaginationHelper } from '../utils/paginationHelper.ts';
+import { storyFindOptions } from '../constants/paginationFields.ts';
 
 export class StoryRepository {
   private storyRepository = AppDataSource.getRepository(Story);
@@ -12,12 +15,23 @@ export class StoryRepository {
     return this.storyRepository.save(newStory);
   }
 
-  async getAllStories(): Promise<Story[]> {
-    return this.storyRepository.find();
+  async getAllStories(paginationParams: StoryPaginationQuery): Promise<PaginatedResponse<Story>> {
+    const query = this.storyRepository
+      .createQueryBuilder('stories')
+      .leftJoinAndSelect('stories.user', 'users');
+
+    return PaginationHelper.paginate(query, paginationParams, {
+      entityAlias: 'stories',
+      searchableFields: storyFindOptions,
+    });
   }
 
   async getStoryById(storyId: string): Promise<StoryOrNull> {
-    return this.storyRepository.findOneBy({ storyId });
+    return this.storyRepository
+      .createQueryBuilder('stories')
+      .leftJoinAndSelect('stories.user', 'user')
+      .where('stories.storyId = :storyId', { storyId })
+      .getOne();
   }
 
   async getStoriesByUserId(userId: string): Promise<Story[]> {

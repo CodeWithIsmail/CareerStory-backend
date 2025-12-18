@@ -6,7 +6,6 @@ import {
   DatabaseError,
   ConflictError,
 } from './CustomErrors.ts';
-import { constantErrorMessages } from '../constants/errorMessages.ts';
 
 export class ErrorFactory {
   static createNotFoundError = (message?: string, context?: string): NotFoundError => {

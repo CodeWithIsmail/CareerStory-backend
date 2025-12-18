@@ -10,9 +10,6 @@ export const RESPONSE_MESSAGES = {
     UPDATE: {
       SUCCESS: 'User updated successfully',
     },
-    DELETE: {
-      SUCCESS: 'User deleted successfully',
-    },
   },
 
   STORY: {
@@ -26,9 +23,6 @@ export const RESPONSE_MESSAGES = {
     },
     UPDATE: {
       SUCCESS: 'Story updated successfully',
-    },
-    DELETE: {
-      SUCCESS: 'Story deleted successfully',
     },
   },
 };

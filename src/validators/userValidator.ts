@@ -46,10 +46,6 @@ export class UserValidator {
     return this.createUserSchema.parse(data);
   }
 
-  static validateUpdateUser(data: unknown): UpdateUserDto {
-    return this.updateUserSchema.parse(data);
-  }
-
   static validateUserIdParam(params: unknown): string {
     return z.uuidv4(VALIDATION_MESSAGES.USER.USER_ID.INVALID).parse(params);
   }

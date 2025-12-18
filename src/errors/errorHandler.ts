@@ -41,6 +41,7 @@ export class ErrorHandler {
     else if (error instanceof QueryFailedError) {
       statusCode = HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
       message = error.message;
+
       logger.error('Database error occurred', {
         context,
         errorCode: (error as any).code,

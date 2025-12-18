@@ -15,9 +15,9 @@ export class UserController {
     }
   };
 
-  getAllUsers = async (_req: Request, res: Response, next: NextFunction) => {
+  getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const users = await this.userService.getAllUsers();
+      const users = await this.userService.getAllUsers(req.validatedQuery);
       return ResponseHandler.success(res, users, RESPONSE_MESSAGES.USER.FETCH.ALL_SUCCESS);
     } catch (error) {
       next(error);
@@ -45,11 +45,7 @@ export class UserController {
   deleteUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
       await this.userService.deleteUser(req.params.userId);
-      return ResponseHandler.success(
-        res,
-        { id: req.params.userId },
-        RESPONSE_MESSAGES.USER.DELETE.SUCCESS,
-      );
+      return ResponseHandler.noContent(res);
     } catch (error) {
       next(error);
     }

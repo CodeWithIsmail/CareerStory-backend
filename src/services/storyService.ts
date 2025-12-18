@@ -1,11 +1,13 @@
 import { CreateStoryDto, UpdateStoryDto, StoryResponseDto } from '../dto/storyDto.ts';
-import { mapStoryToDto, mapStoriesToDtoList } from '../utils/storyMapper.ts';
+import { mapStoryToDto, mapStoriesToDtoList } from '../mappers/storyMapper.ts';
 import { ErrorFactory } from '../errors/errorFactory.ts';
 import { UserRepository } from '../repositories/userRepository.ts';
 import { StoryRepository } from '../repositories/storyRepository.ts';
 import logger from '../utils/logger.ts';
 import { LOG_MESSAGES } from '../constants/logMessages.ts';
 import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
+import { StoryPaginationQuery } from '../validators/paginationValidator.ts';
+import { PaginatedResponse } from '../types/customTypes.ts';
 
 export class StoryService {
   private storyRepository = new StoryRepository();
@@ -33,11 +35,20 @@ export class StoryService {
     return mapStoryToDto(newStory);
   }
 
-  async getAllStories(): Promise<StoryResponseDto[]> {
+  async getAllStories(
+    paginationParams: StoryPaginationQuery,
+  ): Promise<PaginatedResponse<StoryResponseDto>> {
     logger.debug(LOG_MESSAGES.STORY.FETCH.ALL_START);
-    const stories = await this.storyRepository.getAllStories();
-    logger.info(LOG_MESSAGES.STORY.FETCH.ALL_SUCCESS, { storyCount: stories.length });
-    return mapStoriesToDtoList(stories);
+    const paginatedStories = await this.storyRepository.getAllStories(paginationParams);
+    logger.info(LOG_MESSAGES.STORY.FETCH.ALL_SUCCESS, {
+      storyCount: paginatedStories.data.length,
+      page: paginatedStories.pagination.currentPage,
+      totalItems: paginatedStories.pagination.totalItems,
+    });
+    return {
+      data: mapStoriesToDtoList(paginatedStories.data),
+      pagination: paginatedStories.pagination,
+    };
   }
 
   async getStoryById(storyId: string): Promise<StoryResponseDto> {
@@ -58,6 +69,14 @@ export class StoryService {
 
   async getStoriesByUserId(userId: string): Promise<StoryResponseDto[]> {
     logger.debug(LOG_MESSAGES.STORY.FETCH.BY_USER_START, { userId });
+    const user = await this.userRepository.getUserById(userId);
+    if (!user) {
+      logger.warn(LOG_MESSAGES.USER.FETCH.BY_ID_NOT_FOUND, { userId });
+      throw ErrorFactory.createNotFoundError(
+        `User with ID ${userId} not found`,
+        'fetching stories',
+      );
+    }
     const stories = await this.storyRepository.getStoriesByUserId(userId);
     logger.info(LOG_MESSAGES.STORY.FETCH.BY_USER_SUCCESS, { userId, storyCount: stories.length });
     return mapStoriesToDtoList(stories);
