@@ -18,7 +18,7 @@ export class StoryResponseDto {
   @Expose()
   updatedAt: Date;
 
-  @Expose()
+  @Expose({ name: 'user' })
   @Type(() => UserResponseDto)
-  user: UserResponseDto | null;
+  author: UserResponseDto | null;
 }

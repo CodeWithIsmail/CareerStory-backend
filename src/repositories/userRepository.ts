@@ -1,4 +1,4 @@
-import { DeleteResult, IsNull, Not } from 'typeorm';
+import { DeleteResult, EntityManager, IsNull } from 'typeorm';
 import { AppDataSource } from '../dataSource.ts';
 import { User } from '../entities/User.ts';
 import { CreateUserDto, UpdateUserDto } from '../dto/userDto.ts';
@@ -9,9 +9,9 @@ import { userFindOptions } from '../constants/paginationFields.ts';
 export class UserRepository {
   private userRepository = AppDataSource.getRepository(User);
 
-  async createUser(userData: CreateUserDto): Promise<User> {
-    const newUser = this.userRepository.create(userData);
-    return this.userRepository.save(newUser);
+  async createUser(userData: CreateUserDto, entityManager: EntityManager): Promise<User> {
+    const newUser = entityManager.create(User, userData);
+    return entityManager.save(newUser);
   }
 
   async getAllUsers(paginationParams: UserPaginationQuery): Promise<PaginatedResponse<User>> {
@@ -26,6 +26,17 @@ export class UserRepository {
     return this.userRepository.findOneBy({ userId });
   }
 
+  async getUserByUsername(userName: string): Promise<UserOrNull> {
+    return this.userRepository.findOne({ where: { userName }, withDeleted: true });
+  }
+
+  async getUserByUsernameOrEmail(email: string, userName: string): Promise<UserOrNull> {
+    return this.userRepository.findOne({
+      where: [{ email }, { userName }],
+      withDeleted: true,
+    });
+  }
+
   async updateUser(userId: string, updateData: UpdateUserDto): Promise<UserOrNull> {
     await this.userRepository.update(userId, updateData);
     return this.getUserById(userId);
@@ -33,13 +44,5 @@ export class UserRepository {
 
   async deleteUser(userId: string): Promise<DeleteResult> {
     return this.userRepository.softDelete({ userId, deletedAt: IsNull() });
-  }
-
-  async getUserByEmail(email: string): Promise<UserOrNull> {
-    return this.userRepository.findOneBy({ email });
-  }
-
-  async getUserByUsername(userName: string): Promise<UserOrNull> {
-    return this.userRepository.findOneBy({ userName });
   }
 }

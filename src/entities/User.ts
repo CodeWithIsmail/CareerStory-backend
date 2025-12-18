@@ -4,7 +4,10 @@ import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
+  UpdateDateColumn,
+  OneToOne,
 } from 'typeorm';
+import { Auth } from './Auth.ts';
 
 export enum UserRole {
   ADMIN = 'ADMIN',
@@ -25,11 +28,14 @@ export class User {
   @Column({ unique: true, length: 255 })
   email: string;
 
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
+  role: UserRole;
+
   @CreateDateColumn()
   joinDate: Date;
 
-  @Column({ type: 'enum', enum: UserRole })
-  role: UserRole;
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   @DeleteDateColumn()
   deletedAt?: Date;

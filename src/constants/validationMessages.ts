@@ -47,6 +47,16 @@ export const VALIDATION_MESSAGES = {
     },
   },
 
+  PASSWORD: {
+    REQUIRED: 'Password is required',
+    MIN: 'Password must be at least 6 characters',
+    MAX: 'Password must be at most 128 characters',
+    UPPERCASE: 'Password must contain at least one uppercase letter',
+    NUMBER: 'Password must contain at least one number',
+    SPECIAL: 'Password must contain at least one special character (!@#$%^&*)',
+    MISMATCH: "Passwords don't match",
+  },
+
   SORT_DIRECTION: {
     INVALID: 'Sort direction must be either ASC or DESC',
   },

@@ -7,7 +7,7 @@ export class Auth {
   userId: string;
 
   @Column()
-  password: string;
+  hashedPassword: string;
 
   @Column({ type: 'timestamp', nullable: true })
   passwordLastModificationTime: Date;

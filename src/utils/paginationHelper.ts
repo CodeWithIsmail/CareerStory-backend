@@ -15,9 +15,7 @@ export class PaginationHelper {
     const skip = (page - 1) * itemsPerPage;
 
     if (find?.trim()) {
-      const searchConditions = searchableFields
-        .map((field) => `${String(field)} ILIKE :find `)
-        .join(' OR ');
+      const searchConditions = searchableFields.map((field) => `${String(field)} ILIKE :find `).join(' OR ');
 
       query.andWhere(`(${searchConditions})`, { find: `%${find}%` });
     }

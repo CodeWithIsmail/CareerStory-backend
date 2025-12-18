@@ -33,7 +33,7 @@ export class Story {
   @DeleteDateColumn()
   deletedAt?: Date;
 
-  @ManyToOne(() => User, { eager: false })
+  @ManyToOne(() => User)
   @JoinColumn({ name: 'userId', referencedColumnName: 'userId' })
   user: User;
 }

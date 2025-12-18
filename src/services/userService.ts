@@ -3,54 +3,27 @@ import { CreateUserDto, UpdateUserDto, UserResponseDto } from '../dto/userDto.ts
 import { mapUsersToDtoList, mapUserToDto } from '../mappers/userMapper.ts';
 import { ErrorFactory } from '../errors/errorFactory.ts';
 import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
-import logger from '../utils/logger.ts';
-import { LOG_MESSAGES } from '../constants/logMessages.ts';
 import { UserPaginationQuery } from '../validators/paginationValidator.ts';
 import { PaginatedResponse } from '../types/customTypes.ts';
+import { EntityManager } from 'typeorm';
+import { checkForDuplicateUser } from '../utils/userUtils.ts';
 
 export class UserService {
   private userRepository = new UserRepository();
 
-  async createUser(user: CreateUserDto): Promise<UserResponseDto> {
-    logger.debug(LOG_MESSAGES.USER.CREATE.START, { user });
-
-    const existingEmailUser = await this.userRepository.getUserByEmail(user.email);
-    if (existingEmailUser) {
-      logger.warn(LOG_MESSAGES.USER.CREATE.DUPLICATE_EMAIL, { email: user.email });
-      throw ErrorFactory.createConflictError(ERROR_MESSAGES.USER.DUPLICATE_EMAIL, 'creating user');
-    }
-
-    const existingUsernameUser = await this.userRepository.getUserByUsername(user.userName);
-    if (existingUsernameUser) {
-      logger.warn(LOG_MESSAGES.USER.CREATE.DUPLICATE_USERNAME, { userName: user.userName });
-      throw ErrorFactory.createConflictError(
-        ERROR_MESSAGES.USER.DUPLICATE_USERNAME,
-        'creating user',
-      );
-    }
-
-    const newUser = await this.userRepository.createUser(user);
+  async createUser(user: CreateUserDto, entityManager: EntityManager): Promise<UserResponseDto> {
+    const context = 'creating user';
+    const isExistingUser = await this.userRepository.getUserByUsernameOrEmail(user.email, user.userName);
+    checkForDuplicateUser(isExistingUser, user, context);
+    const newUser = await this.userRepository.createUser(user, entityManager);
     if (!newUser) {
-      logger.error(LOG_MESSAGES.USER.CREATE.FAILED, { user });
-      throw ErrorFactory.createDatabaseError(
-        ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR,
-        'creating user',
-      );
+      throw ErrorFactory.createDatabaseError(ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR, context);
     }
-    logger.info(LOG_MESSAGES.USER.CREATE.SUCCESS, { newUser });
     return mapUserToDto(newUser);
   }
 
-  async getAllUsers(
-    paginationParams: UserPaginationQuery,
-  ): Promise<PaginatedResponse<UserResponseDto>> {
-    logger.debug(LOG_MESSAGES.USER.FETCH.ALL_START);
+  async getAllUsers(paginationParams: UserPaginationQuery): Promise<PaginatedResponse<UserResponseDto>> {
     const paginatedUsers = await this.userRepository.getAllUsers(paginationParams);
-    logger.info(LOG_MESSAGES.USER.FETCH.ALL_SUCCESS, {
-      userCount: paginatedUsers.data.length,
-      page: paginatedUsers.pagination.currentPage,
-      totalItems: paginatedUsers.pagination.totalItems,
-    });
     return {
       data: mapUsersToDtoList(paginatedUsers.data),
       pagination: paginatedUsers.pagination,
@@ -58,43 +31,37 @@ export class UserService {
   }
 
   async getUserById(userId: string): Promise<UserResponseDto> {
-    logger.debug(LOG_MESSAGES.USER.FETCH.BY_ID_START, { userId });
+    const context = `fetching user with ID ${userId}`;
     const user = await this.userRepository.getUserById(userId);
     if (!user) {
-      logger.warn(LOG_MESSAGES.USER.FETCH.BY_ID_NOT_FOUND, { userId });
-      throw ErrorFactory.createNotFoundError(
-        ERROR_MESSAGES.USER.NOT_FOUND,
-        `fetching user with ID ${userId}`,
-      );
+      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, context);
     }
-    logger.info(LOG_MESSAGES.USER.FETCH.BY_ID_SUCCESS, { userId });
+    return mapUserToDto(user);
+  }
+
+  async getUserForAuthByUsername(userName: string): Promise<UserResponseDto> {
+    const user = await this.userRepository.getUserByUsername(userName);
+    const context = `fetching user with username ${userName}`;
+    if (!user) {
+      throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.USER.UNAUTHORIZED, context);
+    }
     return mapUserToDto(user);
   }
 
   async updateUser(userId: string, updateData: UpdateUserDto): Promise<UserResponseDto> {
-    logger.debug(LOG_MESSAGES.USER.UPDATE.START, { userId, updateData });
+    const context = `updating user with ID ${userId}`;
     const updatedUser = await this.userRepository.updateUser(userId, updateData);
     if (!updatedUser) {
-      logger.warn(LOG_MESSAGES.USER.UPDATE.NOT_FOUND_UPDATE, { userId });
-      throw ErrorFactory.createNotFoundError(
-        ERROR_MESSAGES.USER.NOT_FOUND,
-        `updating user with ID ${userId}`,
-      );
+      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, context);
     }
-    logger.info(LOG_MESSAGES.USER.UPDATE.SUCCESS, { userId });
     return mapUserToDto(updatedUser);
   }
 
   async deleteUser(userId: string): Promise<void> {
-    logger.debug(LOG_MESSAGES.USER.DELETE.START, { userId });
+    const context = `deleting user with ID ${userId}`;
     const result = await this.userRepository.deleteUser(userId);
     if (result.affected === 0) {
-      logger.warn(LOG_MESSAGES.USER.DELETE.NOT_FOUND_DELETE, { userId });
-      throw ErrorFactory.createNotFoundError(
-        ERROR_MESSAGES.USER.NOT_FOUND,
-        `deleting user with ID ${userId}`,
-      );
+      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, context);
     }
-    logger.info(LOG_MESSAGES.USER.DELETE.SUCCESS, { userId });
   }
 }

@@ -31,12 +31,7 @@ export class ErrorResponse {
 }
 
 export class ResponseHandler {
-  static success<T>(
-    res: Response,
-    result: T,
-    message: string,
-    statusCode: number = HTTP_STATUS_CODES.OK,
-  ) {
+  static success<T>(res: Response, result: T, message: string, statusCode: number = HTTP_STATUS_CODES.OK) {
     const response = new SuccessResponse(statusCode, message, result);
     res.status(statusCode).json(response);
   }
