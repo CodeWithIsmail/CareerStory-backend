@@ -5,63 +5,68 @@ import { ErrorFactory } from '../errors/errorFactory.ts';
 import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
 import { UserPaginationQuery } from '../validators/paginationValidator.ts';
 import { PaginatedResponse } from '../types/customTypes.ts';
-import { EntityManager } from 'typeorm';
 import { checkForDuplicateUser } from '../utils/userUtils.ts';
+import { CONTEXT } from '../constants/context.ts';
+import { mapPaginatedResponse } from '../mappers/paginationMapper.ts';
+import { User } from '../entities/User.ts';
 
 export class UserService {
   private userRepository = new UserRepository();
 
-  async createUser(user: CreateUserDto, entityManager: EntityManager): Promise<UserResponseDto> {
-    const context = 'creating user';
+  async createUser(user: CreateUserDto): Promise<UserResponseDto> {
     const isExistingUser = await this.userRepository.getUserByUsernameOrEmail(user.email, user.userName);
-    checkForDuplicateUser(isExistingUser, user, context);
-    const newUser = await this.userRepository.createUser(user, entityManager);
+    checkForDuplicateUser(isExistingUser, user, CONTEXT.USER.CREATE);
+    const newUser = await this.userRepository.createUser(user);
     if (!newUser) {
-      throw ErrorFactory.createDatabaseError(ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR, context);
+      throw ErrorFactory.createDatabaseError(
+        ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR,
+        CONTEXT.USER.CREATE,
+      );
     }
     return mapUserToDto(newUser);
   }
 
   async getAllUsers(paginationParams: UserPaginationQuery): Promise<PaginatedResponse<UserResponseDto>> {
     const paginatedUsers = await this.userRepository.getAllUsers(paginationParams);
-    return {
-      data: mapUsersToDtoList(paginatedUsers.data),
-      pagination: paginatedUsers.pagination,
-    };
+    return mapPaginatedResponse<User, UserResponseDto>(paginatedUsers, mapUsersToDtoList);
   }
 
   async getUserById(userId: string): Promise<UserResponseDto> {
-    const context = `fetching user with ID ${userId}`;
     const user = await this.userRepository.getUserById(userId);
     if (!user) {
-      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, context);
+      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, CONTEXT.USER.FETCH);
     }
     return mapUserToDto(user);
   }
 
-  async getUserForAuthByUsername(userName: string): Promise<UserResponseDto> {
+  async getUserByUsername(userName: string): Promise<UserResponseDto> {
     const user = await this.userRepository.getUserByUsername(userName);
-    const context = `fetching user with username ${userName}`;
     if (!user) {
-      throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.USER.UNAUTHORIZED, context);
+      throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.USER.UNAUTHORIZED, CONTEXT.USER.FETCH);
     }
     return mapUserToDto(user);
   }
 
   async updateUser(userId: string, updateData: UpdateUserDto): Promise<UserResponseDto> {
-    const context = `updating user with ID ${userId}`;
     const updatedUser = await this.userRepository.updateUser(userId, updateData);
     if (!updatedUser) {
-      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, context);
+      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, CONTEXT.USER.UPDATE);
+    }
+    return mapUserToDto(updatedUser);
+  }
+
+  async updateEmailVerificationStatus(userId: string): Promise<UserResponseDto> {
+    const updatedUser = await this.userRepository.updateEmailVerificationStatus(userId);
+    if (!updatedUser) {
+      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, CONTEXT.USER.EMAIL_VERIFICATION);
     }
     return mapUserToDto(updatedUser);
   }
 
   async deleteUser(userId: string): Promise<void> {
-    const context = `deleting user with ID ${userId}`;
     const result = await this.userRepository.deleteUser(userId);
     if (result.affected === 0) {
-      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, context);
+      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, CONTEXT.USER.DELETE);
     }
   }
 }

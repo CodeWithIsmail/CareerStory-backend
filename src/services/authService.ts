@@ -1,41 +1,71 @@
-import { SignupDto, LoginDto, AuthResponseDto, CreateAuthDto } from '../dto/authDto.ts';
+import { SignupDto, LoginDto, AuthResponseDto, CreateAuthDto, TokenPayloadDto } from '../dto/authDto.ts';
 import { mapSignUpToCreateAuth, mapSignupToCreateUser } from '../mappers/authMapper.ts';
 import { UserService } from './userService.ts';
 import { UserResponseDto } from '../dto/userDto.ts';
 import { ENV } from '../config/environment.ts';
 import { ErrorFactory } from '../errors/errorFactory.ts';
 import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
-import { generateAccessToken } from '../utils/tokenUtils.ts';
+import { generateToken, generateTokenError } from '../utils/tokenUtils.ts';
 import { AuthRepository } from '../repositories/authRepository.ts';
-import { AuthOrNull } from '../types/customTypes.ts';
-import { AppDataSource } from '../dataSource.ts';
+import { AuthOrNull, TOKEN_TYPE } from '../types/customTypes.ts';
 import { validateUserPassword } from '../utils/passwordUtils.ts';
+import { sendVerificationEmail } from '../utils/emailUtils.ts';
+import jwt from 'jsonwebtoken';
+import { CONTEXT } from '../constants/context.ts';
 
 export class AuthService {
   private userService = new UserService();
   private authRepository = new AuthRepository();
 
   async signup(signupDto: SignupDto): Promise<UserResponseDto> {
-    return AppDataSource.transaction(async (entityManager) => {
-      const createUserDto = mapSignupToCreateUser(signupDto);
-      const newUser = await this.userService.createUser(createUserDto, entityManager);
-      const authData: CreateAuthDto = await mapSignUpToCreateAuth(newUser.userId, signupDto.password);
-      await this.authRepository.createAuth(authData, entityManager);
-      return newUser;
-    });
+    const createUserDto = mapSignupToCreateUser(signupDto);
+    const newUser = await this.userService.createUser(createUserDto);
+    const authData: CreateAuthDto = await mapSignUpToCreateAuth(newUser.userId, signupDto.password);
+    await this.authRepository.createAuth(authData);
+    await this.sendVerificationEmail(newUser);
+    return newUser;
+  }
+
+  async sendVerificationEmail(newUser: UserResponseDto): Promise<void> {
+    const emailVerificationToken = generateToken(newUser, TOKEN_TYPE.EMAIL_VERIFICATION);
+    await sendVerificationEmail(newUser, emailVerificationToken);
+  }
+
+  async resendConfirmationEmail(userName: string): Promise<void> {
+    const user = await this.userService.getUserByUsername(userName);
+    await this.sendVerificationEmail(user);
+  }
+
+  async confirmEmail(token: string): Promise<void> {
+    try {
+      const decoded = jwt.verify(token, ENV.JWT_SECRET) as TokenPayloadDto;
+      if (decoded.tokenType !== TOKEN_TYPE.EMAIL_VERIFICATION) {
+        throw ErrorFactory.createUnauthorizedError(
+          ERROR_MESSAGES.AUTH.INVALID_TOKEN,
+          CONTEXT.AUTH.CONFIRM_EMAIL,
+        );
+      }
+      const userId = decoded.userId;
+      await this.userService.updateEmailVerificationStatus(userId);
+    } catch (error) {
+      generateTokenError(error);
+    }
   }
 
   async login(loginDto: LoginDto): Promise<AuthResponseDto> {
-    const user = await this.userService.getUserForAuthByUsername(loginDto.userName);
+    const user = await this.userService.getUserByUsername(loginDto.userName);
+    if (!user.isEmailVerified) {
+      throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.EMAIL_NOT_VERIFIED, CONTEXT.AUTH.LOGIN);
+    }
     const auth = await this.getAuthByUserId(user.userId);
     const isValid = await validateUserPassword(loginDto.password, auth.hashedPassword);
     if (!isValid) {
-      throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.INCORRECT_PASSWORD, 'during login');
+      throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.INCORRECT_PASSWORD, CONTEXT.AUTH.LOGIN);
     }
-    const accessToken = generateAccessToken(user);
+    const accessToken = generateToken(user, TOKEN_TYPE.AUTH);
     return {
       accessToken,
-      expiresIn: ENV.JWT_EXPIRES_IN,
+      expiresIn: ENV.AUTH_JWT_EXPIRES_IN,
       user,
     };
   }
@@ -43,10 +73,7 @@ export class AuthService {
   async getAuthByUserId(userId: string): Promise<AuthOrNull> {
     const auth = await this.authRepository.getAuthByUserId(userId);
     if (!auth) {
-      throw ErrorFactory.createUnauthorizedError(
-        ERROR_MESSAGES.USER.UNAUTHORIZED,
-        `fetching auth for user ID ${userId}`,
-      );
+      throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.USER.UNAUTHORIZED, CONTEXT.AUTH.LOGIN);
     }
     return auth;
   }

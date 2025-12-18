@@ -15,7 +15,9 @@ export const ERROR_MESSAGES = {
     INCORRECT_PASSWORD: 'Incorrect password',
     NO_TOKEN: 'No authentication token provided',
     INVALID_TOKEN: 'Invalid authentication token',
+    TOKEN_EXPIRED: 'Authentication token has expired',
     UNAUTHORIZED: 'You do not have permission to perform this action',
+    EMAIL_NOT_VERIFIED: 'Email address not verified',
   },
   COMMON: {
     INVALID_INPUT: 'Invalid input data',

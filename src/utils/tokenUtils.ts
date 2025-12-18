@@ -2,18 +2,27 @@ import { ENV } from '../config/environment.ts';
 import { TokenPayloadDto } from '../dto/authDto.ts';
 import { UserResponseDto } from '../dto/userDto.ts';
 import jwt from 'jsonwebtoken';
+import { TOKEN_TYPE, tokenExpiryMap } from '../types/customTypes.ts';
+import { ErrorFactory } from '../errors/errorFactory.ts';
+import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
 
-export function generateAccessToken(user: UserResponseDto): string {
+export function generateToken(user: UserResponseDto, tokenType: TOKEN_TYPE): string {
   const payload: TokenPayloadDto = {
-    userName: user.userName,
-    email: user.email,
-    name: user.name,
-    role: user.role,
     userId: user.userId,
+    role: user.role,
+    tokenType: tokenType,
   };
 
-  const accessToken = jwt.sign(payload, ENV.JWT_SECRET, {
-    expiresIn: ENV.JWT_EXPIRES_IN,
+  const token = jwt.sign(payload, ENV.JWT_SECRET, {
+    expiresIn: tokenExpiryMap[tokenType],
   });
-  return accessToken;
+  return token;
+}
+
+export function generateTokenError(error: any) {
+  if (error instanceof jwt.TokenExpiredError)
+    throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.TOKEN_EXPIRED, 'confirming email');
+  if (error instanceof jwt.JsonWebTokenError)
+    throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.INVALID_TOKEN, 'confirming email');
+  else throw ErrorFactory.createUnauthorizedError(ERROR_MESSAGES.AUTH.INVALID_TOKEN, 'confirming email');
 }

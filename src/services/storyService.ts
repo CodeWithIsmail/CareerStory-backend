@@ -6,7 +6,8 @@ import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
 import { StoryPaginationQuery } from '../validators/paginationValidator.ts';
 import { PaginatedResponse } from '../types/customTypes.ts';
 import { UserService } from './userService.ts';
-
+import { mapPaginatedResponse } from '../mappers/paginationMapper.ts';
+import { CONTEXT } from '../constants/context.ts';
 export class StoryService {
   private storyRepository = new StoryRepository();
   private userService = new UserService();
@@ -14,37 +15,38 @@ export class StoryService {
   async createStory(story: CreateStoryDto): Promise<StoryResponseDto> {
     const newStory = await this.storyRepository.createStory(story);
     if (!newStory) {
-      throw ErrorFactory.createDatabaseError(ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR, 'creating story');
+      throw ErrorFactory.createDatabaseError(
+        ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR,
+        CONTEXT.STORY.CREATE,
+      );
     }
     return mapStoryToDto(newStory);
   }
 
-  async getAllStories(paginationParams: StoryPaginationQuery): Promise<PaginatedResponse<StoryResponseDto>> {
-    const paginatedStories = await this.storyRepository.getAllStories(paginationParams);
-    return {
-      data: mapStoriesToDtoList(paginatedStories.data),
-      pagination: paginatedStories.pagination,
-    };
+  async getStories(
+    paginationParams: StoryPaginationQuery,
+    userId?: string,
+  ): Promise<PaginatedResponse<StoryResponseDto>> {
+    let paginatedStories;
+    if (userId) {
+      await this.userService.getUserById(userId);
+      paginatedStories = await this.storyRepository.getStories(paginationParams, userId);
+    } else paginatedStories = await this.storyRepository.getStories(paginationParams);
+    return mapPaginatedResponse(paginatedStories, mapStoriesToDtoList);
   }
 
   async getStoryById(storyId: string): Promise<StoryResponseDto> {
     const story = await this.storyRepository.getStoryById(storyId);
     if (!story) {
-      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.STORY.NOT_FOUND, `fetching story ${storyId}`);
+      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.STORY.NOT_FOUND, CONTEXT.STORY.FETCH);
     }
     return mapStoryToDto(story);
-  }
-
-  async getStoriesByUserId(userId: string): Promise<StoryResponseDto[]> {
-    await this.userService.getUserById(userId);
-    const stories = await this.storyRepository.getStoriesByUserId(userId);
-    return mapStoriesToDtoList(stories);
   }
 
   async updateStory(storyId: string, updateData: UpdateStoryDto): Promise<StoryResponseDto> {
     const updatedStory = await this.storyRepository.updateStory(storyId, updateData);
     if (!updatedStory) {
-      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.STORY.NOT_FOUND, `updating story ${storyId}`);
+      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.STORY.NOT_FOUND, CONTEXT.STORY.UPDATE);
     }
     return mapStoryToDto(updatedStory);
   }
@@ -52,14 +54,14 @@ export class StoryService {
   async deleteStory(storyId: string): Promise<void> {
     const result = await this.storyRepository.deleteStory(storyId);
     if (result.affected === 0) {
-      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.STORY.NOT_FOUND, `deleting story ${storyId}`);
+      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.STORY.NOT_FOUND, CONTEXT.STORY.DELETE);
     }
   }
 
   async storyAuthorUserId(storyId: string): Promise<string> {
     const story = await this.storyRepository.getStoryById(storyId);
     if (!story) {
-      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.STORY.NOT_FOUND, `fetching story ${storyId}`);
+      throw ErrorFactory.createNotFoundError(ERROR_MESSAGES.STORY.NOT_FOUND, CONTEXT.STORY.FETCH);
     }
     return story.userId;
   }

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import z from 'zod';
-
+import { REQ_SOURCE } from '../types/customTypes.ts';
+import { ErrorFactory } from '../errors/errorFactory.ts';
 declare global {
   namespace Express {
     interface Request {
@@ -9,35 +10,52 @@ declare global {
   }
 }
 
-export const validateParamId = (paramName: string, validateFn: (value: unknown) => any) => {
+export const reqValidation = <T>(source: REQ_SOURCE, schema: z.ZodSchema<T>, paramName?: string) => {
   return (req: Request, _res: Response, next: NextFunction) => {
-    try {
-      req.params[paramName] = validateFn(req.params[paramName]);
-      next();
-    } catch (err) {
-      next(err);
+    switch (source) {
+      case REQ_SOURCE.BODY:
+        req.body = schema.parse(req.body);
+        break;
+      case REQ_SOURCE.PARAM:
+        req.params[paramName] = schema.parse(req.params[paramName]) as string;
+        break;
+      case REQ_SOURCE.QUERY:
+        req.validatedQuery = schema.parse(req.query) as string;
+        break;
     }
+    next();
   };
 };
 
-export const validateReqBody = (schema: z.ZodSchema) => {
-  return (req: Request, _res: Response, next: NextFunction) => {
-    try {
-      req.body = schema.parse(req.body);
-      next();
-    } catch (err) {
-      next(err);
-    }
-  };
-};
+// export const validateParam = (paramName: string, paramSchema: ) => {
+//   return (req: Request, _res: Response, next: NextFunction) => {
+//     try {
+//       req.params[paramName] = paramSchema.parse(req.params[paramName]);
+//       next();
+//     } catch (err) {
+//       next(err);
+//     }
+//   };
+// };
 
-export const validateReqQuery = (validateFn: (value: unknown) => any) => {
-  return (req: Request, _res: Response, next: NextFunction) => {
-    try {
-      req.validatedQuery = validateFn(req.query);
-      next();
-    } catch (err) {
-      next(err);
-    }
-  };
-};
+// export const validateReqBody = (schema: z.ZodSchema) => {
+//   return (req: Request, _res: Response, next: NextFunction) => {
+//     try {
+
+//       next();
+//     } catch (err) {
+//       next(err);
+//     }
+//   };
+// };
+
+// export const validateReqQuery = (schema: z.ZodSchema) => {
+//   return (req: Request, _res: Response, next: NextFunction) => {
+//     try {
+//       req.validatedQuery = schema.parse(req.query);
+//       next();
+//     } catch (err) {
+//       next(err);
+//     }
+//   };
+// };

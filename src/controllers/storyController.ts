@@ -7,23 +7,18 @@ export class StoryController {
   private storyService = new StoryService();
 
   createStory = async (req: Request, res: Response) => {
-    const newStory = await this.storyService.createStory({ ...req.body, userId: req.user.userId });
+    const newStory = await this.storyService.createStory({ ...req.body, userId: req.userId });
     return ResponseHandler.created(res, newStory, RESPONSE_MESSAGES.STORY.CREATE.SUCCESS);
   };
 
   getAllStories = async (req: Request, res: Response) => {
-    const stories = await this.storyService.getAllStories(req.validatedQuery);
+    const stories = await this.storyService.getStories(req.validatedQuery);
     return ResponseHandler.success(res, stories, RESPONSE_MESSAGES.STORY.FETCH.ALL_SUCCESS);
   };
 
   getStoryById = async (req: Request, res: Response) => {
     const story = await this.storyService.getStoryById(req.params.storyId);
     return ResponseHandler.success(res, story, RESPONSE_MESSAGES.STORY.FETCH.BY_ID_SUCCESS);
-  };
-
-  getStoriesByUserId = async (req: Request, res: Response) => {
-    const stories = await this.storyService.getStoriesByUserId(req.params.userId);
-    return ResponseHandler.success(res, stories, RESPONSE_MESSAGES.STORY.FETCH.BY_USER_SUCCESS);
   };
 
   updateStory = async (req: Request, res: Response) => {

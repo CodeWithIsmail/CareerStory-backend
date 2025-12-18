@@ -1,27 +1,18 @@
 import { z } from 'zod';
 import { userOrderByOptions, storyOrderByOptions } from '../constants/paginationFields.ts';
 import { basePaginationSchema } from './baseSchema.ts';
-export class PaginationValidator {
-  static userPaginationSchema = basePaginationSchema
-    .extend({
-      orderBy: z.enum(userOrderByOptions).default('userName'),
-    })
-    .strict();
 
-  static storyPaginationSchema = basePaginationSchema
-    .extend({
-      orderBy: z.enum(storyOrderByOptions).default('title'),
-    })
-    .strict();
+export const userPaginationSchema = basePaginationSchema
+  .extend({
+    orderBy: z.enum(userOrderByOptions).default('userName'),
+  })
+  .strict();
 
-  static validateUserPagination(data: unknown) {
-    return this.userPaginationSchema.parse(data);
-  }
+export const storyPaginationSchema = basePaginationSchema
+  .extend({
+    orderBy: z.enum(storyOrderByOptions).default('userId'),
+  })
+  .strict();
 
-  static validateStoryPagination(data: unknown) {
-    return this.storyPaginationSchema.parse(data);
-  }
-}
-
-export type UserPaginationQuery = z.infer<typeof PaginationValidator.userPaginationSchema>;
-export type StoryPaginationQuery = z.infer<typeof PaginationValidator.storyPaginationSchema>;
+export type UserPaginationQuery = z.infer<typeof userPaginationSchema>;
+export type StoryPaginationQuery = z.infer<typeof storyPaginationSchema>;

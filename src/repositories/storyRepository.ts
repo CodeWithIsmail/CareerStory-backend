@@ -1,11 +1,12 @@
-import { DeleteResult, Entity, IsNull } from 'typeorm';
+import { DeleteResult, IsNull } from 'typeorm';
 import { AppDataSource } from '../dataSource.ts';
 import { Story } from '../entities/Story.ts';
 import { CreateStoryDto, UpdateStoryDto } from '../dto/storyDto.ts';
 import { PaginatedResponse, StoryOrNull } from '../types/customTypes.ts';
 import { StoryPaginationQuery } from '../validators/paginationValidator.ts';
-import { PaginationHelper } from '../utils/paginationHelper.ts';
+import { PaginationHelper } from '../utils/paginationUtils.ts';
 import { storyFindOptions } from '../constants/paginationFields.ts';
+import { mapPaginationConfig } from '../mappers/paginationMapper.ts';
 
 export class StoryRepository {
   private storyRepository = AppDataSource.getRepository(Story);
@@ -15,28 +16,25 @@ export class StoryRepository {
     return this.storyRepository.save(newStory);
   }
 
-  async getAllStories(paginationParams: StoryPaginationQuery): Promise<PaginatedResponse<Story>> {
+  async getStories(
+    paginationParams: StoryPaginationQuery,
+    userId?: string,
+  ): Promise<PaginatedResponse<Story>> {
     const query = this.storyRepository
       .createQueryBuilder('stories')
       .leftJoinAndSelect('stories.user', 'users');
+    if (userId) {
+      query.where('stories.userId = :userId', { userId });
+    }
 
-    return PaginationHelper.paginate(query, paginationParams, {
-      entityAlias: 'stories',
-      searchableFields: storyFindOptions,
-    });
+    const paginationConfig = mapPaginationConfig('stories', storyFindOptions);
+    return PaginationHelper.paginate(query, paginationParams, paginationConfig);
   }
 
   async getStoryById(storyId: string): Promise<StoryOrNull> {
-    return this.storyRepository
-      .createQueryBuilder('stories')
-      .leftJoinAndSelect('stories.user', 'user')
-      .where('stories.storyId = :storyId', { storyId })
-      .getOne();
-  }
-
-  async getStoriesByUserId(userId: string): Promise<Story[]> {
-    return this.storyRepository.find({
-      where: { userId },
+    return this.storyRepository.findOne({
+      where: { storyId },
+      relations: ['user'],
     });
   }
 

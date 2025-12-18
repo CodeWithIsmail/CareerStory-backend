@@ -1,9 +1,8 @@
 import { User } from '../entities/User.ts';
 import { UserResponseDto } from '../dto/userDto.ts';
-import { plainToInstance } from 'class-transformer';
+import { userResponseSchema } from '../validators/userValidator.ts';
 
-export const mapUserToDto = (user: User): UserResponseDto =>
-  plainToInstance(UserResponseDto, user, { excludeExtraneousValues: true });
+export const mapUserToDto = (user: User): UserResponseDto => userResponseSchema.parse(user);
 
 export const mapUsersToDtoList = (users: User[]): UserResponseDto[] =>
-  plainToInstance(UserResponseDto, users, { excludeExtraneousValues: true });
+  users.map((user) => mapUserToDto(user));
