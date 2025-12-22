@@ -3,6 +3,7 @@ import { AuthService } from '../services/authService.ts';
 import { ResponseHandler } from '../utils/responseHandler.ts';
 import { RESPONSE_MESSAGES } from '../constants/responseMessages.ts';
 import { AuthRequest } from '../middlewares/authenticationMiddleware.ts';
+import { ENV } from '../config/environment.ts';
 
 export class AuthController {
   private authService = new AuthService();
@@ -17,9 +18,20 @@ export class AuthController {
     return ResponseHandler.success(res, user, RESPONSE_MESSAGES.AUTH.LOGIN.SUCCESS);
   };
 
+  // confirmEmail = async (req: Request, res: Response) => {
+  //   const confirmedUser = await this.authService.confirmEmail(req.params.token);
+  //   return ResponseHandler.success(res, confirmedUser, RESPONSE_MESSAGES.AUTH.EMAIL_CONFIRMATION.SUCCESS);
+  // };
+
   confirmEmail = async (req: Request, res: Response) => {
-    const confirmedUser = await this.authService.confirmEmail(req.params.token);
-    return ResponseHandler.success(res, confirmedUser, RESPONSE_MESSAGES.AUTH.EMAIL_CONFIRMATION.SUCCESS);
+    const FRONTEND_URL = ENV.FRONTEND_URL;
+    try {
+      await this.authService.confirmEmail(req.params.token);
+      return res.redirect(`${FRONTEND_URL}/email-confirmation-status?status=success`);
+    } catch (error: any) {
+      const message = encodeURIComponent(error.message || 'Verification failed');
+      return res.redirect(`${FRONTEND_URL}/email-confirmation-status?status=error&message=${message}`);
+    }
   };
 
   resendConfirmationEmail = async (req: Request, res: Response) => {

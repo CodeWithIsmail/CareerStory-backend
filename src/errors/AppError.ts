@@ -3,7 +3,7 @@ export class AppError extends Error {
   context: string;
 
   constructor(message: string, statusCode: number, context: string = '') {
-    const fullMessage = context ? `${message} during ${context}` : message;
+    const fullMessage = message;
     super(fullMessage);
     this.statusCode = statusCode;
     this.context = context;

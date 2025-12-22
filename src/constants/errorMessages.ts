@@ -51,8 +51,7 @@ export const ERROR_MESSAGES = {
     NOT_FOUND: 'Resource not found',
     CONFLICT: 'Conflict occurred',
     INTERNAL_SERVER_ERROR: 'Internal server error',
-    RATE_LIMIT_EXCEEDED:
-      'Rate limit exceeded: Only 1 resend attempt allowed every 5 minutes. Please try again later.',
+    RATE_LIMIT_EXCEEDED: 'Only 1 resend email attempt allowed every 5 minutes. Please try again later.',
   },
   USER: {
     UNAUTHORIZED: 'No authorized user found',
