@@ -19,6 +19,7 @@ export const ENV = {
   EMAIL_USER: process.env.EMAIL_USER,
   EMAIL_PASS: process.env.EMAIL_PASS,
   BACKEND_URL: process.env.BACKEND_URL,
+  FRONTEND_URL: process.env.FRONTEND_URL,
 
   OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
   AI_MODEL_NAME: process.env.AI_MODEL_NAME,
