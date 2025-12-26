@@ -72,6 +72,8 @@ export const baseStorySchema = z.object({
     .trim()
     .min(10, VALIDATION_MESSAGES.STORY.BODY.MIN)
     .max(5000, VALIDATION_MESSAGES.STORY.BODY.MAX),
+
+  coverImage: baseUrlSchema.nullable().optional(),
   categoryIds: z.array(z.uuid(VALIDATION_MESSAGES.CATEGORY.INVALID)),
 });
 

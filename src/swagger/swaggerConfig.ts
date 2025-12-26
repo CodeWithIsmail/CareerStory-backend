@@ -74,6 +74,7 @@ const options = {
             userId: { type: 'string', format: 'uuid' },
             title: { type: 'string', minLength: 5, maxLength: 255 },
             body: { type: 'string', minLength: 10, maxLength: 5000 },
+            coverImage: { type: 'string', format: 'uri', nullable: true },
             summary: { type: 'string', nullable: true },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' },
@@ -236,6 +237,13 @@ const options = {
           properties: {
             title: { type: 'string', minLength: 5, maxLength: 255, example: 'My Journey to Google' },
             body: { type: 'string', minLength: 10, maxLength: 5000 },
+            coverImage: {
+              type: 'string',
+              format: 'uri',
+              nullable: true,
+              description: 'URL of the story cover image',
+              example: 'https://res.cloudinary.com/demo/image/upload/sample.jpg',
+            },
             categoryIds: {
               type: 'array',
               items: { type: 'string', format: 'uuid' },
@@ -251,6 +259,7 @@ const options = {
           properties: {
             title: { type: 'string', minLength: 5, maxLength: 255 },
             body: { type: 'string', minLength: 10, maxLength: 5000 },
+            coverImage: { type: 'string', format: 'uri', nullable: true },
             categoryIds: { type: 'array', items: { type: 'string', format: 'uuid' } },
             generateSummary: { type: 'boolean' },
           },

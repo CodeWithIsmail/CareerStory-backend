@@ -12,7 +12,8 @@ import {
 } from 'typeorm';
 import { Category } from './Category.ts';
 import { User } from './User.ts';
-
+import { UrlNullableColumn } from '../utils/columnUtils.ts';
+import { StringOrNull } from '../types/customTypes.ts';
 @Entity({ name: 'stories' })
 export class Story {
   @PrimaryGeneratedColumn('uuid')
@@ -26,6 +27,9 @@ export class Story {
 
   @Column({ type: 'text' })
   body: string;
+
+  @UrlNullableColumn()
+  coverImage?: StringOrNull;
 
   @Column({ type: 'text', nullable: true })
   summary?: string;
