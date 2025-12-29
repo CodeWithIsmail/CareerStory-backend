@@ -22,6 +22,11 @@ export class StoryController {
     return ResponseHandler.success(res, story, RESPONSE_MESSAGES.STORY.FETCH.BY_ID_SUCCESS);
   };
 
+  getUserStories = async (req: AuthRequest, res: Response) => {
+    const stories = await this.storyService.getStories(req.validatedQuery, req.userId, req.params.userId);
+    return ResponseHandler.success(res, stories, RESPONSE_MESSAGES.STORY.FETCH.BY_USER_SUCCESS);
+  }
+
   voteStory = async (req: AuthRequest, res: Response) => {
     await this.storyService.voteStory(req.params.storyId, req.userId, req.body);
     return ResponseHandler.success(res, null, RESPONSE_MESSAGES.VOTE.SUCCESS);
