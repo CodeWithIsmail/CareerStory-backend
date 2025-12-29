@@ -63,9 +63,11 @@ export const ERROR_MESSAGES = {
   STORY: {
     NOT_FOUND: 'Story not found',
   },
+  VOTE: {
+    ALREADY_VOTED: 'You have already voted',
+  },
   SERVER: {
     INTERNAL_SERVER_ERROR: 'Internal server error',
-
     SERVICE_UNAVAILABLE: 'Service temporarily unavailable',
   },
   CATEGORY: {

@@ -1,9 +1,10 @@
-import { CreateStoryDto, UpdateStoryDto, StoryResponseDto } from '../dto/storyDto.ts';
+import { CreateStoryDto, UpdateStoryDto, StoryResponseDto, VoteStoryDto } from '../dto/storyDto.ts';
 import { mapStoryToDto, mapStoriesToDtoList } from '../mappers/storyMapper.ts';
 import { StoryRepository } from '../repositories/storyRepository.ts';
+import { VoteRepository } from '../repositories/voteRepository.ts';
 import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
 import { StoryPaginationQuery } from '../validators/paginationValidator.ts';
-import { PaginatedResponse, StoryOrNull } from '../types/customTypes.ts';
+import { PaginatedResponse } from '../types/customTypes.ts';
 import { UserService } from './userService.ts';
 import { mapPaginatedResponse } from '../mappers/paginationMapper.ts';
 import { CONTEXT } from '../constants/context.ts';
@@ -11,8 +12,10 @@ import { CategoryService } from './categoryService.ts';
 import { Category } from '../entities/Category.ts';
 import { AIService } from './aiService.ts';
 import { DatabaseError, NotFoundError } from '../errors/CustomErrors.ts';
+
 export class StoryService {
   private storyRepository = new StoryRepository();
+  private voteRepository = new VoteRepository();
   private userService = new UserService();
   private categoryService = new CategoryService();
   private aiService = new AIService();
@@ -36,35 +39,53 @@ export class StoryService {
     return mapStoryToDto(newStory);
   }
 
+  async voteStory(storyId: string, userId: string, voteData: VoteStoryDto): Promise<void> {
+    const story = await this.storyRepository.getStoryById(storyId, userId);
+    if (!story) {
+      throw new NotFoundError(ERROR_MESSAGES.STORY.NOT_FOUND, CONTEXT.STORY.FETCH);
+    }
+    await this.voteRepository.handleVote(userId, storyId, voteData);
+  }
+
   async getStories(
     paginationParams: StoryPaginationQuery,
+    currentUserId: string,
     userId?: string,
   ): Promise<PaginatedResponse<StoryResponseDto>> {
-    let paginatedStories;
     if (userId) {
       await this.userService.getUserById(userId);
     }
 
-    paginatedStories = await this.storyRepository.getStories(
+    const paginatedStories = await this.storyRepository.getStories(
       paginationParams,
+      currentUserId,
       userId,
       paginationParams.category,
     );
     return mapPaginatedResponse(paginatedStories, mapStoriesToDtoList);
   }
 
-  async getStoryById(storyId: string): Promise<StoryResponseDto> {
-    const story = await this.storyRepository.getStoryById(storyId);
+  async getStoryById(storyId: string, currentUserId: string): Promise<StoryResponseDto> {
+    const story = await this.storyRepository.getStoryById(storyId, currentUserId);
     if (!story) {
       throw new NotFoundError(ERROR_MESSAGES.STORY.NOT_FOUND, CONTEXT.STORY.FETCH);
     }
     return mapStoryToDto(story);
   }
 
-  async updateStory(storyId: string, updateData: UpdateStoryDto): Promise<StoryResponseDto> {
-    const story = await this.getStoryById(storyId);
-    let updatedStory: StoryOrNull;
+  async updateStory(
+    storyId: string,
+    updateData: UpdateStoryDto,
+    currentUserId: string,
+  ): Promise<StoryResponseDto> {
+    const story = await this.storyRepository.getStoryById(storyId, '');
+    if (!story) {
+      throw new NotFoundError(ERROR_MESSAGES.STORY.NOT_FOUND, CONTEXT.STORY.FETCH);
+    }
+
+    let updatedStory;
     const { generateSummary, ...newUpdateData } = updateData;
+
     if (generateSummary) {
       const summary = await this.aiService.generateStorySummary(
         updateData.title || story.title,
@@ -75,8 +96,15 @@ export class StoryService {
 
     if (updateData.categoryIds !== undefined) {
       const categories = await this.validateAndFetchCategories(updateData.categoryIds, CONTEXT.STORY.UPDATE);
-      updatedStory = await this.storyRepository.updateStory(storyId, newUpdateData, categories);
-    } else updatedStory = await this.storyRepository.updateStory(storyId, newUpdateData);
+      updatedStory = await this.storyRepository.updateStory(
+        storyId,
+        newUpdateData,
+        currentUserId,
+        categories,
+      );
+    } else {
+      updatedStory = await this.storyRepository.updateStory(storyId, newUpdateData, currentUserId);
+    }
 
     if (!updatedStory) {
       throw new NotFoundError(ERROR_MESSAGES.STORY.NOT_FOUND, CONTEXT.STORY.UPDATE);
@@ -92,8 +120,8 @@ export class StoryService {
   }
 
   async storyAuthorUserId(storyId: string): Promise<string | null> {
-    const story = await this.getStoryById(storyId);
-    return story.user?.userId;
+    const story = await this.storyRepository.getStoryById(storyId, '');
+    return story?.user?.userId || null;
   }
 
   async validateAndFetchCategories(categoryIds: string[], context: string): Promise<Category[]> {

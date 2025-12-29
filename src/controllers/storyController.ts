@@ -17,13 +17,18 @@ export class StoryController {
     return ResponseHandler.success(res, stories, RESPONSE_MESSAGES.STORY.FETCH.ALL_SUCCESS);
   };
 
-  getStoryById = async (req: Request, res: Response) => {
-    const story = await this.storyService.getStoryById(req.params.storyId);
+  getStoryById = async (req: AuthRequest, res: Response) => {
+    const story = await this.storyService.getStoryById(req.params.storyId, req.userId);
     return ResponseHandler.success(res, story, RESPONSE_MESSAGES.STORY.FETCH.BY_ID_SUCCESS);
   };
 
-  updateStory = async (req: Request, res: Response) => {
-    const updatedStory = await this.storyService.updateStory(req.params.storyId, req.body);
+  voteStory = async (req: AuthRequest, res: Response) => {
+    await this.storyService.voteStory(req.params.storyId, req.userId, req.body);
+    return ResponseHandler.success(res, null, RESPONSE_MESSAGES.VOTE.SUCCESS);
+  };
+
+  updateStory = async (req: AuthRequest, res: Response) => {
+    const updatedStory = await this.storyService.updateStory(req.params.storyId, req.body, req.userId);
     return ResponseHandler.success(res, updatedStory, RESPONSE_MESSAGES.STORY.UPDATE.SUCCESS);
   };
 

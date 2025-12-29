@@ -3,6 +3,7 @@ import { VALIDATION_MESSAGES } from '../constants/validationMessages.ts';
 import { baseStorySchema } from './baseSchema.ts';
 import { userProfileSchema } from './userValidator.ts';
 import { categoryResponseSchema } from './categoryValidator.ts';
+import { VoteType } from '../types/customTypes.ts';
 
 export const createStorySchema = baseStorySchema
   .extend({
@@ -37,7 +38,18 @@ export const storyResponseSchema = baseStorySchema
       .strip()
       .nullable()
       .optional(),
+
+    voteCount: z.number().default(0),
+    userVote: z.enum(VoteType).nullable().optional(),
   })
   .strip();
 
 export const storyParamSchema = z.uuidv4(VALIDATION_MESSAGES.STORY.STORY_ID.INVALID);
+
+export const voteStorySchema = z
+  .object({
+    voteType: z.enum(VoteType, {
+      message: VALIDATION_MESSAGES.VOTE.VOTE_TYPE.INVALID,
+    }),
+  })
+  .strict();

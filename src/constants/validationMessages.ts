@@ -88,4 +88,10 @@ export const VALIDATION_MESSAGES = {
     },
     INVALID: 'Category ID must be a valid UUID',
   },
+
+  VOTE:{
+    VOTE_TYPE: {
+      INVALID: 'Vote type must be either UP or DOWN',
+    },
+  }
 };

@@ -14,6 +14,7 @@ import { Category } from './Category.ts';
 import { User } from './User.ts';
 import { UrlNullableColumn } from '../utils/columnUtils.ts';
 import { StringOrNull } from '../types/customTypes.ts';
+import { Vote } from './Vote.ts';
 @Entity({ name: 'stories' })
 export class Story {
   @PrimaryGeneratedColumn('uuid')
@@ -32,7 +33,7 @@ export class Story {
   coverImage?: StringOrNull;
 
   @Column({ type: 'text', nullable: true })
-  summary?: string;
+  summary?: StringOrNull;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -54,4 +55,8 @@ export class Story {
     inverseJoinColumn: { name: 'categoryId', referencedColumnName: 'categoryId' },
   })
   categories: Category[];
+
+  voteCount: number;
+
+  userVote?: Vote;
 }

@@ -27,6 +27,11 @@ export enum UserRole {
   USER = 'USER',
 }
 
+export enum VoteType {
+  UP = 'UP',
+  DOWN = 'DOWN',
+}
+
 export const tokenExpiryMap: Record<TOKEN_TYPE, number> = {
   [TOKEN_TYPE.AUTH]: ENV.AUTH_JWT_EXPIRES_IN,
   [TOKEN_TYPE.EMAIL_VERIFICATION]: ENV.EMAIL_VERIFICATION_TOKEN_EXPIRES_IN,

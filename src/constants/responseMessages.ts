@@ -62,4 +62,7 @@ export const RESPONSE_MESSAGES = {
       SUCCESS: 'Category deleted successfully',
     },
   },
+  VOTE: {
+    SUCCESS: 'Vote recorded successfully',
+  },
 };
