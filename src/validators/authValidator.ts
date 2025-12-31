@@ -17,7 +17,14 @@ export const signupSchema = baseUserSchema
     path: ['confirmPassword'],
   });
 
-export const loginSchema = signupSchema.pick({ userName: true, password: true }).strict();
+// export const loginSchema = signupSchema.pick({ userName: true, password: true }).strict();
+
+export const loginSchema = z
+  .object({
+    userName: z.string().nonempty(VALIDATION_MESSAGES.USER.USERNAME.REQUIRED),
+    password: z.string().nonempty(VALIDATION_MESSAGES.PASSWORD.REQUIRED),
+  })
+  .strict();
 
 export const emailResendSchema = z.string().min(3, VALIDATION_MESSAGES.USER.USERNAME.MIN);
 

@@ -17,7 +17,7 @@ export class AIService {
 - Practical advice for future candidates
 - Notable achievements or outcomes
 
-Keep the summary short, ideally 5-7 sentences, while retaining essential information. Make it readable and informative for a job seeker who wants a quick overview.
+Keep the summary short, ideally 5-7 sentences, while retaining essential information. Make it readable and informative for a job seeker who wants a quick overview. Don't include any styling like bullet points or numbering, bold italics underlines. Just give in plain text.
 
 Story:
 Title: ${title}
