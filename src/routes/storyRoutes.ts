@@ -6,6 +6,7 @@ import { storyPaginationSchema } from '../validators/paginationValidator.ts';
 import { authenticate } from '../middlewares/authenticationMiddleware.ts';
 import { authorizeStoryOwnerOrAdmin } from '../middlewares/authorizationMiddleware.ts';
 import { REQ_SOURCE } from '../types/customTypes.ts';
+import { userParamSchema } from '../validators/userValidator.ts';
 
 const storyRouter = Router();
 const storyController = new StoryController();
@@ -14,6 +15,13 @@ storyRouter
   .post('/', authenticate, reqValidation(REQ_SOURCE.BODY, createStorySchema), storyController.createStory)
 
   .get('/', reqValidation(REQ_SOURCE.QUERY, storyPaginationSchema), storyController.getAllStories)
+
+  .get(
+    '/user/:userId',
+    reqValidation(REQ_SOURCE.PARAM, userParamSchema, 'userId'),
+    reqValidation(REQ_SOURCE.QUERY, storyPaginationSchema),
+    storyController.getStoriesByUser,
+  )
 
   .get(
     '/:storyId',
