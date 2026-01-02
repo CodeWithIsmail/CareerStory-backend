@@ -12,9 +12,7 @@ import {
   loginSchema,
   signupSchema,
   tokenParamSchema,
-  changePasswordInitiationSchema,
-  verifyPasswordChangeCodeSchema,
-  setNewPasswordSchema,
+  changePasswordSchema,
 } from '../validators/authValidator.ts';
 import { REQ_SOURCE } from '../types/customTypes.ts';
 import { authenticate } from '../middlewares/authenticationMiddleware.ts';
@@ -41,26 +39,9 @@ authRouter
   )
 
   .post(
-    '/change-password/initiate',
+    '/change-password',
     authenticate,
-    changePasswordInitiateLimiter,
-    reqValidation(REQ_SOURCE.BODY, changePasswordInitiationSchema),
-    authController.initiatePasswordChange,
-  )
-
-  .post(
-    '/change-password/verify-code',
-    authenticate,
-    changePasswordVerifyLimiter,
-    reqValidation(REQ_SOURCE.BODY, verifyPasswordChangeCodeSchema),
-    authController.verifyPasswordChangeCode,
-  )
-
-  .post(
-    '/change-password/set-new-password',
-    authenticate,
-    changePasswordSetLimiter,
-    reqValidation(REQ_SOURCE.BODY, setNewPasswordSchema),
+    reqValidation(REQ_SOURCE.BODY, changePasswordSchema),
     authController.changePassword,
   );
 

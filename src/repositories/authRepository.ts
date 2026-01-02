@@ -1,8 +1,8 @@
 import { AppDataSource } from '../dataSource.ts';
 import { CreateAuthDto } from '../dto/authDto.ts';
 import { Auth } from '../entities/Auth.ts';
-import { resetPasswordChangeFields, updatePasswordField } from '../mappers/authMapper.ts';
-import { AuthOrNull, StringOrNull } from '../types/customTypes.ts';
+import {  updatePasswordField } from '../mappers/authMapper.ts';
+import { AuthOrNull } from '../types/customTypes.ts';
 
 export class AuthRepository {
   private authRepository = AppDataSource.getRepository(Auth);
@@ -16,28 +16,6 @@ export class AuthRepository {
     return this.authRepository.findOneBy({ userId });
   }
 
-  async storePasswordChangeCode(userId: string, code: string, expiresAt: Date): Promise<Auth | null> {
-    await this.authRepository.update({ userId }, resetPasswordChangeFields(code, expiresAt));
-    return this.getAuthByUserId(userId);
-  }
-
-  async getPasswordChangeCode(userId: string): Promise<StringOrNull> {
-    const auth = await this.getAuthByUserId(userId);
-    return auth?.passwordChangeCode || null;
-  }
-
-  async verifyPasswordChangeCode(userId: string): Promise<AuthOrNull> {
-    await this.authRepository.update(
-      { userId },
-      {
-        passwordChangeCodeVerified: true,
-        passwordChangeCodeVerifiedAt: new Date(),
-      },
-    );
-
-    return this.getAuthByUserId(userId);
-  }
-
   async updatePassword(
     userId: string,
     hashedPassword: string,
@@ -49,9 +27,5 @@ export class AuthRepository {
     );
     if (result.affected === 0) return null;
     return this.getAuthByUserId(userId);
-  }
-
-  async clearPasswordChangeCode(userId: string): Promise<void> {
-    await this.authRepository.update({ userId }, resetPasswordChangeFields());
   }
 }

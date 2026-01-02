@@ -18,11 +18,6 @@ export class AuthController {
     return ResponseHandler.success(res, user, RESPONSE_MESSAGES.AUTH.LOGIN.SUCCESS);
   };
 
-  // confirmEmail = async (req: Request, res: Response) => {
-  //   const confirmedUser = await this.authService.confirmEmail(req.params.token);
-  //   return ResponseHandler.success(res, confirmedUser, RESPONSE_MESSAGES.AUTH.EMAIL_CONFIRMATION.SUCCESS);
-  // };
-
   confirmEmail = async (req: Request, res: Response) => {
     const FRONTEND_URL = ENV.FRONTEND_URL;
     try {
@@ -39,18 +34,8 @@ export class AuthController {
     return ResponseHandler.success(res, null, RESPONSE_MESSAGES.AUTH.EMAIL_CONFIRMATION.RESEND);
   };
 
-  initiatePasswordChange = async (req: AuthRequest, res: Response) => {
-    await this.authService.initiatePasswordChange(req.userId, req.body.currentPassword);
-    return ResponseHandler.success(res, null, RESPONSE_MESSAGES.AUTH.PASSWORD_CHANGE.INITIATE);
-  };
-
-  verifyPasswordChangeCode = async (req: AuthRequest, res: Response) => {
-    await this.authService.verifyPasswordChangeCode(req.userId, req.body.code);
-    return ResponseHandler.success(res, null, RESPONSE_MESSAGES.AUTH.PASSWORD_CHANGE.CODE_VERIFIED);
-  };
-
   changePassword = async (req: AuthRequest, res: Response) => {
-    await this.authService.setNewPassword(req.userId, req.body.password);
-    return ResponseHandler.success(res, null, RESPONSE_MESSAGES.AUTH.PASSWORD_CHANGE.PASSWORD_CHANGED);
+    await this.authService.changePassword(req.userId, req.body);
+    return ResponseHandler.success(res, null, RESPONSE_MESSAGES.AUTH.PASSWORD_CHANGE.SUCCESS);
   };
 }

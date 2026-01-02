@@ -5,17 +5,10 @@ export const RESPONSE_MESSAGES = {
       RESEND: 'Confirmation email resent successfully',
     },
     PASSWORD_CHANGE: {
-      INITIATE: 'Password change initiated successfully. Please check your email for the confirmation code.',
-      CODE_VERIFIED: 'Confirmation code verified successfully',
-      PASSWORD_CHANGED: 'Password changed successfully',
+      SUCCESS: 'Password changed successfully',
     },
     LOGIN: {
       SUCCESS: 'User logged in successfully',
-    },
-    CHANGE_PASSWORD: {
-      INITIATION_SUCCESS: 'Confirmation code sent to your email',
-      CODE_VERIFIED_SUCCESS: 'Code verified successfully',
-      PASSWORD_CHANGED_SUCCESS: 'Password changed successfully',
     },
   },
   USER: {

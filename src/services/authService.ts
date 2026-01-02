@@ -1,7 +1,13 @@
-import { SignupDto, LoginDto, AuthResponseDto, CreateAuthDto, TokenPayloadDto } from '../dto/authDto.ts';
+import {
+  SignupDto,
+  LoginDto,
+  AuthResponseDto,
+  CreateAuthDto,
+  TokenPayloadDto,
+  ChangePasswordDto,
+} from '../dto/authDto.ts';
 import { mapSignUpToCreateAuth, mapSignupToCreateUser } from '../mappers/authMapper.ts';
 import { UserService } from './userService.ts';
-// import { UserResponseDto } from '../dto/userDto.ts';
 import { ENV } from '../config/environment.ts';
 import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
 import { generateToken, generateTokenError } from '../utils/tokenUtils.ts';
@@ -9,19 +15,15 @@ import { AuthRepository } from '../repositories/authRepository.ts';
 import { AuthOrNull, TOKEN_TYPE } from '../types/customTypes.ts';
 import {
   generateHashedPassword,
-  generatePasswordChangeCode,
-  isPasswordChangeCodeExpired,
   validateUserPassword,
 } from '../utils/passwordUtils.ts';
 import {
-  sendPasswordChangeCodeEmail,
   sendPasswordChangeConfirmationEmail,
   sendVerificationEmail,
 } from '../utils/emailUtils.ts';
 import jwt from 'jsonwebtoken';
 import { CONTEXT } from '../constants/context.ts';
 import { BadRequestError, DatabaseError, UnauthorizedError } from '../errors/CustomErrors.ts';
-import { generateExpiryTimestamp } from '../utils/timeUtils.ts';
 import { UserProfileDto } from '../dto/userDto.ts';
 
 export class AuthService {
@@ -90,85 +92,22 @@ export class AuthService {
     return auth;
   }
 
-  async initiatePasswordChange(userId: string, currentPassword: string): Promise<void> {
-    const auth = await this.getAuthByUserId(userId, CONTEXT.AUTH.CHANGE_PASSWORD_INITIATE);
-    await validateUserPassword(currentPassword, auth.hashedPassword, CONTEXT.AUTH.CHANGE_PASSWORD_INITIATE);
+  async changePassword(userId: string, changePasswordDto: ChangePasswordDto): Promise<void> {
+    const { currentPassword, newPassword } = changePasswordDto;
 
-    const verificationCode = generatePasswordChangeCode();
-    const expiresAt = generateExpiryTimestamp();
+    const auth = await this.getAuthByUserId(userId, CONTEXT.AUTH.CHANGE_PASSWORD);
 
-    const result = await this.authRepository.storePasswordChangeCode(userId, verificationCode, expiresAt);
-
-    if (!result) {
-      throw new DatabaseError(
-        ERROR_MESSAGES.AUTH.CHANGE_PASSWORD.UPDATE_FAILED,
-        CONTEXT.AUTH.CHANGE_PASSWORD_INITIATE,
-      );
-    }
-
-    const user = await this.userService.getUserById(userId);
-    await sendPasswordChangeCodeEmail(user.userName, user.email, verificationCode);
-  }
-
-  async verifyPasswordChangeCode(userId: string, passwordChangeCode: string): Promise<void> {
-    const auth = await this.getAuthByUserId(userId, CONTEXT.AUTH.CHANGE_PASSWORD_VERIFY);
-    if (!auth.passwordChangeCode || !auth.passwordChangeCodeExpiresAt) {
-      throw new BadRequestError(
-        ERROR_MESSAGES.AUTH.CHANGE_PASSWORD.CODE_NOT_REQUESTED,
-        CONTEXT.AUTH.CHANGE_PASSWORD_VERIFY,
-      );
-    }
-
-    if (isPasswordChangeCodeExpired(auth.passwordChangeCodeExpiresAt)) {
-      await this.authRepository.clearPasswordChangeCode(userId);
-      throw new BadRequestError(
-        ERROR_MESSAGES.AUTH.CHANGE_PASSWORD.CODE_EXPIRED,
-        CONTEXT.AUTH.CHANGE_PASSWORD_VERIFY,
-      );
-    }
-
-    const isCodeValid = auth.passwordChangeCode === passwordChangeCode;
-    if (!isCodeValid) {
-      throw new BadRequestError(
-        ERROR_MESSAGES.AUTH.CHANGE_PASSWORD.CODE_INVALID,
-        CONTEXT.AUTH.CHANGE_PASSWORD_VERIFY,
-      );
-    }
-
-    const result = await this.authRepository.verifyPasswordChangeCode(userId);
-    if (!result) {
-      throw new DatabaseError(
-        ERROR_MESSAGES.AUTH.CHANGE_PASSWORD.UPDATE_FAILED,
-        CONTEXT.AUTH.CHANGE_PASSWORD_VERIFY,
-      );
-    }
-  }
-
-  async setNewPassword(userId: string, newPassword: string): Promise<void> {
-    const auth = await this.getAuthByUserId(userId, CONTEXT.AUTH.CHANGE_PASSWORD_SET);
-
-    if (!auth.passwordChangeCodeVerified) {
-      throw new BadRequestError(
-        ERROR_MESSAGES.AUTH.CHANGE_PASSWORD.CODE_NOT_VERIFIED,
-        CONTEXT.AUTH.CHANGE_PASSWORD_SET,
-      );
-    }
-
-    if (isPasswordChangeCodeExpired(auth.passwordChangeCodeExpiresAt!)) {
-      throw new BadRequestError(
-        ERROR_MESSAGES.AUTH.CHANGE_PASSWORD.CODE_EXPIRED,
-        CONTEXT.AUTH.CHANGE_PASSWORD_SET,
-      );
-    }
+    await validateUserPassword(currentPassword, auth.hashedPassword, CONTEXT.AUTH.CHANGE_PASSWORD);
 
     const hashedNewPassword = await generateHashedPassword(newPassword);
     const lastModificationTime = new Date();
 
     const result = await this.authRepository.updatePassword(userId, hashedNewPassword, lastModificationTime);
+
     if (!result) {
       throw new DatabaseError(
         ERROR_MESSAGES.AUTH.CHANGE_PASSWORD.UPDATE_FAILED,
-        CONTEXT.AUTH.CHANGE_PASSWORD_SET,
+        CONTEXT.AUTH.CHANGE_PASSWORD,
       );
     }
 

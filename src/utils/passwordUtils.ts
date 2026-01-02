@@ -18,12 +18,3 @@ export async function validateUserPassword(
     throw new UnauthorizedError(ERROR_MESSAGES.AUTH.INCORRECT_PASSWORD, context);
   }
 }
-
-export const generatePasswordChangeCode = (): string => {
-  return crypto.randomInt(100000, 999999).toString();
-};
-
-export const isPasswordChangeCodeExpired = (expiresAt: Date | null): boolean => {
-  if (!expiresAt) return true;
-  return new Date() > expiresAt;
-};

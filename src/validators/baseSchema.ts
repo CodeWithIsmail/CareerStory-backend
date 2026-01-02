@@ -55,7 +55,7 @@ export const baseUserSchema = z.object({
 });
 
 export const basePasswordSchema = z
-  .string()
+  .string({ message: VALIDATION_MESSAGES.PASSWORD.REQUIRED })
   .trim()
   .nonempty(VALIDATION_MESSAGES.PASSWORD.REQUIRED)
   .min(6, VALIDATION_MESSAGES.PASSWORD.MIN)

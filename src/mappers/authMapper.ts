@@ -1,6 +1,5 @@
 import { CreateAuthDto, SignupDto } from '../dto/authDto.ts';
 import { CreateUserDto } from '../dto/userDto.ts';
-import { DateOrNull, StringOrNull } from '../types/customTypes.ts';
 import { generateHashedPassword } from '../utils/passwordUtils.ts';
 
 export const mapSignupToCreateUser = (signup: SignupDto): CreateUserDto => ({
@@ -14,15 +13,7 @@ export const mapSignUpToCreateAuth = async (userId: string, password: string): P
   hashedPassword: await generateHashedPassword(password),
 });
 
-export const resetPasswordChangeFields = (code: StringOrNull = null, expiresAt: DateOrNull = null) => ({
-  passwordChangeCode: code,
-  passwordChangeCodeExpiresAt: expiresAt,
-  passwordChangeCodeVerified: false,
-  passwordChangeCodeVerifiedAt: null,
-});
-
 export const updatePasswordField = (hashedPassword: string, passwordLastModificationTime: Date) => ({
   hashedPassword,
   passwordLastModificationTime,
-  ...resetPasswordChangeFields(null, null),
 });
