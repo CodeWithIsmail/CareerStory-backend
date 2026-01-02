@@ -2,9 +2,7 @@ import { Router } from 'express';
 import { AuthController } from '../controllers/authController.ts';
 import { reqValidation } from '../middlewares/reqValidationMiddleware.ts';
 import {
-  changePasswordInitiateLimiter,
-  changePasswordSetLimiter,
-  changePasswordVerifyLimiter,
+
   resendEmailLimiter,
 } from '../middlewares/rateLimitMiddleware.ts';
 import {

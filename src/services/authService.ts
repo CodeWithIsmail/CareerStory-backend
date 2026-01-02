@@ -6,21 +6,15 @@ import {
   TokenPayloadDto,
   ChangePasswordDto,
 } from '../dto/authDto.ts';
-import { mapSignUpToCreateAuth, mapSignupToCreateUser } from '../mappers/authMapper.ts';
+import { mapSignUpToCreateAuth, mapSignupToCreateUser, updateAuthMapper } from '../mappers/authMapper.ts';
 import { UserService } from './userService.ts';
 import { ENV } from '../config/environment.ts';
 import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
 import { generateToken, generateTokenError } from '../utils/tokenUtils.ts';
 import { AuthRepository } from '../repositories/authRepository.ts';
 import { AuthOrNull, TOKEN_TYPE } from '../types/customTypes.ts';
-import {
-  generateHashedPassword,
-  validateUserPassword,
-} from '../utils/passwordUtils.ts';
-import {
-  sendPasswordChangeConfirmationEmail,
-  sendVerificationEmail,
-} from '../utils/emailUtils.ts';
+import { generateHashedPassword, validateUserPassword } from '../utils/passwordUtils.ts';
+import { sendPasswordChangeConfirmationEmail, sendVerificationEmail } from '../utils/emailUtils.ts';
 import jwt from 'jsonwebtoken';
 import { CONTEXT } from '../constants/context.ts';
 import { BadRequestError, DatabaseError, UnauthorizedError } from '../errors/CustomErrors.ts';
@@ -96,13 +90,14 @@ export class AuthService {
     const { currentPassword, newPassword } = changePasswordDto;
 
     const auth = await this.getAuthByUserId(userId, CONTEXT.AUTH.CHANGE_PASSWORD);
-
     await validateUserPassword(currentPassword, auth.hashedPassword, CONTEXT.AUTH.CHANGE_PASSWORD);
 
     const hashedNewPassword = await generateHashedPassword(newPassword);
     const lastModificationTime = new Date();
 
-    const result = await this.authRepository.updatePassword(userId, hashedNewPassword, lastModificationTime);
+    const updateData = updateAuthMapper(hashedNewPassword, lastModificationTime);
+
+    const result = await this.authRepository.updatePassword(userId, updateData);
 
     if (!result) {
       throw new DatabaseError(
@@ -111,10 +106,9 @@ export class AuthService {
       );
     }
 
-    const user = await this.userService.getUserById(userId);
     await sendPasswordChangeConfirmationEmail(
-      user.userName,
-      user.email,
+      result.user.userName,
+      result.user.email,
       lastModificationTime.toLocaleString(),
     );
   }

@@ -31,8 +31,6 @@ export const ERROR_MESSAGES = {
     EMAIL_ALREADY_VERIFIED: 'Email address is already verified',
 
     CHANGE_PASSWORD: {
-      CURRENT_PASSWORD_INCORRECT: 'Current password is incorrect',
-      SAME_AS_CURRENT: 'New password must be different from current password',
       UPDATE_FAILED: 'Failed to update password',
     },
   },

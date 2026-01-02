@@ -4,6 +4,7 @@ import { ResponseHandler } from '../utils/responseHandler.ts';
 import { RESPONSE_MESSAGES } from '../constants/responseMessages.ts';
 import { AuthRequest } from '../middlewares/authenticationMiddleware.ts';
 import { ENV } from '../config/environment.ts';
+import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
 
 export class AuthController {
   private authService = new AuthService();
@@ -19,13 +20,21 @@ export class AuthController {
   };
 
   confirmEmail = async (req: Request, res: Response) => {
-    const FRONTEND_URL = ENV.FRONTEND_URL;
     try {
       await this.authService.confirmEmail(req.params.token);
-      return res.redirect(`${FRONTEND_URL}/email-confirmation-status?status=success`);
+      return res.redirect(`${ENV.FRONTEND_URL}/email-confirmation-status?status=success`);
     } catch (error: any) {
-      const message = encodeURIComponent(error.message || 'Verification failed');
-      return res.redirect(`${FRONTEND_URL}/email-confirmation-status?status=error&message=${message}`);
+      let errorCode = 'verification_failed';
+      if (error.message === ERROR_MESSAGES.AUTH.TOKEN_EXPIRED) {
+        errorCode = 'token_expired';
+      } else if (error.message === ERROR_MESSAGES.AUTH.INVALID_TOKEN) {
+        errorCode = 'invalid_token';
+      } else if (error.message === ERROR_MESSAGES.USER.NOT_FOUND) {
+        errorCode = 'user_not_found';
+      } else if (error.message === ERROR_MESSAGES.AUTH.EMAIL_ALREADY_VERIFIED) {
+        errorCode = 'already_verified';
+      }
+      return res.redirect(`${ENV.FRONTEND_URL}/email-confirmation-status?status=error&code=${errorCode}`);
     }
   };
 

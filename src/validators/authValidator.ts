@@ -17,15 +17,12 @@ export const signupSchema = baseUserSchema
     path: ['confirmPassword'],
   });
 
-
 export const loginSchema = z
   .object({
     userName: z.string().nonempty(VALIDATION_MESSAGES.USER.USERNAME.REQUIRED),
     password: z.string().nonempty(VALIDATION_MESSAGES.PASSWORD.REQUIRED),
   })
   .strict();
-
-
 
 export const emailResendSchema = z.string().min(3, VALIDATION_MESSAGES.USER.USERNAME.MIN);
 
@@ -39,7 +36,7 @@ export const changePasswordSchema = z
   .refine((data) => data.newPassword === data.confirmPassword, {
     message: VALIDATION_MESSAGES.PASSWORD.MISMATCH,
     path: ['confirmPassword'],
-  }); 
+  });
 
 export const tokenPayloadSchema = z
   .object({
@@ -65,7 +62,6 @@ export const createAuthSchema = z
     hashedPassword: z.string(),
   })
   .strict();
-
 
 export const changePasswordResponseSchema = z
   .object({

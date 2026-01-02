@@ -1,7 +1,6 @@
 import { AppDataSource } from '../dataSource.ts';
-import { CreateAuthDto } from '../dto/authDto.ts';
+import { CreateAuthDto, UpdateAuthPasswordDto } from '../dto/authDto.ts';
 import { Auth } from '../entities/Auth.ts';
-import {  updatePasswordField } from '../mappers/authMapper.ts';
 import { AuthOrNull } from '../types/customTypes.ts';
 
 export class AuthRepository {
@@ -16,16 +15,8 @@ export class AuthRepository {
     return this.authRepository.findOneBy({ userId });
   }
 
-  async updatePassword(
-    userId: string,
-    hashedPassword: string,
-    passwordLastModificationTime: Date,
-  ): Promise<AuthOrNull> {
-    const result = await this.authRepository.update(
-      { userId },
-      updatePasswordField(hashedPassword, passwordLastModificationTime),
-    );
-    if (result.affected === 0) return null;
+  async updatePassword(userId: string, updateData: UpdateAuthPasswordDto): Promise<AuthOrNull> {
+    await this.authRepository.update({ userId }, updateData);
     return this.getAuthByUserId(userId);
   }
 }

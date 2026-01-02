@@ -165,36 +165,20 @@ const options = {
           },
         },
 
-        ChangePasswordInitiationRequest: {
+        UpdatePasswordRequest: {
           type: 'object',
-          description: 'Initiate password change',
-          required: ['currentPassword'],
+          description: 'Change user password',
+          required: ['currentPassword', 'newPassword', 'confirmPassword'],
           properties: {
-            currentPassword: { type: 'string', minLength: 6, maxLength: 128 },
-          },
-        },
-
-        VerifyPasswordChangeCodeRequest: {
-          type: 'object',
-          description: 'Verify password change code',
-          required: ['code'],
-          properties: {
-            code: { type: 'string', minLength: 6, maxLength: 6, example: '123456' },
-          },
-        },
-
-        SetNewPasswordRequest: {
-          type: 'object',
-          description: 'Set new password',
-          required: ['password', 'confirmPassword'],
-          properties: {
-            password: {
+            currentPassword: { type: 'string', example: 'CurrentPass123!' },
+            newPassword: {
               type: 'string',
               minLength: 6,
               maxLength: 128,
               description: 'Must include uppercase, lowercase, number, special character',
+              example: 'NewSecurePass123!',
             },
-            confirmPassword: { type: 'string' },
+            confirmPassword: { type: 'string', example: 'NewSecurePass123!' },
           },
         },
 
