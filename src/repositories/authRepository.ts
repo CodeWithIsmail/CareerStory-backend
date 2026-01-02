@@ -12,7 +12,7 @@ export class AuthRepository {
   }
 
   async getAuthByUserId(userId: string): Promise<AuthOrNull> {
-    return this.authRepository.findOneBy({ userId });
+    return this.authRepository.findOne({ where: { userId }, relations: ['user'] });
   }
 
   async updatePassword(userId: string, updateData: UpdateAuthPasswordDto): Promise<AuthOrNull> {

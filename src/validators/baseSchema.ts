@@ -35,8 +35,6 @@ export const baseUserSchema = z.object({
 
   organization: z.string().trim().max(255).nullable().optional(),
 
-  photoUrl: baseUrlSchema.nullable().optional(),
-
   linkedInUrl: baseUrlSchema.nullable().optional(),
 
   githubUrl: baseUrlSchema.nullable().optional(),

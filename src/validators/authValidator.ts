@@ -30,9 +30,15 @@ export const changePasswordSchema = z
   .object({
     currentPassword: basePasswordSchema,
     newPassword: basePasswordSchema,
-    confirmPassword: basePasswordSchema,
+    confirmPassword: z
+      .string({ message: VALIDATION_MESSAGES.PASSWORD.REQUIRED })
+      .nonempty(VALIDATION_MESSAGES.PASSWORD.REQUIRED),
   })
   .strict()
+  .refine((data) => data.currentPassword !== data.newPassword, {
+    message: VALIDATION_MESSAGES.PASSWORD.SAME_AS_CURRENT,
+    path: ['newPassword'],
+  })
   .refine((data) => data.newPassword === data.confirmPassword, {
     message: VALIDATION_MESSAGES.PASSWORD.MISMATCH,
     path: ['confirmPassword'],

@@ -33,7 +33,7 @@ export const storyResponseSchema = baseStorySchema
       .array()
       .default([]),
     user: userProfileSchema
-      .pick({ userId: true, userName: true, name: true, organization: true, photoUrl: true })
+      .pick({ userId: true, userName: true, name: true, organization: true })
       .strip()
       .nullable()
       .optional(),

@@ -16,7 +16,6 @@ export const updateUserProfileSchema = baseUserSchema
     name: true,
     bio: true,
     organization: true,
-    photoUrl: true,
     linkedInUrl: true,
     githubUrl: true,
     portfolioUrl: true,

@@ -30,9 +30,6 @@ export class User {
   organization: string | null;
 
   @UrlNullableColumn()
-  photoUrl: string | null;
-
-  @UrlNullableColumn()
   linkedInUrl: string | null;
 
   @UrlNullableColumn()

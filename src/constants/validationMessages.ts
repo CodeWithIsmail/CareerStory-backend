@@ -71,6 +71,7 @@ export const VALIDATION_MESSAGES = {
     NUMBER: 'Password must contain at least one number',
     SPECIAL: 'Password must contain at least one special character (!@#$%^&*)',
     MISMATCH: "Passwords don't match",
+    SAME_AS_CURRENT: 'New password must be different from current password',
   },
 
   SORT_DIRECTION: {
