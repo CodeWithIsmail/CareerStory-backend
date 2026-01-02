@@ -2,7 +2,6 @@ import nodemailer from 'nodemailer';
 import { ENV } from '../config/environment.ts';
 import { UserProfileDto } from '../dto/userDto.ts';
 import { createPasswordChangeConfirmation } from '../emails/passwordChange.ts';
-import { createPasswordChangeCode } from '../emails/verificationCode.ts';
 import { createVerificationEmail } from '../emails/emailVerification.ts';
 
 const transporter = nodemailer.createTransport({
@@ -14,20 +13,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendPasswordChangeCodeEmail = async (
-  userName: string,
-  userEmail: string,
-  code: string,
-): Promise<void> => {
-  const mailOptions = {
-    from: `"CareerStory" <${ENV.EMAIL_USER}>`,
-    to: userEmail,
-    subject: 'Password Change Confirmation Code – CareerStory',
-    html: createPasswordChangeCode(userName, code),
-  };
 
-  await transporter.sendMail(mailOptions);
-};
 
 export const sendPasswordChangeConfirmationEmail = async (
   userName: string,

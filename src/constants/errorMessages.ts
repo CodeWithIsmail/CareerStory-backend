@@ -31,14 +31,6 @@ export const ERROR_MESSAGES = {
     EMAIL_ALREADY_VERIFIED: 'Email address is already verified',
 
     CHANGE_PASSWORD: {
-      CODE_NOT_REQUESTED: 'No password change requested',
-      CURRENT_PASSWORD_INCORRECT: 'Current password is incorrect',
-      CODE_EXPIRED: 'Confirmation code has expired. Please initiate password change again.',
-      CODE_INVALID: 'Invalid or incorrect confirmation code',
-      CODE_NOT_VERIFIED: 'Please verify the confirmation code first',
-      SAME_AS_CURRENT: 'New password must be different from current password',
-      INITIATION_FAILED: 'Failed to initiate password change',
-      VERIFICATION_FAILED: 'Failed to verify confirmation code',
       UPDATE_FAILED: 'Failed to update password',
     },
   },

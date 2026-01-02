@@ -13,18 +13,6 @@ export class Auth {
   @Column({ type: 'timestamp', nullable: true })
   passwordLastModificationTime: DateOrNull;
 
-  @Column({ nullable: true })
-  passwordChangeCode: StringOrNull;
-
-  @Column({ type: 'timestamp', nullable: true })
-  passwordChangeCodeExpiresAt: DateOrNull;
-
-  @Column({ default: false })
-  passwordChangeCodeVerified: boolean;
-
-  @Column({ type: 'timestamp', nullable: true })
-  passwordChangeCodeVerifiedAt: DateOrNull;
-
   @OneToOne(() => User)
   @JoinColumn({
     name: 'userId',
