@@ -82,7 +82,7 @@ export const baseStorySchema = z.object({
 export const basePaginationSchema = z.object({
   find: z.string().optional(),
   page: z.coerce.number().int().min(1).default(1),
-  itemsPerPage: z.coerce.number().int().min(1).max(100).default(2),
+  itemsPerPage: z.coerce.number().int().min(1).max(100).default(10),
   sortDirection: z
     .enum(['ASC', 'DESC'], { message: VALIDATION_MESSAGES.SORT_DIRECTION.INVALID })
     .default('ASC'),
