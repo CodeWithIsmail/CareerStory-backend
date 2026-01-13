@@ -33,6 +33,7 @@ export const createMockResponse = (): Partial<Response> => {
   res.json = jest.fn().mockReturnValue(res);
   res.send = jest.fn().mockReturnValue(res);
   res.sendStatus = jest.fn().mockReturnValue(res);
+  res.redirect = jest.fn().mockReturnValue(res);
   return res;
 };
 

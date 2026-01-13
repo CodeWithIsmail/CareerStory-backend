@@ -9,6 +9,7 @@ import {
 } from '../../fixtures/index.ts';
 import { Response } from 'express';
 import { AuthRequest } from '../../../middlewares/authenticationMiddleware.ts';
+import { ERROR_MESSAGES } from '../../../constants/errorMessages.ts';
 
 // Mock dependencies
 jest.mock('../../../services/authService.ts');
@@ -95,23 +96,66 @@ describe('AuthController', () => {
   });
 
   describe('confirmEmail', () => {
-    it('should confirm email and return 200 status', async () => {
+    it('should confirm email and redirect to success page', async () => {
       mockRequest.params = { token: 'valid-jwt-token' };
       mockAuthService.confirmEmail = jest.fn().mockResolvedValue(undefined);
 
       await authController.confirmEmail(mockRequest as any, mockResponse as Response);
 
-      expect(mockResponse.status).toHaveBeenCalledWith(200);
       expect(mockAuthService.confirmEmail).toHaveBeenCalledWith('valid-jwt-token');
+      expect(mockResponse.redirect).toHaveBeenCalledWith(expect.stringContaining('status=success'));
     });
 
-    it('should propagate error when token is invalid', async () => {
-      mockRequest.params = { token: 'invalid-token' };
-      mockAuthService.confirmEmail = jest.fn().mockRejectedValue(new Error('Invalid token'));
+    it('should redirect with token_expired error code', async () => {
+      mockRequest.params = { token: 'expired-token' };
+      mockAuthService.confirmEmail = jest
+        .fn()
+        .mockRejectedValue(new Error(ERROR_MESSAGES.AUTH.TOKEN_EXPIRED));
 
-      await expect(authController.confirmEmail(mockRequest as any, mockResponse as Response)).rejects.toThrow(
-        'Invalid token',
-      );
+      await authController.confirmEmail(mockRequest as any, mockResponse as Response);
+
+      expect(mockResponse.redirect).toHaveBeenCalledWith(expect.stringContaining('code=token_expired'));
+    });
+
+    it('should redirect with invalid_token error code', async () => {
+      mockRequest.params = { token: 'invalid-token' };
+      mockAuthService.confirmEmail = jest
+        .fn()
+        .mockRejectedValue(new Error(ERROR_MESSAGES.AUTH.INVALID_TOKEN));
+
+      await authController.confirmEmail(mockRequest as any, mockResponse as Response);
+
+      expect(mockResponse.redirect).toHaveBeenCalledWith(expect.stringContaining('code=invalid_token'));
+    });
+
+    it('should redirect with user_not_found error code', async () => {
+      mockRequest.params = { token: 'token-for-missing-user' };
+      mockAuthService.confirmEmail = jest.fn().mockRejectedValue(new Error(ERROR_MESSAGES.USER.NOT_FOUND));
+
+      await authController.confirmEmail(mockRequest as any, mockResponse as Response);
+
+      expect(mockResponse.redirect).toHaveBeenCalledWith(expect.stringContaining('code=user_not_found'));
+    });
+
+    it('should redirect with already_verified error code', async () => {
+      mockRequest.params = { token: 'already-verified-token' };
+      mockAuthService.confirmEmail = jest
+        .fn()
+        .mockRejectedValue(new Error(ERROR_MESSAGES.AUTH.EMAIL_ALREADY_VERIFIED));
+
+      await authController.confirmEmail(mockRequest as any, mockResponse as Response);
+
+      expect(mockResponse.redirect).toHaveBeenCalledWith(expect.stringContaining('code=already_verified'));
+    });
+
+    it('should redirect with verification_failed error code for unknown errors', async () => {
+      mockRequest.params = { token: 'invalid-token' };
+      mockAuthService.confirmEmail = jest.fn().mockRejectedValue(new Error('Unknown error'));
+
+      await authController.confirmEmail(mockRequest as any, mockResponse as Response);
+
+      expect(mockResponse.redirect).toHaveBeenCalledWith(expect.stringContaining('status=error'));
+      expect(mockResponse.redirect).toHaveBeenCalledWith(expect.stringContaining('code=verification_failed'));
     });
   });
 
@@ -138,72 +182,26 @@ describe('AuthController', () => {
     });
   });
 
-  describe('initiatePasswordChange', () => {
-    it('should initiate password change and return 200 status', async () => {
-      mockRequest.userId = 'user-uuid-123';
-      mockRequest.body = { currentPassword: 'currentPass123' };
-      mockAuthService.initiatePasswordChange = jest.fn().mockResolvedValue(undefined);
-
-      await authController.initiatePasswordChange(mockRequest as AuthRequest, mockResponse as Response);
-
-      expect(mockResponse.status).toHaveBeenCalledWith(200);
-      expect(mockAuthService.initiatePasswordChange).toHaveBeenCalledWith('user-uuid-123', 'currentPass123');
-    });
-
-    it('should propagate error when initiation fails', async () => {
-      mockRequest.userId = 'user-uuid-123';
-      mockRequest.body = { currentPassword: 'wrongPassword' };
-      mockAuthService.initiatePasswordChange = jest.fn().mockRejectedValue(new Error('Incorrect password'));
-
-      await expect(
-        authController.initiatePasswordChange(mockRequest as AuthRequest, mockResponse as Response),
-      ).rejects.toThrow('Incorrect password');
-    });
-  });
-
-  describe('verifyPasswordChangeCode', () => {
-    it('should verify code and return 200 status', async () => {
-      mockRequest.userId = 'user-uuid-123';
-      mockRequest.body = { code: '123456' };
-      mockAuthService.verifyPasswordChangeCode = jest.fn().mockResolvedValue(undefined);
-
-      await authController.verifyPasswordChangeCode(mockRequest as AuthRequest, mockResponse as Response);
-
-      expect(mockResponse.status).toHaveBeenCalledWith(200);
-      expect(mockAuthService.verifyPasswordChangeCode).toHaveBeenCalledWith('user-uuid-123', '123456');
-    });
-
-    it('should propagate error when code is invalid', async () => {
-      mockRequest.userId = 'user-uuid-123';
-      mockRequest.body = { code: 'wrong-code' };
-      mockAuthService.verifyPasswordChangeCode = jest.fn().mockRejectedValue(new Error('Invalid code'));
-
-      await expect(
-        authController.verifyPasswordChangeCode(mockRequest as AuthRequest, mockResponse as Response),
-      ).rejects.toThrow('Invalid code');
-    });
-  });
-
   describe('changePassword', () => {
     it('should change password and return 200 status', async () => {
       mockRequest.userId = 'user-uuid-123';
-      mockRequest.body = { password: 'newPassword123' };
-      mockAuthService.setNewPassword = jest.fn().mockResolvedValue(undefined);
+      mockRequest.body = { currentPassword: 'currentPass123', newPassword: 'newPassword123' };
+      mockAuthService.changePassword = jest.fn().mockResolvedValue(undefined);
 
       await authController.changePassword(mockRequest as AuthRequest, mockResponse as Response);
 
       expect(mockResponse.status).toHaveBeenCalledWith(200);
-      expect(mockAuthService.setNewPassword).toHaveBeenCalledWith('user-uuid-123', 'newPassword123');
+      expect(mockAuthService.changePassword).toHaveBeenCalledWith('user-uuid-123', mockRequest.body);
     });
 
     it('should propagate error when password change fails', async () => {
       mockRequest.userId = 'user-uuid-123';
-      mockRequest.body = { password: 'newPassword123' };
-      mockAuthService.setNewPassword = jest.fn().mockRejectedValue(new Error('Code not verified'));
+      mockRequest.body = { currentPassword: 'wrongPassword', newPassword: 'newPassword123' };
+      mockAuthService.changePassword = jest.fn().mockRejectedValue(new Error('Incorrect password'));
 
       await expect(
         authController.changePassword(mockRequest as AuthRequest, mockResponse as Response),
-      ).rejects.toThrow('Code not verified');
+      ).rejects.toThrow('Incorrect password');
     });
   });
 });
