@@ -12,18 +12,18 @@ const customFormat = winston.format.combine(
 );
 
 const transports = [
-  new winston.transports.File({
-    filename: path.join(logsDir, 'error.log'),
-    level: 'error',
-    maxsize: 5242880,
-    maxFiles: 5,
-  }),
+  // new winston.transports.File({
+  //   filename: path.join(logsDir, 'error.log'),
+  //   level: 'error',
+  //   maxsize: 5242880,
+  //   maxFiles: 5,
+  // }),
 
-  new winston.transports.File({
-    filename: path.join(logsDir, 'combined.log'),
-    maxsize: 5242880,
-    maxFiles: 10,
-  }),
+  // new winston.transports.File({
+  //   filename: path.join(logsDir, 'combined.log'),
+  //   maxsize: 5242880,
+  //   maxFiles: 10,
+  // }),
 
   new winston.transports.Console({
     level: 'debug',
