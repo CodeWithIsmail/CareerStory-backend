@@ -67,7 +67,7 @@ describe('StoryController', () => {
     });
   });
 
-  describe('getAllStories', () => { 
+  describe('getAllStories', () => {
     it('should return paginated stories with 200 status', async () => {
       const mockStories = [createMockStory(), createMockStory({ storyId: 'story-2' })];
       const mockPaginatedResponse = createMockPaginatedResponse(mockStories);
@@ -96,6 +96,24 @@ describe('StoryController', () => {
       await storyController.getAllStories(mockRequest as AuthRequest, mockResponse as Response);
 
       expect(mockResponse.status).toHaveBeenCalledWith(200);
+    });
+  });
+
+  describe('getStoriesByUser', () => {
+    it('should return stories for specific user with 200 status', async () => {
+      const mockStories = [createMockStory()];
+      const mockPaginatedResponse = createMockPaginatedResponse(mockStories);
+
+      mockRequest.params = { userId: 'target-user-uuid' };
+      mockStoryService.getStories = jest.fn().mockResolvedValue(mockPaginatedResponse);
+
+      await storyController.getStoriesByUser(mockRequest as any, mockResponse as Response);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+      expect(mockStoryService.getStories).toHaveBeenCalledWith(
+        mockRequest.validatedQuery,
+        'target-user-uuid',
+      );
     });
   });
 

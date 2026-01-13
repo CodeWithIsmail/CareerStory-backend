@@ -67,32 +67,9 @@ export const createMockAuth = (overrides?: Partial<Auth>): Auth => {
     userId: MOCK_USER_ID,
     hashedPassword: '$2b$10$hashedpassword123',
     passwordLastModificationTime: new Date('2024-01-01'),
-    passwordChangeCode: null,
-    passwordChangeCodeExpiresAt: null,
-    passwordChangeCodeVerified: false,
-    passwordChangeCodeVerifiedAt: null,
     user: createMockUser(),
     ...overrides,
   } as Auth;
-};
-
-export const createMockAuthWithPasswordChangeCode = (overrides?: Partial<Auth>): Auth => {
-  return createMockAuth({
-    passwordChangeCode: '123456',
-    passwordChangeCodeExpiresAt: new Date(Date.now() + 3600000), // 1 hour from now
-    passwordChangeCodeVerified: false,
-    ...overrides,
-  });
-};
-
-export const createMockAuthWithVerifiedCode = (overrides?: Partial<Auth>): Auth => {
-  return createMockAuth({
-    passwordChangeCode: '123456',
-    passwordChangeCodeExpiresAt: new Date(Date.now() + 3600000),
-    passwordChangeCodeVerified: true,
-    passwordChangeCodeVerifiedAt: new Date(),
-    ...overrides,
-  });
 };
 
 // ============== STORY FIXTURES ==============
