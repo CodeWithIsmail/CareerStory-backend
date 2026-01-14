@@ -1,5 +1,5 @@
 import { Column } from 'typeorm';
 
 export function UrlNullableColumn() {
-  return Column({ length: 255, nullable: true });
+  return Column({ type: 'varchar', length: 255, nullable: true });
 }

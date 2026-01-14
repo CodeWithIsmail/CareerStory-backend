@@ -23,10 +23,10 @@ export class User {
   @Column({ unique: true, length: 255 })
   email: string;
 
-  @Column({ length: 1000, nullable: true })
+  @Column({type:'varchar', length: 1000, nullable: true })
   bio: string | null;
 
-  @Column({ length: 255, nullable: true })
+  @Column({ type:'varchar', length: 255, nullable: true })
   organization: string | null;
 
   @UrlNullableColumn()
