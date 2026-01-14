@@ -5,9 +5,11 @@ build/
 tmp/
 temp/
 .env
+.env.prod
 logs/
 logs/**/*
 *.log
 npm-debug.log*
 lorem_ipsum.html
 coverage/
+dist/

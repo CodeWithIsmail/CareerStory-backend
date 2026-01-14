@@ -8,7 +8,10 @@
     "lint": "eslint src/**/*.{ts,js}",
     "lint:fix": "eslint src/**/*.{ts,js} --fix",
     "format": "prettier --write 'src/**/*.{ts,js,json,md}'",
-    "start": "node --watch --env-file=.env --loader ts-node/esm src/index.ts",
+    "build": "tsx --no-warnings src/index.ts --version",
+    "start": "node --env-file=.env --loader ts-node/esm src/index.ts",
+    "start:prod": "node --loader ts-node/esm src/index.ts",
+    "start:dev": "node --env-file=.env --loader ts-node/esm src/index.ts",
     "typeorm": "typeorm-ts-node-commonjs",
     "prepare": "husky",
     "test": "jest",
@@ -29,6 +32,8 @@
     "reflect-metadata": "^0.2.2",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
     "typeorm": "0.3.27",
     "winston": "^3.18.3",
     "zod": "^4.1.12"
@@ -57,8 +62,7 @@
     "prettier": "^3.6.2",
     "supertest": "^7.1.4",
     "ts-jest": "^29.4.6",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.3",
+    "tsx": "^4.21.0",
     "typescript-eslint": "^8.46.4"
   },
   "repository": {
