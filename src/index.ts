@@ -13,8 +13,8 @@ import { ENV } from './config/environment.ts';
 import categoryRouter from './routes/categoryRoutes.ts';
 import { specs, swaggerUiOptions } from './swagger/swaggerConfig.ts';
 import cors from 'cors';
-const PORT = ENV.PORT;
 
+const PORT = ENV.PORT;
 const app = express();
 
 app.use(express.json());
