@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import swaggerUi from 'swagger-ui-express';
 import userRouter from './routes/userRoutes.ts';
@@ -12,8 +13,8 @@ import { ENV } from './config/environment.ts';
 import categoryRouter from './routes/categoryRoutes.ts';
 import { specs, swaggerUiOptions } from './swagger/swaggerConfig.ts';
 import cors from 'cors';
-const PORT = ENV.PORT;
 
+const PORT = ENV.PORT;
 const app = express();
 
 app.use(express.json());
@@ -27,8 +28,18 @@ app.use('/api/v1/categories', categoryRouter);
 app.use(routeNotFoundMiddleware);
 app.use(globalErrorMiddleware);
 
-await AppDataSource.initialize();
-logger.info(LOG_MESSAGES.DATABASE.CONNECTION.SUCCESS);
-app.listen(PORT, () => {
-  logger.info(LOG_MESSAGES.SERVER.RUNNING, { port: PORT });
-});
+const startServer = async () => {
+  try {
+    await AppDataSource.initialize();
+    logger.info(LOG_MESSAGES.DATABASE.CONNECTION.SUCCESS);
+
+    app.listen(PORT, () => {
+      logger.info(LOG_MESSAGES.SERVER.RUNNING, { port: PORT });
+    });
+  } catch (error) {
+    logger.error('Failed to connect to the database or start server', error);
+    process.exit(1);
+  }
+};
+
+startServer();

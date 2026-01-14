@@ -1,6 +1,5 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
 import { User } from './User.ts';
-import { DateOrNull, StringOrNull } from '../types/customTypes.ts';
 
 @Entity()
 export class Auth {
@@ -11,7 +10,7 @@ export class Auth {
   hashedPassword: string;
 
   @Column({ type: 'timestamp', nullable: true })
-  passwordLastModificationTime: DateOrNull;
+  passwordLastModificationTime: Date | null;
 
   @OneToOne(() => User)
   @JoinColumn({
