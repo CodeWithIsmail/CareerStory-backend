@@ -6,7 +6,7 @@ import { Story } from './entities/Story.ts';
 import { ENV } from './config/environment.ts';
 import { Category } from './entities/Category.ts';
 
-const isProduction = ENV.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === 'production';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -16,11 +16,6 @@ export const AppDataSource = new DataSource({
   password: ENV.DB_PASSWORD,
   database: ENV.DB_DATABASE,
   synchronize: !isProduction,
-  ssl: isProduction
-    ? {
-        rejectUnauthorized: false,
-      }
-    : false,
-
+  ssl: isProduction ? { rejectUnauthorized: false } : false,
   entities: [User, Auth, Story, Category],
 });
