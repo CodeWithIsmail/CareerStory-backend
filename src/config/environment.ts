@@ -1,5 +1,5 @@
 export const ENV = {
-  PORT: parseInt(process.env.PORT),
+  PORT: parseInt(process.env.PORT || '3000'),
   DB_HOST: process.env.DB_HOST,
   DB_PORT: parseInt(process.env.DB_PORT),
   DB_USERNAME: process.env.DB_USERNAME,
