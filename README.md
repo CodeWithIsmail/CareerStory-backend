@@ -1,17 +1,17 @@
 # CareerStory Backend
 
-A RESTful API backend for CareerStory - a platform where users share and discover interview experiences and career stories.
+A RESTful API backend for CareerStory - a platform where Software Engineers share and discover interview experiences and career stories.
 
 ## Tech Stack
 
 - **Runtime:** Node.js with TypeScript (ESM)
-- **Framework:** Express.js 5
+- **Framework:** Express.js
 - **Database:** PostgreSQL with TypeORM
 - **Authentication:** JWT-based authentication
 - **Validation:** Zod schema validation
 - **Documentation:** Swagger/OpenAPI
-- **AI Integration:** OpenRouter API for story summarization
-- **Testing:** Jest with 100% code coverage
+- **AI Integration:** OpenRouter API
+- **Testing:** Jest 
 
 ## Prerequisites
 
@@ -22,8 +22,8 @@ A RESTful API backend for CareerStory - a platform where users share and discove
 ## Installation
 
 ```bash
-git clone https://github.com/CodeWithIsmail/CarrerStory-backend.git
-cd CarrerStory-backend
+git clone https://github.com/CodeWithIsmail/CareerStory-backend.git
+cd CareerStory-backend
 npm install
 ```
 
@@ -151,8 +151,8 @@ src/
 - User registration with email verification
 - JWT-based authentication and authorization
 - Role-based access control (User/Admin)
-- CRUD operations for stories and categories
-- AI-powered story summarization
+- CRUD operations for users, stories and categories
+- AI-powered story summarization using OpenRouter API
 - Pagination and sorting for list endpoints
 - Request validation with Zod
 - Rate limiting for sensitive endpoints
