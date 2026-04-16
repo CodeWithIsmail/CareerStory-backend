@@ -29,7 +29,7 @@ export class AuthService {
     const newUser = await this.userService.createUser(createUserDto);
     const authData: CreateAuthDto = await mapSignUpToCreateAuth(newUser.userId, signupDto.password);
     await this.authRepository.createAuth(authData);
-    await this.sendVerificationEmail(newUser);
+    // await this.sendVerificationEmail(newUser);
     return newUser;
   }
 

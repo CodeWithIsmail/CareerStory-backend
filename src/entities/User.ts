@@ -38,7 +38,7 @@ export class User {
   @UrlNullableColumn()
   portfolioUrl: string | null;
 
-  @Column({ default: false })
+  @Column({ default: true })
   isEmailVerified: boolean;
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
