@@ -1,25 +1,25 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
-  ManyToOne,
-  JoinColumn,
   DeleteDateColumn,
-  ManyToMany,
+  Entity,
+  JoinColumn,
   JoinTable,
+  ManyToMany,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Category } from './Category.ts';
 import { User } from './User.ts';
 
 @Entity({ name: 'stories' })
 export class Story {
-  @PrimaryGeneratedColumn('uuid')
-  storyId: string;
+  @PrimaryGeneratedColumn('increment')
+  storyId: number;
 
-  @Column('uuid')
-  userId: string;
+  @Column()
+  userId: number;
 
   @Column({ length: 255 })
   title: string;

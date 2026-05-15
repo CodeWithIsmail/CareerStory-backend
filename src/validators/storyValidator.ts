@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { VALIDATION_MESSAGES } from '../constants/validationMessages.ts';
 import { baseStorySchema } from './baseSchema.ts';
-import { userProfileSchema } from './userValidator.ts';
 import { categoryResponseSchema } from './categoryValidator.ts';
+import { userProfileSchema } from './userValidator.ts';
 
 export const createStorySchema = baseStorySchema
   .extend({
@@ -24,7 +24,7 @@ export const updateStorySchema = baseStorySchema
 export const storyResponseSchema = baseStorySchema
   .omit({ categoryIds: true })
   .extend({
-    storyId: z.uuidv4(),
+    storyId: z.number().int().positive(),
     createdAt: z.date(),
     updatedAt: z.date(),
     summary: z.string().nullable().optional(),
@@ -40,4 +40,4 @@ export const storyResponseSchema = baseStorySchema
   })
   .strip();
 
-export const storyParamSchema = z.uuidv4(VALIDATION_MESSAGES.STORY.STORY_ID.INVALID);
+export const storyParamSchema = z.number().int().positive(VALIDATION_MESSAGES.STORY.STORY_ID.INVALID);

@@ -1,18 +1,18 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { UrlNullableColumn } from '../utils/columnUtils.ts';
 import { UserRole } from '../types/customTypes.ts';
+import { UrlNullableColumn } from '../utils/columnUtils.ts';
 
 @Entity({ name: 'users' })
 export class User {
-  @PrimaryGeneratedColumn('uuid')
-  userId: string;
+  @PrimaryGeneratedColumn('increment')
+  userId: number;
 
   @Column({ unique: true, length: 50 })
   userName: string;
@@ -23,10 +23,10 @@ export class User {
   @Column({ unique: true, length: 255 })
   email: string;
 
-  @Column({type:'varchar', length: 1000, nullable: true })
+  @Column({ type: 'varchar', length: 1000, nullable: true })
   bio: string | null;
 
-  @Column({ type:'varchar', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   organization: string | null;
 
   @UrlNullableColumn()

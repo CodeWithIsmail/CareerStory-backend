@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { VALIDATION_MESSAGES } from '../constants/validationMessages.ts';
-import { baseUserSchema } from './baseSchema.ts';
 import { UserRole } from '../types/customTypes.ts';
+import { baseUserSchema } from './baseSchema.ts';
 
 export const createUserSchema = baseUserSchema
   .pick({
@@ -45,4 +45,4 @@ export const updateUserRoleSchema = z
   })
   .strict();
 
-export const userParamSchema = z.uuidv4(VALIDATION_MESSAGES.USER.USER_ID.INVALID);
+export const userParamSchema = z.number().int().positive(VALIDATION_MESSAGES.USER.USER_ID.INVALID);

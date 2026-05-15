@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { baseCategorySchema } from './baseSchema.ts';
 import { VALIDATION_MESSAGES } from '../constants/validationMessages.ts';
+import { baseCategorySchema } from './baseSchema.ts';
 
 export const createCategorySchema = baseCategorySchema.strict();
 
@@ -13,9 +13,9 @@ export const updateCategorySchema = baseCategorySchema
 
 export const categoryResponseSchema = baseCategorySchema
   .extend({
-    categoryId: z.uuidv4(),
+    categoryId: z.number().int().positive(),
     createdAt: z.date(),
   })
   .strip();
 
-export const categoryParamSchema = z.uuidv4(VALIDATION_MESSAGES.CATEGORY.INVALID);
+export const categoryParamSchema = z.number().int().positive(VALIDATION_MESSAGES.CATEGORY.INVALID);

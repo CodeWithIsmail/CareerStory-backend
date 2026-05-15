@@ -147,8 +147,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
       requestBody:
         required: true
         content:
@@ -179,8 +178,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
       responses:
         '200':
           description: The user
@@ -202,8 +200,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
       responses:
         '204':
           description: User deleted successfully
@@ -267,8 +264,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
       requestBody:
         required: true
         content:
@@ -302,8 +298,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
       responses:
         '204':
           description: Category deleted successfully
@@ -382,8 +377,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
         - name: page
           in: query
           schema:
@@ -422,8 +416,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
       responses:
         '200':
           description: The story
@@ -445,8 +438,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
       requestBody:
         required: true
         content:
@@ -480,8 +472,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
       responses:
         '204':
           description: Story deleted successfully
@@ -497,8 +488,7 @@ components:
       type: object
       properties:
         id:
-          type: string
-          format: uuid
+          type: integer
         userName:
           type: string
         email:
@@ -552,8 +542,7 @@ components:
       type: object
       properties:
         categoryId:
-          type: string
-          format: uuid
+          type: integer
         name:
           type: string
         description:
@@ -579,8 +568,7 @@ components:
       type: object
       properties:
         storyId:
-          type: string
-          format: uuid
+          type: integer
         title:
           type: string
         content:
@@ -615,8 +603,7 @@ components:
         categoryIds:
           type: array
           items:
-            type: string
-            format: uuid
+            type: integer
     UpdateStoryDto:
       type: object
       properties:
@@ -631,8 +618,7 @@ components:
         categoryIds:
           type: array
           items:
-            type: string
-            format: uuid
+            type: integer
     SignupDto:
       type: object
       properties:
@@ -667,8 +653,7 @@ components:
       type: object
       properties:
         id:
-          type: string
-          format: uuid
+          type: integer
         userName:
           type: string
         email:

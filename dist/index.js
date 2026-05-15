@@ -22,42 +22,41 @@ import { DataSource } from "typeorm";
 import { Column as Column3, Entity as Entity2, JoinColumn, OneToOne, PrimaryColumn } from "typeorm";
 
 // src/entities/User.ts
-import { Entity, PrimaryGeneratedColumn, Column as Column2, CreateDateColumn, DeleteDateColumn, UpdateDateColumn } from "typeorm";
-
-// src/utils/columnUtils.ts
-import { Column } from "typeorm";
-function UrlNullableColumn() {
-  return Column({
-    type: "varchar",
-    length: 255,
-    nullable: true
-  });
-}
-__name(UrlNullableColumn, "UrlNullableColumn");
+import { Column as Column2, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 // src/config/environment.ts
+console.log("Environment variables loaded:");
+console.log("PORT:", process.env.PORT);
+console.log("DB_HOST:", process.env.DB_HOST);
+console.log("DB_PORT:", process.env.DB_PORT);
+console.log("DB_USERNAME:", process.env.DB_USERNAME);
+console.log("DB_PASSWORD:", process.env.DB_PASSWORD ? "***set***" : "NOT SET");
+console.log("DB_DATABASE:", process.env.DB_DATABASE);
+console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log("JWT_SECRET:", process.env.JWT_SECRET ? "***set***" : "NOT SET");
 var ENV = {
-  PORT: parseInt(process.env.PORT),
-  DB_HOST: process.env.DB_HOST,
-  DB_PORT: parseInt(process.env.DB_PORT),
-  DB_USERNAME: process.env.DB_USERNAME,
-  DB_PASSWORD: process.env.DB_PASSWORD,
-  DB_DATABASE: process.env.DB_DATABASE,
-  NODE_ENV: process.env.NODE_ENV,
-  LOG_LEVEL: process.env.LOG_LEVEL,
-  JWT_SECRET: process.env.JWT_SECRET,
-  AUTH_JWT_EXPIRES_IN: parseInt(process.env.AUTH_JWT_EXPIRES_IN),
-  EMAIL_VERIFICATION_TOKEN_EXPIRES_IN: parseInt(process.env.EMAIL_VERIFICATION_TOKEN_EXPIRES_IN),
-  SALT_ROUNDS: parseInt(process.env.SALT_ROUNDS),
-  EMAIL_HOST: process.env.EMAIL_HOST,
-  EMAIL_PORT: parseInt(process.env.EMAIL_PORT),
-  EMAIL_USER: process.env.EMAIL_USER,
-  EMAIL_PASS: process.env.EMAIL_PASS,
-  BACKEND_URL: process.env.BACKEND_URL,
-  FRONTEND_URL: process.env.FRONTEND_URL,
-  OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
-  AI_MODEL_NAME: process.env.AI_MODEL_NAME
+  PORT: parseInt(process.env.PORT || "3000"),
+  DB_HOST: process.env.DB_HOST || "",
+  DB_PORT: parseInt(process.env.DB_PORT || "5432"),
+  DB_USERNAME: process.env.DB_USERNAME || "",
+  DB_PASSWORD: process.env.DB_PASSWORD || "",
+  DB_DATABASE: process.env.DB_DATABASE || "",
+  NODE_ENV: process.env.NODE_ENV || "development",
+  LOG_LEVEL: process.env.LOG_LEVEL || "info",
+  JWT_SECRET: process.env.JWT_SECRET || "",
+  AUTH_JWT_EXPIRES_IN: parseInt(process.env.AUTH_JWT_EXPIRES_IN || "2592000"),
+  EMAIL_VERIFICATION_TOKEN_EXPIRES_IN: parseInt(process.env.EMAIL_VERIFICATION_TOKEN_EXPIRES_IN || "86400"),
+  SALT_ROUNDS: parseInt(process.env.SALT_ROUNDS || "10"),
+  EMAIL_HOST: process.env.EMAIL_HOST || "",
+  EMAIL_PORT: parseInt(process.env.EMAIL_PORT || "587"),
+  EMAIL_USER: process.env.EMAIL_USER || "",
+  EMAIL_PASS: process.env.EMAIL_PASS || "",
+  BACKEND_URL: process.env.BACKEND_URL || "http://localhost:3000/api/v1",
+  FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:5173",
+  OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY || "",
+  AI_MODEL_NAME: process.env.AI_MODEL_NAME || "openai/gpt-4o-mini"
 };
+console.log("ENV object created successfully");
 
 // src/types/customTypes.ts
 var TOKEN_TYPE = /* @__PURE__ */ (function(TOKEN_TYPE2) {
@@ -80,6 +79,17 @@ var tokenExpiryMap = {
   ["AUTH"]: ENV.AUTH_JWT_EXPIRES_IN,
   ["EMAIL_VERIFICATION"]: ENV.EMAIL_VERIFICATION_TOKEN_EXPIRES_IN
 };
+
+// src/utils/columnUtils.ts
+import { Column } from "typeorm";
+function UrlNullableColumn() {
+  return Column({
+    type: "varchar",
+    length: 255,
+    nullable: true
+  });
+}
+__name(UrlNullableColumn, "UrlNullableColumn");
 
 // src/entities/User.ts
 function _ts_decorate(decorators, target, key, desc) {
@@ -114,8 +124,8 @@ var _User = class _User {
 __name(_User, "User");
 var User = _User;
 _ts_decorate([
-  PrimaryGeneratedColumn("uuid"),
-  _ts_metadata("design:type", String)
+  PrimaryGeneratedColumn("increment"),
+  _ts_metadata("design:type", Number)
 ], User.prototype, "userId", void 0);
 _ts_decorate([
   Column2({
@@ -167,7 +177,7 @@ _ts_decorate([
 ], User.prototype, "portfolioUrl", void 0);
 _ts_decorate([
   Column2({
-    default: false
+    default: true
   }),
   _ts_metadata("design:type", Boolean)
 ], User.prototype, "isEmailVerified", void 0);
@@ -220,8 +230,8 @@ var _Auth = class _Auth {
 __name(_Auth, "Auth");
 var Auth = _Auth;
 _ts_decorate2([
-  PrimaryColumn("uuid"),
-  _ts_metadata2("design:type", String)
+  PrimaryColumn(),
+  _ts_metadata2("design:type", Number)
 ], Auth.prototype, "userId", void 0);
 _ts_decorate2([
   Column3(),
@@ -247,10 +257,10 @@ Auth = _ts_decorate2([
 ], Auth);
 
 // src/entities/Story.ts
-import { Entity as Entity4, PrimaryGeneratedColumn as PrimaryGeneratedColumn3, Column as Column5, CreateDateColumn as CreateDateColumn3, UpdateDateColumn as UpdateDateColumn2, ManyToOne, JoinColumn as JoinColumn2, DeleteDateColumn as DeleteDateColumn3, ManyToMany as ManyToMany2, JoinTable } from "typeorm";
+import { Column as Column5, CreateDateColumn as CreateDateColumn3, DeleteDateColumn as DeleteDateColumn3, Entity as Entity4, JoinColumn as JoinColumn2, JoinTable, ManyToMany as ManyToMany2, ManyToOne, PrimaryGeneratedColumn as PrimaryGeneratedColumn3, UpdateDateColumn as UpdateDateColumn2 } from "typeorm";
 
 // src/entities/Category.ts
-import { Entity as Entity3, PrimaryGeneratedColumn as PrimaryGeneratedColumn2, Column as Column4, CreateDateColumn as CreateDateColumn2, ManyToMany, DeleteDateColumn as DeleteDateColumn2 } from "typeorm";
+import { Column as Column4, CreateDateColumn as CreateDateColumn2, DeleteDateColumn as DeleteDateColumn2, Entity as Entity3, ManyToMany, PrimaryGeneratedColumn as PrimaryGeneratedColumn2 } from "typeorm";
 function _ts_decorate3(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -275,8 +285,8 @@ var _Category = class _Category {
 __name(_Category, "Category");
 var Category = _Category;
 _ts_decorate3([
-  PrimaryGeneratedColumn2("uuid"),
-  _ts_metadata3("design:type", String)
+  PrimaryGeneratedColumn2("increment"),
+  _ts_metadata3("design:type", Number)
 ], Category.prototype, "categoryId", void 0);
 _ts_decorate3([
   Column4({
@@ -337,12 +347,12 @@ var _Story = class _Story {
 __name(_Story, "Story");
 var Story = _Story;
 _ts_decorate4([
-  PrimaryGeneratedColumn3("uuid"),
-  _ts_metadata4("design:type", String)
+  PrimaryGeneratedColumn3("increment"),
+  _ts_metadata4("design:type", Number)
 ], Story.prototype, "storyId", void 0);
 _ts_decorate4([
-  Column5("uuid"),
-  _ts_metadata4("design:type", String)
+  Column5(),
+  _ts_metadata4("design:type", Number)
 ], Story.prototype, "userId", void 0);
 _ts_decorate4([
   Column5({
@@ -405,7 +415,6 @@ Story = _ts_decorate4([
 ], Story);
 
 // src/dataSource.ts
-var isProduction = process.env.NODE_ENV === "production";
 var AppDataSource = new DataSource({
   type: "postgres",
   host: ENV.DB_HOST,
@@ -413,10 +422,10 @@ var AppDataSource = new DataSource({
   username: ENV.DB_USERNAME,
   password: ENV.DB_PASSWORD,
   database: ENV.DB_DATABASE,
-  synchronize: !isProduction,
-  ssl: isProduction ? {
-    rejectUnauthorized: false
-  } : false,
+  synchronize: true,
+  // ssl: {
+  //   rejectUnauthorized: false,
+  // },
   entities: [
     User,
     Auth,
@@ -721,7 +730,7 @@ var VALIDATION_MESSAGES = {
   },
   USER: {
     USER_ID: {
-      INVALID: "User ID must be a valid UUID"
+      INVALID: "User ID must be a valid integer"
     },
     USERNAME: {
       MIN: "Username must be at least 3 characters",
@@ -748,7 +757,7 @@ var VALIDATION_MESSAGES = {
       REQUIRED: "generateSummary must be a boolean value"
     },
     USER_ID: {
-      INVALID: "userId must be a valid UUID"
+      INVALID: "userId must be a valid integer"
     },
     TITLE: {
       MIN: "Title must be at least 5 characters",
@@ -761,7 +770,7 @@ var VALIDATION_MESSAGES = {
       REQUIRED: "Body is required"
     },
     STORY_ID: {
-      INVALID: "Story ID must be a valid UUID"
+      INVALID: "Story ID must be a valid integer"
     }
   },
   PASSWORD: {
@@ -786,7 +795,7 @@ var VALIDATION_MESSAGES = {
     DESCRIPTION: {
       MAX: "Description must be at most 255 characters long"
     },
-    INVALID: "Category ID must be a valid UUID"
+    INVALID: "Category ID must be a valid integer"
   }
 };
 
@@ -796,7 +805,7 @@ var baseUrlSchema = z.url({
   message: VALIDATION_MESSAGES.URL.INVALID
 }).trim().max(255, VALIDATION_MESSAGES.URL.MAX);
 var baseUserSchema = z.object({
-  userId: z.uuidv4(VALIDATION_MESSAGES.USER.USER_ID.INVALID),
+  userId: z.number().int().positive(VALIDATION_MESSAGES.USER.USER_ID.INVALID),
   userName: z.string().nonempty(VALIDATION_MESSAGES.USER.USERNAME.REQUIRED).min(3, VALIDATION_MESSAGES.USER.USERNAME.MIN).max(50, VALIDATION_MESSAGES.USER.USERNAME.MAX).regex(/^[a-z0-9_]+$/, VALIDATION_MESSAGES.USER.USERNAME.INVALID),
   email: z.string().nonempty(VALIDATION_MESSAGES.USER.EMAIL.REQUIRED).email({
     message: VALIDATION_MESSAGES.USER.EMAIL.INVALID
@@ -821,7 +830,7 @@ var basePasswordSchema = z.string({
 var baseStorySchema = z.object({
   title: z.string().trim().nonempty(VALIDATION_MESSAGES.STORY.TITLE.REQUIRED).min(5, VALIDATION_MESSAGES.STORY.TITLE.MIN).max(255, VALIDATION_MESSAGES.STORY.TITLE.MAX),
   body: z.string().trim().nonempty(VALIDATION_MESSAGES.STORY.BODY.REQUIRED).min(10, VALIDATION_MESSAGES.STORY.BODY.MIN).max(5e3, VALIDATION_MESSAGES.STORY.BODY.MAX),
-  categoryIds: z.array(z.uuid(VALIDATION_MESSAGES.CATEGORY.INVALID))
+  categoryIds: z.array(z.number().int().positive(VALIDATION_MESSAGES.CATEGORY.INVALID))
 });
 var basePaginationSchema = z.object({
   find: z.string().optional(),
@@ -871,7 +880,7 @@ var updateUserRoleSchema = z2.object({
     message: VALIDATION_MESSAGES.USER.ROLE.INVALID
   })
 }).strict();
-var userParamSchema = z2.uuidv4(VALIDATION_MESSAGES.USER.USER_ID.INVALID);
+var userParamSchema = z2.number().int().positive(VALIDATION_MESSAGES.USER.USER_ID.INVALID);
 
 // src/mappers/userMapper.ts
 var mapUserToProfileDto = /* @__PURE__ */ __name((user) => userProfileSchema.parse(user), "mapUserToProfileDto");
@@ -1208,10 +1217,10 @@ var updateCategorySchema = baseCategorySchema.partial().strict().refine((data) =
   message: VALIDATION_MESSAGES.COMMON.AT_LEAST_ONE_FIELD
 });
 var categoryResponseSchema = baseCategorySchema.extend({
-  categoryId: z4.uuidv4(),
+  categoryId: z4.number().int().positive(),
   createdAt: z4.date()
 }).strip();
-var categoryParamSchema = z4.uuidv4(VALIDATION_MESSAGES.CATEGORY.INVALID);
+var categoryParamSchema = z4.number().int().positive(VALIDATION_MESSAGES.CATEGORY.INVALID);
 
 // src/validators/storyValidator.ts
 var createStorySchema = baseStorySchema.extend({
@@ -1228,7 +1237,7 @@ var updateStorySchema = baseStorySchema.extend({
 var storyResponseSchema = baseStorySchema.omit({
   categoryIds: true
 }).extend({
-  storyId: z5.uuidv4(),
+  storyId: z5.number().int().positive(),
   createdAt: z5.date(),
   updatedAt: z5.date(),
   summary: z5.string().nullable().optional(),
@@ -1244,7 +1253,7 @@ var storyResponseSchema = baseStorySchema.omit({
     organization: true
   }).strip().nullable().optional()
 }).strip();
-var storyParamSchema = z5.uuidv4(VALIDATION_MESSAGES.STORY.STORY_ID.INVALID);
+var storyParamSchema = z5.number().int().positive(VALIDATION_MESSAGES.STORY.STORY_ID.INVALID);
 
 // src/mappers/storyMapper.ts
 var mapStoryToDto = /* @__PURE__ */ __name((story) => storyResponseSchema.parse(story), "mapStoryToDto");
@@ -2015,7 +2024,6 @@ var _AuthService = class _AuthService {
     const newUser = await this.userService.createUser(createUserDto);
     const authData = await mapSignUpToCreateAuth(newUser.userId, signupDto.password);
     await this.authRepository.createAuth(authData);
-    await this.sendVerificationEmail(newUser);
     return newUser;
   }
   async sendVerificationEmail(newUser) {
@@ -2178,7 +2186,7 @@ var changePasswordSchema = z7.object({
   ]
 });
 var tokenPayloadSchema = z7.object({
-  userId: z7.uuidv4(),
+  userId: z7.number().int().positive(),
   role: z7.enum(UserRole),
   tokenType: z7.enum(TOKEN_TYPE)
 }).strict();
@@ -2191,7 +2199,7 @@ var authResponseSchema = z7.object({
   })
 }).strip();
 var createAuthSchema = z7.object({
-  userId: z7.uuidv4(),
+  userId: z7.number().int().positive(),
   hashedPassword: z7.string()
 }).strict();
 var changePasswordResponseSchema = z7.object({

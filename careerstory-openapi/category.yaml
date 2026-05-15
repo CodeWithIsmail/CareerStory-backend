@@ -63,8 +63,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
       requestBody:
         required: true
         content:
@@ -98,8 +97,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
       responses:
         '204':
           description: Category deleted successfully
@@ -115,8 +113,7 @@ components:
       type: object
       properties:
         categoryId:
-          type: string
-          format: uuid
+          type: integer
         name:
           type: string
         description:

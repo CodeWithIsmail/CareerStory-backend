@@ -1,17 +1,17 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  ManyToMany,
   DeleteDateColumn,
+  Entity,
+  ManyToMany,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Story } from '../entities/Story.ts';
 
 @Entity('categories')
 export class Category {
-  @PrimaryGeneratedColumn('uuid')
-  categoryId: string;
+  @PrimaryGeneratedColumn('increment')
+  categoryId: number;
 
   @Column({ length: 50, unique: true })
   name: string;

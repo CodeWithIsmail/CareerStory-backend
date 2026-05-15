@@ -8,7 +8,7 @@ export const baseUrlSchema = z
   .max(255, VALIDATION_MESSAGES.URL.MAX);
 
 export const baseUserSchema = z.object({
-  userId: z.uuidv4(VALIDATION_MESSAGES.USER.USER_ID.INVALID),
+  userId: z.number().int().positive(VALIDATION_MESSAGES.USER.USER_ID.INVALID),
   userName: z
     .string()
     .nonempty(VALIDATION_MESSAGES.USER.USERNAME.REQUIRED)
@@ -76,7 +76,7 @@ export const baseStorySchema = z.object({
     .nonempty(VALIDATION_MESSAGES.STORY.BODY.REQUIRED)
     .min(10, VALIDATION_MESSAGES.STORY.BODY.MIN)
     .max(5000, VALIDATION_MESSAGES.STORY.BODY.MAX),
-  categoryIds: z.array(z.uuid(VALIDATION_MESSAGES.CATEGORY.INVALID)),
+  categoryIds: z.array(z.number().int().positive(VALIDATION_MESSAGES.CATEGORY.INVALID)),
 });
 
 export const basePaginationSchema = z.object({
