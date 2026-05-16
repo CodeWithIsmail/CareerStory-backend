@@ -40,4 +40,4 @@ export const storyResponseSchema = baseStorySchema
   })
   .strip();
 
-export const storyParamSchema = z.number().int().positive(VALIDATION_MESSAGES.STORY.STORY_ID.INVALID);
+export const storyParamSchema = z.coerce.number().int().positive(VALIDATION_MESSAGES.STORY.STORY_ID.INVALID);

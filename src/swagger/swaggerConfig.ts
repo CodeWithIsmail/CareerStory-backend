@@ -48,7 +48,7 @@ const options = {
             'updatedAt',
           ],
           properties: {
-            userId: { type: 'string', format: 'uuid' },
+            userId: { type: 'integer' },
             userName: { type: 'string', minLength: 3, maxLength: 50 },
             email: { type: 'string', format: 'email' },
             name: { type: 'string', minLength: 3, maxLength: 100 },
@@ -69,8 +69,8 @@ const options = {
           description: 'Story with author and categories',
           required: ['storyId', 'userId', 'title', 'body', 'createdAt', 'updatedAt'],
           properties: {
-            storyId: { type: 'string', format: 'uuid' },
-            userId: { type: 'string', format: 'uuid' },
+            storyId: { type: 'integer' },
+            userId: { type: 'integer' },
             title: { type: 'string', minLength: 5, maxLength: 255 },
             body: { type: 'string', minLength: 10, maxLength: 5000 },
             summary: { type: 'string', nullable: true },
@@ -81,7 +81,7 @@ const options = {
               items: {
                 type: 'object',
                 properties: {
-                  categoryId: { type: 'string', format: 'uuid' },
+                  categoryId: { type: 'integer' },
                   name: { type: 'string' },
                   description: { type: 'string', nullable: true },
                 },
@@ -91,7 +91,7 @@ const options = {
               type: 'object',
               nullable: true,
               properties: {
-                userId: { type: 'string', format: 'uuid' },
+                userId: { type: 'integer' },
                 userName: { type: 'string' },
                 name: { type: 'string' },
                 organization: { type: 'string', nullable: true },
@@ -105,7 +105,7 @@ const options = {
           description: 'Story category',
           required: ['categoryId', 'name', 'createdAt'],
           properties: {
-            categoryId: { type: 'string', format: 'uuid' },
+            categoryId: { type: 'integer' },
             name: { type: 'string', minLength: 1, maxLength: 50 },
             description: { type: 'string', maxLength: 255, nullable: true },
             createdAt: { type: 'string', format: 'date-time' },
@@ -220,7 +220,7 @@ const options = {
             body: { type: 'string', minLength: 10, maxLength: 5000 },
             categoryIds: {
               type: 'array',
-              items: { type: 'string', format: 'uuid' },
+              items: { type: 'integer' },
               default: [],
             },
             generateSummary: { type: 'boolean', description: 'Auto-generate AI summary' },
@@ -233,7 +233,7 @@ const options = {
           properties: {
             title: { type: 'string', minLength: 5, maxLength: 255 },
             body: { type: 'string', minLength: 10, maxLength: 5000 },
-            categoryIds: { type: 'array', items: { type: 'string', format: 'uuid' } },
+            categoryIds: { type: 'array', items: { type: 'integer' } },
             generateSummary: { type: 'boolean' },
           },
         },

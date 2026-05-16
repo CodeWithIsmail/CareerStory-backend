@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
+import { RESPONSE_MESSAGES } from '../constants/responseMessages.ts';
 import { UserService } from '../services/userService.ts';
 import { ResponseHandler } from '../utils/responseHandler.ts';
-import { RESPONSE_MESSAGES } from '../constants/responseMessages.ts';
-import { AuthRequest } from '../middlewares/authenticationMiddleware.ts';
 
 export class UserController {
   private userService = new UserService();
@@ -13,27 +12,27 @@ export class UserController {
   };
 
   getUserById = async (req: Request, res: Response) => {
-    const user = await this.userService.getUserById(req.params.userId);
+    const user = await this.userService.getUserById(Number(req.params.userId));
     return ResponseHandler.success(res, user, RESPONSE_MESSAGES.USER.FETCH.BY_ID_SUCCESS);
   };
 
-  getCurrentUserProfile = async (req: AuthRequest, res: Response) => {
+  getCurrentUserProfile = async (req: Request, res: Response) => {
     const user = await this.userService.getUserById(req.userId);
     return ResponseHandler.success(res, user, RESPONSE_MESSAGES.USER.FETCH.PROFILE_SUCCESS);
   };
 
   updateUser = async (req: Request, res: Response) => {
-    const updatedUser = await this.userService.updateUser(req.params.userId, req.body);
+    const updatedUser = await this.userService.updateUser(Number(req.params.userId), req.body);
     return ResponseHandler.success(res, updatedUser, RESPONSE_MESSAGES.USER.UPDATE.SUCCESS);
   };
 
-  updateUserProfile = async (req: AuthRequest, res: Response) => {
+  updateUserProfile = async (req: Request, res: Response) => {
     const updatedUser = await this.userService.updateUser(req.userId, req.body);
     return ResponseHandler.success(res, updatedUser, RESPONSE_MESSAGES.USER.UPDATE.SUCCESS);
   };
 
   deleteUser = async (req: Request, res: Response) => {
-    await this.userService.deleteUser(req.params.userId);
+    await this.userService.deleteUser(Number(req.params.userId));
     return ResponseHandler.noContent(res);
   };
 }

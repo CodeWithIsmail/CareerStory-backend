@@ -1,10 +1,10 @@
-import { CategoryRepository } from '../repositories/categoryRepository.ts';
-import { CategoryResponseDto, CreateCategoryDto, UpdateCategoryDto } from '../dto/categoryDto.ts';
-import { mapCategoriesToDtoList, mapCategoryToDto } from '../mappers/categoryMapper.ts';
-import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
 import { CONTEXT } from '../constants/context.ts';
+import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
+import { CategoryResponseDto, CreateCategoryDto, UpdateCategoryDto } from '../dto/categoryDto.ts';
 import { Category } from '../entities/Category.ts';
 import { ConflictError, DatabaseError, NotFoundError } from '../errors/CustomErrors.ts';
+import { mapCategoriesToDtoList, mapCategoryToDto } from '../mappers/categoryMapper.ts';
+import { CategoryRepository } from '../repositories/categoryRepository.ts';
 export class CategoryService {
   private categoryRepository = new CategoryRepository();
 
@@ -25,7 +25,7 @@ export class CategoryService {
     return mapCategoriesToDtoList(categories);
   }
 
-  async getCategoryById(categoryId: string): Promise<CategoryResponseDto> {
+  async getCategoryById(categoryId: number): Promise<CategoryResponseDto> {
     const category = await this.categoryRepository.getCategoryById(categoryId);
     if (!category) {
       throw new NotFoundError(ERROR_MESSAGES.CATEGORY.FETCH, CONTEXT.CATEGORY.FETCH);
@@ -33,7 +33,7 @@ export class CategoryService {
     return mapCategoryToDto(category);
   }
 
-  async getCategoriesByIds(categoryIds: string[]): Promise<Category[]> {
+  async getCategoriesByIds(categoryIds: number[]): Promise<Category[]> {
     const categories = await this.categoryRepository.getCategoriesByIds(categoryIds);
     return categories;
   }
@@ -46,7 +46,7 @@ export class CategoryService {
     return mapCategoryToDto(category);
   }
 
-  async updateCategory(categoryId: string, updateData: UpdateCategoryDto): Promise<CategoryResponseDto> {
+  async updateCategory(categoryId: number, updateData: UpdateCategoryDto): Promise<CategoryResponseDto> {
     const updatedCategory = await this.categoryRepository.updateCategory(categoryId, updateData);
     if (!updatedCategory) {
       throw new NotFoundError(ERROR_MESSAGES.CATEGORY.UPDATE, CONTEXT.CATEGORY.UPDATE);
@@ -54,7 +54,7 @@ export class CategoryService {
     return mapCategoryToDto(updatedCategory);
   }
 
-  async deleteCategory(categoryId: string): Promise<void> {
+  async deleteCategory(categoryId: number): Promise<void> {
     const result = await this.categoryRepository.deleteCategory(categoryId);
     if (result.affected === 0) {
       throw new NotFoundError(ERROR_MESSAGES.CATEGORY.DELETE, CONTEXT.CATEGORY.DELETE);

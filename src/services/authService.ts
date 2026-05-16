@@ -1,24 +1,25 @@
-import {
-  SignupDto,
-  LoginDto,
-  AuthResponseDto,
-  CreateAuthDto,
-  TokenPayloadDto,
-  ChangePasswordDto,
-} from '../dto/authDto.ts';
-import { mapSignUpToCreateAuth, mapSignupToCreateUser, updateAuthMapper } from '../mappers/authMapper.ts';
-import { UserService } from './userService.ts';
-import { ENV } from '../config/environment.ts';
-import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
-import { generateToken, generateTokenError } from '../utils/tokenUtils.ts';
-import { AuthRepository } from '../repositories/authRepository.ts';
-import { AuthOrNull, TOKEN_TYPE } from '../types/customTypes.ts';
-import { generateHashedPassword, validateUserPassword } from '../utils/passwordUtils.ts';
-import { sendPasswordChangeConfirmationEmail, sendVerificationEmail } from '../utils/emailUtils.ts';
 import jwt from 'jsonwebtoken';
+import { ENV } from '../config/environment.ts';
 import { CONTEXT } from '../constants/context.ts';
-import { BadRequestError, DatabaseError, UnauthorizedError } from '../errors/CustomErrors.ts';
+import { ERROR_MESSAGES } from '../constants/errorMessages.ts';
+import {
+  AuthResponseDto,
+  ChangePasswordDto,
+  CreateAuthDto,
+  LoginDto,
+  SignupDto,
+  TokenPayloadDto,
+} from '../dto/authDto.ts';
 import { UserProfileDto } from '../dto/userDto.ts';
+import { Auth } from '../entities/Auth.ts';
+import { BadRequestError, DatabaseError, UnauthorizedError } from '../errors/CustomErrors.ts';
+import { mapSignUpToCreateAuth, mapSignupToCreateUser, updateAuthMapper } from '../mappers/authMapper.ts';
+import { AuthRepository } from '../repositories/authRepository.ts';
+import { TOKEN_TYPE } from '../types/customTypes.ts';
+import { sendPasswordChangeConfirmationEmail, sendVerificationEmail } from '../utils/emailUtils.ts';
+import { generateHashedPassword, validateUserPassword } from '../utils/passwordUtils.ts';
+import { generateToken, generateTokenError } from '../utils/tokenUtils.ts';
+import { UserService } from './userService.ts';
 
 export class AuthService {
   private userService = new UserService();
@@ -78,7 +79,7 @@ export class AuthService {
     };
   }
 
-  async getAuthByUserId(userId: string, context: string): Promise<AuthOrNull> {
+  async getAuthByUserId(userId: number, context: string): Promise<Auth> {
     const auth = await this.authRepository.getAuthByUserId(userId);
     if (!auth) {
       throw new UnauthorizedError(ERROR_MESSAGES.USER.UNAUTHORIZED, context);
@@ -86,7 +87,7 @@ export class AuthService {
     return auth;
   }
 
-  async changePassword(userId: string, changePasswordDto: ChangePasswordDto): Promise<void> {
+  async changePassword(userId: number, changePasswordDto: ChangePasswordDto): Promise<void> {
     const { currentPassword, newPassword } = changePasswordDto;
 
     const auth = await this.getAuthByUserId(userId, CONTEXT.AUTH.CHANGE_PASSWORD);

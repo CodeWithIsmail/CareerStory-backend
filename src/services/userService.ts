@@ -34,7 +34,7 @@ export class UserService {
     return mapPaginatedResponse<User, UserProfileDto>(paginatedUsers, mapUsersToProfileDtoList);
   }
 
-  async getUserById(userId: string): Promise<UserProfileDto> {
+  async getUserById(userId: number): Promise<UserProfileDto> {
     const user = await this.userRepository.getUserById(userId);
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, CONTEXT.USER.FETCH);
@@ -51,7 +51,7 @@ export class UserService {
   }
 
   async updateUser(
-    userId: string,
+    userId: number,
     updateData: UpdateUserProfileDto | UpdateUserStatusDto | UpdateUserRoleDto,
   ): Promise<UserProfileDto> {
     const updatedUser = await this.userRepository.updateUser(userId, updateData);
@@ -61,7 +61,7 @@ export class UserService {
     return mapUserToProfileDto(updatedUser);
   }
 
-  async deleteUser(userId: string): Promise<void> {
+  async deleteUser(userId: number): Promise<void> {
     const result = await this.userRepository.deleteUser(userId);
     if (result.affected === 0) {
       throw new NotFoundError(ERROR_MESSAGES.USER.NOT_FOUND, CONTEXT.USER.DELETE);

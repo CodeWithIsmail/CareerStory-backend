@@ -11,11 +11,11 @@ export class AuthRepository {
     return this.authRepository.save(auth);
   }
 
-  async getAuthByUserId(userId: string): Promise<AuthOrNull> {
+  async getAuthByUserId(userId: number): Promise<AuthOrNull> {
     return this.authRepository.findOne({ where: { userId }, relations: ['user'] });
   }
 
-  async updatePassword(userId: string, updateData: UpdateAuthPasswordDto): Promise<AuthOrNull> {
+  async updatePassword(userId: number, updateData: UpdateAuthPasswordDto): Promise<AuthOrNull> {
     await this.authRepository.update({ userId }, updateData);
     return this.getAuthByUserId(userId);
   }

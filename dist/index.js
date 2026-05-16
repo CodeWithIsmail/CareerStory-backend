@@ -11,6 +11,65 @@ import swaggerUi from "swagger-ui-express";
 // src/routes/userRoutes.ts
 import { Router } from "express";
 
+// src/constants/responseMessages.ts
+var RESPONSE_MESSAGES = {
+  AUTH: {
+    EMAIL_CONFIRMATION: {
+      SUCCESS: "Email confirmed successfully",
+      RESEND: "Confirmation email resent successfully"
+    },
+    PASSWORD_CHANGE: {
+      SUCCESS: "Password changed successfully"
+    },
+    LOGIN: {
+      SUCCESS: "User logged in successfully"
+    }
+  },
+  USER: {
+    CREATE: {
+      SUCCESS: "User created successfully"
+    },
+    FETCH: {
+      ALL_SUCCESS: "Users retrieved successfully",
+      BY_ID_SUCCESS: "User retrieved successfully",
+      PROFILE_SUCCESS: "User profile retrieved successfully"
+    },
+    UPDATE: {
+      SUCCESS: "User updated successfully",
+      ROLE: "User role updated successfully"
+    }
+  },
+  STORY: {
+    CREATE: {
+      SUCCESS: "Story created successfully"
+    },
+    FETCH: {
+      ALL_SUCCESS: "Stories retrieved successfully",
+      BY_ID_SUCCESS: "Story retrieved successfully",
+      BY_USER_SUCCESS: "User stories retrieved successfully"
+    },
+    UPDATE: {
+      SUCCESS: "Story updated successfully"
+    }
+  },
+  CATEGORY: {
+    CREATE: {
+      SUCCESS: "Category created successfully"
+    },
+    FETCH: {
+      ALL_SUCCESS: "Categories retrieved successfully",
+      BY_ID_SUCCESS: "Category retrieved successfully",
+      BY_NAME_SUCCESS: "Category retrieved successfully"
+    },
+    UPDATE: {
+      SUCCESS: "Category updated successfully"
+    },
+    DELETE: {
+      SUCCESS: "Category deleted successfully"
+    }
+  }
+};
+
 // src/repositories/userRepository.ts
 import { IsNull } from "typeorm";
 
@@ -880,7 +939,7 @@ var updateUserRoleSchema = z2.object({
     message: VALIDATION_MESSAGES.USER.ROLE.INVALID
   })
 }).strict();
-var userParamSchema = z2.number().int().positive(VALIDATION_MESSAGES.USER.USER_ID.INVALID);
+var userParamSchema = z2.coerce.number().int().positive(VALIDATION_MESSAGES.USER.USER_ID.INVALID);
 
 // src/mappers/userMapper.ts
 var mapUserToProfileDto = /* @__PURE__ */ __name((user) => userProfileSchema.parse(user), "mapUserToProfileDto");
@@ -1035,65 +1094,6 @@ var _ResponseHandler = class _ResponseHandler {
 __name(_ResponseHandler, "ResponseHandler");
 var ResponseHandler = _ResponseHandler;
 
-// src/constants/responseMessages.ts
-var RESPONSE_MESSAGES = {
-  AUTH: {
-    EMAIL_CONFIRMATION: {
-      SUCCESS: "Email confirmed successfully",
-      RESEND: "Confirmation email resent successfully"
-    },
-    PASSWORD_CHANGE: {
-      SUCCESS: "Password changed successfully"
-    },
-    LOGIN: {
-      SUCCESS: "User logged in successfully"
-    }
-  },
-  USER: {
-    CREATE: {
-      SUCCESS: "User created successfully"
-    },
-    FETCH: {
-      ALL_SUCCESS: "Users retrieved successfully",
-      BY_ID_SUCCESS: "User retrieved successfully",
-      PROFILE_SUCCESS: "User profile retrieved successfully"
-    },
-    UPDATE: {
-      SUCCESS: "User updated successfully",
-      ROLE: "User role updated successfully"
-    }
-  },
-  STORY: {
-    CREATE: {
-      SUCCESS: "Story created successfully"
-    },
-    FETCH: {
-      ALL_SUCCESS: "Stories retrieved successfully",
-      BY_ID_SUCCESS: "Story retrieved successfully",
-      BY_USER_SUCCESS: "User stories retrieved successfully"
-    },
-    UPDATE: {
-      SUCCESS: "Story updated successfully"
-    }
-  },
-  CATEGORY: {
-    CREATE: {
-      SUCCESS: "Category created successfully"
-    },
-    FETCH: {
-      ALL_SUCCESS: "Categories retrieved successfully",
-      BY_ID_SUCCESS: "Category retrieved successfully",
-      BY_NAME_SUCCESS: "Category retrieved successfully"
-    },
-    UPDATE: {
-      SUCCESS: "Category updated successfully"
-    },
-    DELETE: {
-      SUCCESS: "Category deleted successfully"
-    }
-  }
-};
-
 // src/controllers/userController.ts
 var _UserController = class _UserController {
   constructor() {
@@ -1103,7 +1103,7 @@ var _UserController = class _UserController {
       return ResponseHandler.success(res, users, RESPONSE_MESSAGES.USER.FETCH.ALL_SUCCESS);
     }, "getAllUsers"));
     __publicField(this, "getUserById", /* @__PURE__ */ __name(async (req, res) => {
-      const user = await this.userService.getUserById(req.params.userId);
+      const user = await this.userService.getUserById(Number(req.params.userId));
       return ResponseHandler.success(res, user, RESPONSE_MESSAGES.USER.FETCH.BY_ID_SUCCESS);
     }, "getUserById"));
     __publicField(this, "getCurrentUserProfile", /* @__PURE__ */ __name(async (req, res) => {
@@ -1111,7 +1111,7 @@ var _UserController = class _UserController {
       return ResponseHandler.success(res, user, RESPONSE_MESSAGES.USER.FETCH.PROFILE_SUCCESS);
     }, "getCurrentUserProfile"));
     __publicField(this, "updateUser", /* @__PURE__ */ __name(async (req, res) => {
-      const updatedUser = await this.userService.updateUser(req.params.userId, req.body);
+      const updatedUser = await this.userService.updateUser(Number(req.params.userId), req.body);
       return ResponseHandler.success(res, updatedUser, RESPONSE_MESSAGES.USER.UPDATE.SUCCESS);
     }, "updateUser"));
     __publicField(this, "updateUserProfile", /* @__PURE__ */ __name(async (req, res) => {
@@ -1119,7 +1119,7 @@ var _UserController = class _UserController {
       return ResponseHandler.success(res, updatedUser, RESPONSE_MESSAGES.USER.UPDATE.SUCCESS);
     }, "updateUserProfile"));
     __publicField(this, "deleteUser", /* @__PURE__ */ __name(async (req, res) => {
-      await this.userService.deleteUser(req.params.userId);
+      await this.userService.deleteUser(Number(req.params.userId));
       return ResponseHandler.noContent(res);
     }, "deleteUser"));
   }
@@ -1220,7 +1220,7 @@ var categoryResponseSchema = baseCategorySchema.extend({
   categoryId: z4.number().int().positive(),
   createdAt: z4.date()
 }).strip();
-var categoryParamSchema = z4.number().int().positive(VALIDATION_MESSAGES.CATEGORY.INVALID);
+var categoryParamSchema = z4.coerce.number().int().positive(VALIDATION_MESSAGES.CATEGORY.INVALID);
 
 // src/validators/storyValidator.ts
 var createStorySchema = baseStorySchema.extend({
@@ -1253,7 +1253,7 @@ var storyResponseSchema = baseStorySchema.omit({
     organization: true
   }).strip().nullable().optional()
 }).strip();
-var storyParamSchema = z5.number().int().positive(VALIDATION_MESSAGES.STORY.STORY_ID.INVALID);
+var storyParamSchema = z5.coerce.number().int().positive(VALIDATION_MESSAGES.STORY.STORY_ID.INVALID);
 
 // src/mappers/storyMapper.ts
 var mapStoryToDto = /* @__PURE__ */ __name((story) => storyResponseSchema.parse(story), "mapStoryToDto");
@@ -1326,119 +1326,6 @@ var _StoryRepository = class _StoryRepository {
 };
 __name(_StoryRepository, "StoryRepository");
 var StoryRepository = _StoryRepository;
-
-// src/repositories/categoryRepository.ts
-import { In, IsNull as IsNull3 } from "typeorm";
-var _CategoryRepository = class _CategoryRepository {
-  constructor() {
-    __publicField(this, "categoryRepository", AppDataSource.getRepository(Category));
-  }
-  async createCategory(categoryData) {
-    const newCategory = this.categoryRepository.create(categoryData);
-    return this.categoryRepository.save(newCategory);
-  }
-  async updateCategory(categoryId, updateData) {
-    await this.categoryRepository.update(categoryId, updateData);
-    return this.getCategoryById(categoryId);
-  }
-  async getAllCategories() {
-    return this.categoryRepository.find({
-      where: {
-        deletedAt: IsNull3()
-      },
-      order: {
-        name: "ASC"
-      }
-    });
-  }
-  async getCategoryById(categoryId) {
-    return this.categoryRepository.findOneBy({
-      categoryId,
-      deletedAt: IsNull3()
-    });
-  }
-  async getCategoriesByIds(categoryIds) {
-    return this.categoryRepository.findBy({
-      categoryId: In(categoryIds),
-      deletedAt: IsNull3()
-    });
-  }
-  async getCategoryByName(name) {
-    return this.categoryRepository.findOne({
-      where: {
-        name
-      },
-      withDeleted: true
-    });
-  }
-  async deleteCategory(categoryId) {
-    return this.categoryRepository.softDelete({
-      categoryId,
-      deletedAt: IsNull3()
-    });
-  }
-};
-__name(_CategoryRepository, "CategoryRepository");
-var CategoryRepository = _CategoryRepository;
-
-// src/mappers/categoryMapper.ts
-var mapCategoryToDto = /* @__PURE__ */ __name((category) => categoryResponseSchema.parse(category), "mapCategoryToDto");
-var mapCategoriesToDtoList = /* @__PURE__ */ __name((categories) => categories.map((category) => mapCategoryToDto(category)), "mapCategoriesToDtoList");
-
-// src/services/categoryService.ts
-var _CategoryService = class _CategoryService {
-  constructor() {
-    __publicField(this, "categoryRepository", new CategoryRepository());
-  }
-  async createCategory(categoryData) {
-    const isExistingCategory = await this.categoryRepository.getCategoryByName(categoryData.name);
-    if (isExistingCategory) {
-      throw new ConflictError(ERROR_MESSAGES.CATEGORY.DUPLICATE_NAME, CONTEXT.CATEGORY.CREATE);
-    }
-    const newCategory = await this.categoryRepository.createCategory(categoryData);
-    if (!newCategory) {
-      throw new DatabaseError(ERROR_MESSAGES.CATEGORY.CREATE, CONTEXT.CATEGORY.CREATE);
-    }
-    return mapCategoryToDto(newCategory);
-  }
-  async getAllCategories() {
-    const categories = await this.categoryRepository.getAllCategories();
-    return mapCategoriesToDtoList(categories);
-  }
-  async getCategoryById(categoryId) {
-    const category = await this.categoryRepository.getCategoryById(categoryId);
-    if (!category) {
-      throw new NotFoundError(ERROR_MESSAGES.CATEGORY.FETCH, CONTEXT.CATEGORY.FETCH);
-    }
-    return mapCategoryToDto(category);
-  }
-  async getCategoriesByIds(categoryIds) {
-    const categories = await this.categoryRepository.getCategoriesByIds(categoryIds);
-    return categories;
-  }
-  async getCategoryByName(name) {
-    const category = await this.categoryRepository.getCategoryByName(name);
-    if (!category) {
-      throw new NotFoundError(ERROR_MESSAGES.CATEGORY.FETCH, CONTEXT.CATEGORY.FETCH);
-    }
-    return mapCategoryToDto(category);
-  }
-  async updateCategory(categoryId, updateData) {
-    const updatedCategory = await this.categoryRepository.updateCategory(categoryId, updateData);
-    if (!updatedCategory) {
-      throw new NotFoundError(ERROR_MESSAGES.CATEGORY.UPDATE, CONTEXT.CATEGORY.UPDATE);
-    }
-    return mapCategoryToDto(updatedCategory);
-  }
-  async deleteCategory(categoryId) {
-    const result = await this.categoryRepository.deleteCategory(categoryId);
-    if (result.affected === 0) {
-      throw new NotFoundError(ERROR_MESSAGES.CATEGORY.DELETE, CONTEXT.CATEGORY.DELETE);
-    }
-  }
-};
-__name(_CategoryService, "CategoryService");
-var CategoryService = _CategoryService;
 
 // src/services/aiService.ts
 import { OpenRouter } from "@openrouter/sdk";
@@ -1529,6 +1416,119 @@ Summary:`;
 __name(_AIService, "AIService");
 var AIService = _AIService;
 
+// src/mappers/categoryMapper.ts
+var mapCategoryToDto = /* @__PURE__ */ __name((category) => categoryResponseSchema.parse(category), "mapCategoryToDto");
+var mapCategoriesToDtoList = /* @__PURE__ */ __name((categories) => categories.map((category) => mapCategoryToDto(category)), "mapCategoriesToDtoList");
+
+// src/repositories/categoryRepository.ts
+import { In, IsNull as IsNull3 } from "typeorm";
+var _CategoryRepository = class _CategoryRepository {
+  constructor() {
+    __publicField(this, "categoryRepository", AppDataSource.getRepository(Category));
+  }
+  async createCategory(categoryData) {
+    const newCategory = this.categoryRepository.create(categoryData);
+    return this.categoryRepository.save(newCategory);
+  }
+  async updateCategory(categoryId, updateData) {
+    await this.categoryRepository.update(categoryId, updateData);
+    return this.getCategoryById(categoryId);
+  }
+  async getAllCategories() {
+    return this.categoryRepository.find({
+      where: {
+        deletedAt: IsNull3()
+      },
+      order: {
+        name: "ASC"
+      }
+    });
+  }
+  async getCategoryById(categoryId) {
+    return this.categoryRepository.findOneBy({
+      categoryId,
+      deletedAt: IsNull3()
+    });
+  }
+  async getCategoriesByIds(categoryIds) {
+    return this.categoryRepository.findBy({
+      categoryId: In(categoryIds),
+      deletedAt: IsNull3()
+    });
+  }
+  async getCategoryByName(name) {
+    return this.categoryRepository.findOne({
+      where: {
+        name
+      },
+      withDeleted: true
+    });
+  }
+  async deleteCategory(categoryId) {
+    return this.categoryRepository.softDelete({
+      categoryId,
+      deletedAt: IsNull3()
+    });
+  }
+};
+__name(_CategoryRepository, "CategoryRepository");
+var CategoryRepository = _CategoryRepository;
+
+// src/services/categoryService.ts
+var _CategoryService = class _CategoryService {
+  constructor() {
+    __publicField(this, "categoryRepository", new CategoryRepository());
+  }
+  async createCategory(categoryData) {
+    const isExistingCategory = await this.categoryRepository.getCategoryByName(categoryData.name);
+    if (isExistingCategory) {
+      throw new ConflictError(ERROR_MESSAGES.CATEGORY.DUPLICATE_NAME, CONTEXT.CATEGORY.CREATE);
+    }
+    const newCategory = await this.categoryRepository.createCategory(categoryData);
+    if (!newCategory) {
+      throw new DatabaseError(ERROR_MESSAGES.CATEGORY.CREATE, CONTEXT.CATEGORY.CREATE);
+    }
+    return mapCategoryToDto(newCategory);
+  }
+  async getAllCategories() {
+    const categories = await this.categoryRepository.getAllCategories();
+    return mapCategoriesToDtoList(categories);
+  }
+  async getCategoryById(categoryId) {
+    const category = await this.categoryRepository.getCategoryById(categoryId);
+    if (!category) {
+      throw new NotFoundError(ERROR_MESSAGES.CATEGORY.FETCH, CONTEXT.CATEGORY.FETCH);
+    }
+    return mapCategoryToDto(category);
+  }
+  async getCategoriesByIds(categoryIds) {
+    const categories = await this.categoryRepository.getCategoriesByIds(categoryIds);
+    return categories;
+  }
+  async getCategoryByName(name) {
+    const category = await this.categoryRepository.getCategoryByName(name);
+    if (!category) {
+      throw new NotFoundError(ERROR_MESSAGES.CATEGORY.FETCH, CONTEXT.CATEGORY.FETCH);
+    }
+    return mapCategoryToDto(category);
+  }
+  async updateCategory(categoryId, updateData) {
+    const updatedCategory = await this.categoryRepository.updateCategory(categoryId, updateData);
+    if (!updatedCategory) {
+      throw new NotFoundError(ERROR_MESSAGES.CATEGORY.UPDATE, CONTEXT.CATEGORY.UPDATE);
+    }
+    return mapCategoryToDto(updatedCategory);
+  }
+  async deleteCategory(categoryId) {
+    const result = await this.categoryRepository.deleteCategory(categoryId);
+    if (result.affected === 0) {
+      throw new NotFoundError(ERROR_MESSAGES.CATEGORY.DELETE, CONTEXT.CATEGORY.DELETE);
+    }
+  }
+};
+__name(_CategoryService, "CategoryService");
+var CategoryService = _CategoryService;
+
 // src/services/storyService.ts
 var _StoryService = class _StoryService {
   constructor() {
@@ -1577,7 +1577,7 @@ var _StoryService = class _StoryService {
     const { generateSummary, ...newUpdateData } = updateData;
     if (generateSummary) {
       const summary = await this.aiService.generateStorySummary(updateData.title || story.title, updateData.body || story.body);
-      newUpdateData["summary"] = summary;
+      newUpdateData.summary = summary;
     }
     if (updateData.categoryIds !== void 0) {
       const categories = await this.validateAndFetchCategories(updateData.categoryIds, CONTEXT.STORY.UPDATE);
@@ -1596,7 +1596,7 @@ var _StoryService = class _StoryService {
   }
   async storyAuthorUserId(storyId) {
     const story = await this.getStoryById(storyId);
-    return story.user?.userId;
+    return story.user?.userId ?? null;
   }
   async validateAndFetchCategories(categoryIds, context) {
     const categories = await this.categoryService.getCategoriesByIds(categoryIds);
@@ -1622,7 +1622,7 @@ var authorizeRoles = /* @__PURE__ */ __name((...roles) => {
 }, "authorizeRoles");
 var authorizeStoryOwnerOrAdmin = /* @__PURE__ */ __name(async (req, _res, next) => {
   const storyService = new StoryService();
-  const storyId = req.params.storyId;
+  const storyId = Number(req.params.storyId);
   const storyAuthorUserId = await storyService.storyAuthorUserId(storyId);
   if (req.userId !== storyAuthorUserId && req.role !== UserRole.ADMIN) {
     throw new ForbiddenError(ERROR_MESSAGES.AUTH.UNAUTHORIZED, CONTEXT.MIDDLEWARE.AUTHORIZATION);
@@ -1630,7 +1630,7 @@ var authorizeStoryOwnerOrAdmin = /* @__PURE__ */ __name(async (req, _res, next) 
   next();
 }, "authorizeStoryOwnerOrAdmin");
 var authorizeOwnerOrAdmin = /* @__PURE__ */ __name((req, _res, next) => {
-  const resourceOwnerId = req.params.userId;
+  const resourceOwnerId = Number(req.params.userId);
   if (req.userId !== resourceOwnerId && req.role !== UserRole.ADMIN) {
     throw new ForbiddenError(ERROR_MESSAGES.AUTH.UNAUTHORIZED, CONTEXT.MIDDLEWARE.AUTHORIZATION);
   }
@@ -1828,19 +1828,19 @@ var _StoryController = class _StoryController {
       return ResponseHandler.success(res, stories, RESPONSE_MESSAGES.STORY.FETCH.ALL_SUCCESS);
     }, "getAllStories"));
     __publicField(this, "getStoriesByUser", /* @__PURE__ */ __name(async (req, res) => {
-      const stories = await this.storyService.getStories(req.validatedQuery, req.params.userId);
+      const stories = await this.storyService.getStories(req.validatedQuery, Number(req.params.userId));
       return ResponseHandler.success(res, stories, RESPONSE_MESSAGES.STORY.FETCH.BY_USER_SUCCESS);
     }, "getStoriesByUser"));
     __publicField(this, "getStoryById", /* @__PURE__ */ __name(async (req, res) => {
-      const story = await this.storyService.getStoryById(req.params.storyId);
+      const story = await this.storyService.getStoryById(Number(req.params.storyId));
       return ResponseHandler.success(res, story, RESPONSE_MESSAGES.STORY.FETCH.BY_ID_SUCCESS);
     }, "getStoryById"));
     __publicField(this, "updateStory", /* @__PURE__ */ __name(async (req, res) => {
-      const updatedStory = await this.storyService.updateStory(req.params.storyId, req.body);
+      const updatedStory = await this.storyService.updateStory(Number(req.params.storyId), req.body);
       return ResponseHandler.success(res, updatedStory, RESPONSE_MESSAGES.STORY.UPDATE.SUCCESS);
     }, "updateStory"));
     __publicField(this, "deleteStory", /* @__PURE__ */ __name(async (req, res) => {
-      await this.storyService.deleteStory(req.params.storyId);
+      await this.storyService.deleteStory(Number(req.params.storyId));
       return ResponseHandler.noContent(res);
     }, "deleteStory"));
   }
@@ -1856,6 +1856,9 @@ var storyRoutes_default = storyRouter;
 
 // src/routes/authRoutes.ts
 import { Router as Router3 } from "express";
+
+// src/services/authService.ts
+import jwt2 from "jsonwebtoken";
 
 // src/utils/passwordUtils.ts
 import bcrypt from "bcrypt";
@@ -2013,7 +2016,6 @@ var sendVerificationEmail = /* @__PURE__ */ __name(async (newUser, token) => {
 }, "sendVerificationEmail");
 
 // src/services/authService.ts
-import jwt2 from "jsonwebtoken";
 var _AuthService = class _AuthService {
   constructor() {
     __publicField(this, "userService", new UserService());
@@ -2295,8 +2297,7 @@ var options = {
           ],
           properties: {
             userId: {
-              type: "string",
-              format: "uuid"
+              type: "integer"
             },
             userName: {
               type: "string",
@@ -2370,12 +2371,10 @@ var options = {
           ],
           properties: {
             storyId: {
-              type: "string",
-              format: "uuid"
+              type: "integer"
             },
             userId: {
-              type: "string",
-              format: "uuid"
+              type: "integer"
             },
             title: {
               type: "string",
@@ -2405,8 +2404,7 @@ var options = {
                 type: "object",
                 properties: {
                   categoryId: {
-                    type: "string",
-                    format: "uuid"
+                    type: "integer"
                   },
                   name: {
                     type: "string"
@@ -2423,8 +2421,7 @@ var options = {
               nullable: true,
               properties: {
                 userId: {
-                  type: "string",
-                  format: "uuid"
+                  type: "integer"
                 },
                 userName: {
                   type: "string"
@@ -2450,8 +2447,7 @@ var options = {
           ],
           properties: {
             categoryId: {
-              type: "string",
-              format: "uuid"
+              type: "integer"
             },
             name: {
               type: "string",
@@ -2661,8 +2657,7 @@ var options = {
             categoryIds: {
               type: "array",
               items: {
-                type: "string",
-                format: "uuid"
+                type: "integer"
               },
               default: []
             },
@@ -2689,8 +2684,7 @@ var options = {
             categoryIds: {
               type: "array",
               items: {
-                type: "string",
-                format: "uuid"
+                type: "integer"
               }
             },
             generateSummary: {

@@ -8,12 +8,12 @@ export class CategoryRepository {
   private categoryRepository = AppDataSource.getRepository(Category);
 
   async createCategory(categoryData: CreateCategoryDto): Promise<Category> {
-    const newCategory = this.categoryRepository.create(categoryData);
+    const newCategory = this.categoryRepository.create(categoryData as Category);
     return this.categoryRepository.save(newCategory);
   }
 
-  async updateCategory(categoryId: string, updateData: UpdateCategoryDto): Promise<CategoryOrNull> {
-    await this.categoryRepository.update(categoryId, updateData);
+  async updateCategory(categoryId: number, updateData: UpdateCategoryDto): Promise<CategoryOrNull> {
+    await this.categoryRepository.update(categoryId, updateData as Partial<Category>);
     return this.getCategoryById(categoryId);
   }
 
@@ -21,11 +21,11 @@ export class CategoryRepository {
     return this.categoryRepository.find({ where: { deletedAt: IsNull() }, order: { name: 'ASC' } });
   }
 
-  async getCategoryById(categoryId: string): Promise<CategoryOrNull> {
+  async getCategoryById(categoryId: number): Promise<CategoryOrNull> {
     return this.categoryRepository.findOneBy({ categoryId, deletedAt: IsNull() });
   }
 
-  async getCategoriesByIds(categoryIds: string[]): Promise<Category[]> {
+  async getCategoriesByIds(categoryIds: number[]): Promise<Category[]> {
     return this.categoryRepository.findBy({ categoryId: In(categoryIds), deletedAt: IsNull() });
   }
 
@@ -33,7 +33,7 @@ export class CategoryRepository {
     return this.categoryRepository.findOne({ where: { name }, withDeleted: true });
   }
 
-  async deleteCategory(categoryId: string): Promise<DeleteResult> {
+  async deleteCategory(categoryId: number): Promise<DeleteResult> {
     return this.categoryRepository.softDelete({ categoryId, deletedAt: IsNull() });
   }
 }

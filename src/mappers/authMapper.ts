@@ -8,7 +8,7 @@ export const mapSignupToCreateUser = (signup: SignupDto): CreateUserDto => ({
   email: signup.email,
 });
 
-export const mapSignUpToCreateAuth = async (userId: string, password: string): Promise<CreateAuthDto> => ({
+export const mapSignUpToCreateAuth = async (userId: number, password: string): Promise<CreateAuthDto> => ({
   userId: userId,
   hashedPassword: await generateHashedPassword(password),
 });

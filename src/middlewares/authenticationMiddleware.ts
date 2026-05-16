@@ -1,17 +1,21 @@
-import { Request, Response, NextFunction } from 'express';
-import { ERROR_MESSAGES } from '../constants/errorMessages.js';
-import { UserService } from '../services/userService.ts';
-import { UserRole } from '../entities/User.ts';
+import { NextFunction, RequestHandler, Response } from 'express';
 import { CONTEXT } from '../constants/context.ts';
-import { verifyToken } from '../utils/tokenUtils.ts';
+import { ERROR_MESSAGES } from '../constants/errorMessages.js';
+import { UserRole } from '../entities/User.ts';
 import { UnauthorizedError } from '../errors/CustomErrors.ts';
+import { UserService } from '../services/userService.ts';
+import { verifyToken } from '../utils/tokenUtils.ts';
 
-export interface AuthRequest extends Request {
-  userId: string;
-  role: UserRole;
+declare global {
+  namespace Express {
+    interface Request {
+      userId: number;
+      role: UserRole;
+    }
+  }
 }
 
-export const authenticate = async (req: AuthRequest, _res: Response, next: NextFunction) => {
+export const authenticate: RequestHandler = async (req, _res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {

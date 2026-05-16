@@ -18,4 +18,4 @@ export const categoryResponseSchema = baseCategorySchema
   })
   .strip();
 
-export const categoryParamSchema = z.number().int().positive(VALIDATION_MESSAGES.CATEGORY.INVALID);
+export const categoryParamSchema = z.coerce.number().int().positive(VALIDATION_MESSAGES.CATEGORY.INVALID);
