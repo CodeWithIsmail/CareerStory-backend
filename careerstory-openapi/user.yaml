@@ -1,69 +1,87 @@
-openapi: 3.0.1
+openapi: 3.0.3
 info:
-  title: CareerStory User API
-  description: API for managing users.
-  version: '1.0'
+  title: CareerStory API - Users
+  description: >
+    User endpoints for the CareerStory platform: listing users, retrieving
+    profiles, updating one's own profile, changing roles (admin), and deleting
+    users.
+  version: 1.0.0
 servers:
   - url: http://localhost:3000/api/v1
+    description: Local development server
+
 tags:
   - name: Users
-    description: Operations related to users
+    description: User profile and account management
+
 paths:
   /users:
     get:
-      tags:
-        - Users
-      summary: Get all users
+      tags: [Users]
+      summary: List users (paginated)
+      description: Returns a paginated list of users. Public endpoint.
       operationId: getAllUsers
       parameters:
-        - name: page
+        - $ref: '#/components/parameters/FindQuery'
+        - $ref: '#/components/parameters/PageQuery'
+        - $ref: '#/components/parameters/ItemsPerPageQuery'
+        - $ref: '#/components/parameters/SortDirectionQuery'
+        - name: orderBy
           in: query
-          schema:
-            type: integer
-            default: 1
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            default: 10
-        - name: sort
-          in: query
+          required: false
+          description: Field to order results by
           schema:
             type: string
-        - name: search
-          in: query
-          schema:
-            type: string
+            enum: [userId, userName, name, email, joinDate]
+            default: userName
       responses:
         '200':
-          description: A list of users
+          description: Users retrieved successfully
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/User'
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      result:
+                        $ref: '#/components/schemas/PaginatedUsers'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /users/profile:
     get:
-      tags:
-        - Users
-      summary: Get current user profile
+      tags: [Users]
+      summary: Get the authenticated user's profile
       operationId: getCurrentUserProfile
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: The user profile
+          description: User profile retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      result:
+                        $ref: '#/components/schemas/UserProfile'
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     patch:
-      tags:
-        - Users
-      summary: Update user profile
+      tags: [Users]
+      summary: Update the authenticated user's profile
+      description: Updates the current user's own profile. At least one field is required.
       operationId: updateUserProfile
       security:
         - bearerAuth: []
@@ -72,156 +90,331 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateUserProfileDto'
+              $ref: '#/components/schemas/UpdateUserProfileRequest'
       responses:
         '200':
-          description: The updated user profile
+          description: User updated successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      result:
+                        $ref: '#/components/schemas/UserProfile'
         '400':
-          description: Bad request
+          $ref: '#/components/responses/ValidationError'
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /users/change-role/{userId}:
     patch:
-      tags:
-        - Users
-      summary: Update user role
-      operationId: updateUserRole
+      tags: [Users]
+      summary: Change a user's role (admin only)
+      operationId: changeUserRole
       security:
         - bearerAuth: []
       parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: '#/components/parameters/UserIdPath'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateUserRoleDto'
+              $ref: '#/components/schemas/UpdateUserRoleRequest'
       responses:
         '200':
-          description: The updated user
+          description: User updated successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      result:
+                        $ref: '#/components/schemas/UserProfile'
         '400':
-          description: Bad request
+          $ref: '#/components/responses/ValidationError'
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/UnauthorizedError'
         '403':
-          description: Forbidden
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /users/{userId}:
     get:
-      tags:
-        - Users
-      summary: Get user by ID
+      tags: [Users]
+      summary: Get a user by ID
+      description: Public endpoint.
       operationId: getUserById
       parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: '#/components/parameters/UserIdPath'
       responses:
         '200':
-          description: The user
+          description: User retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      result:
+                        $ref: '#/components/schemas/UserProfile'
+        '400':
+          $ref: '#/components/responses/ValidationError'
         '404':
-          description: User not found
-    delete:
-      tags:
-        - Users
-      summary: Delete a user
-      operationId: deleteUser
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '204':
-          description: User deleted successfully
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-        '404':
-          description: User not found
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
 components:
-  schemas:
-    User:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        userName:
-          type: string
-        email:
-          type: string
-          format: email
-        name:
-          type: string
-        role:
-          type: string
-          enum: ['USER', 'ADMIN']
-        isEmailVerified:
-          type: boolean
-        bio:
-          type: string
-        organization:
-          type: string
-        linkedInUrl:
-          type: string
-        githubUrl:
-          type: string
-        portfolioUrl:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-    UpdateUserProfileDto:
-      type: object
-      properties:
-        name:
-          type: string
-        bio:
-          type: string
-        organization:
-          type: string
-        linkedInUrl:
-          type: string
-        githubUrl:
-          type: string
-        portfolioUrl:
-          type: string
-    UpdateUserRoleDto:
-      type: object
-      properties:
-        role:
-          type: string
-          enum: ['USER', 'ADMIN']
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: JWT access token obtained from POST /auth/login
+
+  parameters:
+    UserIdPath:
+      name: userId
+      in: path
+      required: true
+      description: User UUID
+      schema:
+        type: string
+        format: uuid
+    FindQuery:
+      name: find
+      in: query
+      required: false
+      description: Free-text search term
+      schema:
+        type: string
+    PageQuery:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    ItemsPerPageQuery:
+      name: itemsPerPage
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+    SortDirectionQuery:
+      name: sortDirection
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [ASC, DESC]
+        default: ASC
+
+  schemas:
+    UpdateUserProfileRequest:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      description: At least one field must be provided.
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+        bio:
+          type: string
+          maxLength: 1000
+          nullable: true
+        organization:
+          type: string
+          maxLength: 255
+          nullable: true
+        linkedInUrl:
+          type: string
+          format: uri
+          maxLength: 255
+          nullable: true
+        githubUrl:
+          type: string
+          format: uri
+          maxLength: 255
+          nullable: true
+        portfolioUrl:
+          type: string
+          format: uri
+          maxLength: 255
+          nullable: true
+
+    UpdateUserRoleRequest:
+      type: object
+      additionalProperties: false
+      required: [role]
+      properties:
+        role:
+          type: string
+          enum: [ADMIN, USER]
+
+    UserProfile:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        userName:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        bio:
+          type: string
+          nullable: true
+        organization:
+          type: string
+          nullable: true
+        linkedInUrl:
+          type: string
+          format: uri
+          nullable: true
+        githubUrl:
+          type: string
+          format: uri
+          nullable: true
+        portfolioUrl:
+          type: string
+          format: uri
+          nullable: true
+        isEmailVerified:
+          type: boolean
+        role:
+          type: string
+          enum: [ADMIN, USER]
+        joinDate:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PaginatedUsers:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserProfile'
+        pagination:
+          $ref: '#/components/schemas/PaginationMetadata'
+
+    PaginationMetadata:
+      type: object
+      properties:
+        totalItems:
+          type: integer
+        totalPages:
+          type: integer
+        currentPage:
+          type: integer
+        itemsPerPage:
+          type: integer
+        hasNextPage:
+          type: boolean
+        hasPreviousPage:
+          type: boolean
+        nextPage:
+          type: integer
+          nullable: true
+        previousPage:
+          type: integer
+          nullable: true
+
+    SuccessEnvelope:
+      type: object
+      required: [success, statusCode, message]
+      properties:
+        success:
+          type: boolean
+          example: true
+        statusCode:
+          type: integer
+          example: 200
+        message:
+          type: string
+        result:
+          description: Present only when the endpoint returns data.
+          nullable: true
+
+    ErrorEnvelope:
+      type: object
+      required: [success, statusCode, message]
+      properties:
+        success:
+          type: boolean
+          example: false
+        statusCode:
+          type: integer
+        message:
+          type: string
+        details:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+
+    ErrorDetail:
+      type: object
+      properties:
+        field:
+          type: string
+        message:
+          type: string
+
+  responses:
+    ValidationError:
+      description: Invalid input data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    UnauthorizedError:
+      description: Missing or invalid authentication token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    ForbiddenError:
+      description: The caller lacks permission to perform this action
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'

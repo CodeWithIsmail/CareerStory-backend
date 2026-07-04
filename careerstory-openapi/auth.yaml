@@ -1,119 +1,266 @@
-openapi: 3.0.1
+openapi: 3.0.3
 info:
-  title: CareerStory Auth API
-  description: API for user authentication and authorization.
-  version: '1.0'
+  title: CareerStory API - Authentication
+  description: >
+    Authentication endpoints for the CareerStory platform: signup and login.
+  version: 1.0.0
 servers:
   - url: http://localhost:3000/api/v1
+    description: Local development server
+
 tags:
   - name: Auth
-    description: Operations related to user authentication
+    description: Authentication and account credential operations
+
 paths:
   /auth/signup:
     post:
-      tags:
-        - Auth
+      tags: [Auth]
       summary: Register a new user
+      description: >
+        Creates a new user account together with its credentials. `password`
+        and `confirmPassword` must match. Fails with 409 if the username or
+        email already exists.
       operationId: signup
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SignupDto'
+              $ref: '#/components/schemas/SignupRequest'
       responses:
         '201':
           description: User created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserResponse'
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      result:
+                        $ref: '#/components/schemas/UserProfile'
         '400':
-          description: Bad request
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /auth/login:
     post:
-      tags:
-        - Auth
-      summary: Login a user
+      tags: [Auth]
+      summary: Log in a user
+      description: >
+        Authenticates a user by username and password and returns a JWT access
+        token. The account's email must be verified.
       operationId: login
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LoginDto'
+              $ref: '#/components/schemas/LoginRequest'
       responses:
         '200':
           description: User logged in successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthResponseDto'
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      result:
+                        $ref: '#/components/schemas/AuthResult'
         '400':
-          description: Bad request
+          $ref: '#/components/responses/ValidationError'
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
 components:
-  schemas:
-    SignupDto:
-      type: object
-      properties:
-        userName:
-          type: string
-        email:
-          type: string
-          format: email
-        name:
-          type: string
-        password:
-          type: string
-        confirmPassword:
-          type: string
-    LoginDto:
-      type: object
-      properties:
-        userName:
-          type: string
-        password:
-          type: string
-    ChangePasswordDto:
-      type: object
-      properties:
-        currentPassword:
-          type: string
-        newPassword:
-          type: string
-        confirmPassword:
-          type: string
-    AuthResponseDto:
-      type: object
-      properties:
-        accessToken:
-          type: string
-        expiresIn:
-          type: number
-        user:
-          $ref: '#/components/schemas/User'
-    User:
-      type: object
-      properties:
-        userId:
-          type: string
-          format: uuid
-        role:
-          type: string
-          enum: ['USER', 'ADMIN']
-        isEmailVerified:
-          type: boolean
-          default: true
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: JWT access token obtained from POST /auth/login
+
+  schemas:
+    SignupRequest:
+      type: object
+      additionalProperties: false
+      required: [userName, email, name, password, confirmPassword]
+      properties:
+        userName:
+          type: string
+          minLength: 3
+          maxLength: 50
+          pattern: '^[a-z0-9_]+$'
+          example: john_doe
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          example: john@example.com
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+          example: John Doe
+        password:
+          type: string
+          minLength: 6
+          maxLength: 128
+          description: Must include lowercase, uppercase, a number, and a special character.
+          example: Passw0rd!
+        confirmPassword:
+          type: string
+          minLength: 6
+          maxLength: 128
+          example: Passw0rd!
+
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      required: [userName, password]
+      properties:
+        userName:
+          type: string
+          example: john_doe
+        password:
+          type: string
+          example: Passw0rd!
+
+    AuthResult:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token
+        expiresIn:
+          type: integer
+          description: Token lifetime in seconds
+          example: 2592000
+        user:
+          $ref: '#/components/schemas/UserProfile'
+
+    UserProfile:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        userName:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        bio:
+          type: string
+          nullable: true
+        organization:
+          type: string
+          nullable: true
+        linkedInUrl:
+          type: string
+          format: uri
+          nullable: true
+        githubUrl:
+          type: string
+          format: uri
+          nullable: true
+        portfolioUrl:
+          type: string
+          format: uri
+          nullable: true
+        isEmailVerified:
+          type: boolean
+        role:
+          type: string
+          enum: [ADMIN, USER]
+        joinDate:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    SuccessEnvelope:
+      type: object
+      required: [success, statusCode, message]
+      properties:
+        success:
+          type: boolean
+          example: true
+        statusCode:
+          type: integer
+          example: 200
+        message:
+          type: string
+        result:
+          description: Present only when the endpoint returns data.
+          nullable: true
+
+    ErrorEnvelope:
+      type: object
+      required: [success, statusCode, message]
+      properties:
+        success:
+          type: boolean
+          example: false
+        statusCode:
+          type: integer
+        message:
+          type: string
+        details:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+
+    ErrorDetail:
+      type: object
+      properties:
+        field:
+          type: string
+        message:
+          type: string
+
+  responses:
+    ValidationError:
+      description: Invalid input data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    UnauthorizedError:
+      description: Missing or invalid authentication / credentials
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    ConflictError:
+      description: Conflict (e.g. duplicate username or email)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'

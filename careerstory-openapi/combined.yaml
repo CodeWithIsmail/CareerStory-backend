@@ -1,119 +1,173 @@
-openapi: 3.0.1
+openapi: 3.0.3
 info:
-  title: CareerStory API (Combined)
-  description: Combined API for managing users, stories, categories, and authentication.
-  version: '1.0'
+  title: CareerStory API
+  description: >
+    RESTful API for CareerStory - a platform where Software Engineers share and
+    discover interview experiences and career stories.
+
+
+    All successful responses are wrapped in a standard envelope
+    (`success`, `statusCode`, `message`, and an optional `result`). Errors use
+    the same envelope with `success: false` and an optional `details` array of
+    field-level validation errors. Authenticated endpoints expect a
+    `Authorization: Bearer <JWT>` header, where the token is obtained from
+    `POST /auth/login`.
+  version: 1.0.0
+  license:
+    name: ISC
 servers:
-  - url: http://host.docker.internal:3000/api/v1
+  - url: http://localhost:8080/api/v1
+    description: Local development server
+
 tags:
-  - name: Users
-    description: Operations related to users
-  - name: Categories
-    description: Operations related to categories
-  - name: Stories
-    description: Operations related to stories
   - name: Auth
-    description: Operations related to user authentication
+    description: Authentication and account credential operations
+  - name: Users
+    description: User profile and account management
+  - name: Stories
+    description: Interview experiences and career stories
+  - name: Categories
+    description: Story categories
+
 paths:
+  # ==================== AUTH ====================
   /auth/signup:
     post:
-      tags:
-        - Auth
+      tags: [Auth]
       summary: Register a new user
+      description: >
+        Creates a new user account together with its credentials. `password`
+        and `confirmPassword` must match. Fails with 409 if the username or
+        email already exists.
       operationId: signup
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SignupDto'
+              $ref: '#/components/schemas/SignupRequest'
       responses:
         '201':
           description: User created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserResponse'
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      result:
+                        $ref: '#/components/schemas/UserProfile'
         '400':
-          description: Bad request
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /auth/login:
     post:
-      tags:
-        - Auth
-      summary: Login a user
+      tags: [Auth]
+      summary: Log in a user
+      description: >
+        Authenticates a user by username and password and returns a JWT access
+        token. The account's email must be verified.
       operationId: login
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LoginDto'
+              $ref: '#/components/schemas/LoginRequest'
       responses:
         '200':
           description: User logged in successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthResponseDto'
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      result:
+                        $ref: '#/components/schemas/AuthResult'
         '400':
-          description: Bad request
+          $ref: '#/components/responses/ValidationError'
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ==================== USERS ====================
   /users:
     get:
-      tags:
-        - Users
-      summary: Get all users
+      tags: [Users]
+      summary: List users (paginated)
+      description: Returns a paginated list of users. Public endpoint.
       operationId: getAllUsers
       parameters:
-        - name: page
+        - $ref: '#/components/parameters/FindQuery'
+        - $ref: '#/components/parameters/PageQuery'
+        - $ref: '#/components/parameters/ItemsPerPageQuery'
+        - $ref: '#/components/parameters/SortDirectionQuery'
+        - name: orderBy
           in: query
-          schema:
-            type: integer
-            default: 1
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            default: 10
-        - name: sort
-          in: query
+          required: false
+          description: Field to order results by
           schema:
             type: string
-        - name: search
-          in: query
-          schema:
-            type: string
+            enum: [userId, userName, name, email, joinDate]
+            default: userName
       responses:
         '200':
-          description: A list of users
+          description: Users retrieved successfully
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/User'
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      result:
+                        $ref: '#/components/schemas/PaginatedUsers'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /users/profile:
     get:
-      tags:
-        - Users
-      summary: Get current user profile
+      tags: [Users]
+      summary: Get the authenticated user's profile
       operationId: getCurrentUserProfile
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: The user profile
+          description: User profile retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      result:
+                        $ref: '#/components/schemas/UserProfile'
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     patch:
-      tags:
-        - Users
-      summary: Update user profile
+      tags: [Users]
+      summary: Update the authenticated user's profile
+      description: Updates the current user's own profile. At least one field is required.
       operationId: updateUserProfile
       security:
         - bearerAuth: []
@@ -122,202 +176,103 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateUserProfileDto'
+              $ref: '#/components/schemas/UpdateUserProfileRequest'
       responses:
         '200':
-          description: The updated user profile
+          description: User updated successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      result:
+                        $ref: '#/components/schemas/UserProfile'
         '400':
-          description: Bad request
+          $ref: '#/components/responses/ValidationError'
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /users/change-role/{userId}:
     patch:
-      tags:
-        - Users
-      summary: Update user role
-      operationId: updateUserRole
+      tags: [Users]
+      summary: Change a user's role (admin only)
+      operationId: changeUserRole
       security:
         - bearerAuth: []
       parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: '#/components/parameters/UserIdPath'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateUserRoleDto'
+              $ref: '#/components/schemas/UpdateUserRoleRequest'
       responses:
         '200':
-          description: The updated user
+          description: User updated successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      result:
+                        $ref: '#/components/schemas/UserProfile'
         '400':
-          description: Bad request
+          $ref: '#/components/responses/ValidationError'
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/UnauthorizedError'
         '403':
-          description: Forbidden
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /users/{userId}:
     get:
-      tags:
-        - Users
-      summary: Get user by ID
+      tags: [Users]
+      summary: Get a user by ID
+      description: Public endpoint.
       operationId: getUserById
       parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: '#/components/parameters/UserIdPath'
       responses:
         '200':
-          description: The user
+          description: User retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '404':
-          description: User not found
-    delete:
-      tags:
-        - Users
-      summary: Delete a user
-      operationId: deleteUser
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '204':
-          description: User deleted successfully
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-        '404':
-          description: User not found
-  /categories:
-    get:
-      tags:
-        - Categories
-      summary: Get all categories
-      operationId: getAllCategories
-      responses:
-        '200':
-          description: A list of categories
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Category'
-    post:
-      tags:
-        - Categories
-      summary: Create a new category
-      operationId: createCategory
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateCategoryDto'
-      responses:
-        '201':
-          description: Category created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Category'
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      result:
+                        $ref: '#/components/schemas/UserProfile'
         '400':
-          description: Bad request
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-  /categories/{categoryId}:
-    patch:
-      tags:
-        - Categories
-      summary: Update a category
-      operationId: updateCategory
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: categoryId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateCategoryDto'
-      responses:
-        '200':
-          description: The updated category
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Category'
-        '400':
-          description: Bad request
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
+          $ref: '#/components/responses/ValidationError'
         '404':
-          description: Category not found
-    delete:
-      tags:
-        - Categories
-      summary: Delete a category
-      operationId: deleteCategory
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: categoryId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '204':
-          description: Category deleted successfully
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-        '404':
-          description: Category not found
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ==================== STORIES ====================
   /stories:
     post:
-      tags:
-        - Stories
-      summary: Create a new story
+      tags: [Stories]
+      summary: Create a story
+      description: >
+        Creates a new story owned by the authenticated user. When
+        `generateSummary` is true an AI summary is generated (a summarization
+        failure is logged and results in a null summary rather than failing the
+        request).
       operationId: createStory
       security:
         - bearerAuth: []
@@ -326,228 +281,690 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateStoryDto'
+              $ref: '#/components/schemas/CreateStoryRequest'
       responses:
         '201':
           description: Story created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Story'
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      result:
+                        $ref: '#/components/schemas/Story'
         '400':
-          description: Bad request
+          $ref: '#/components/responses/ValidationError'
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     get:
-      tags:
-        - Stories
-      summary: Get all stories
+      tags: [Stories]
+      summary: List stories (paginated)
+      description: Returns a paginated list of stories, optionally filtered by category. Public endpoint.
       operationId: getAllStories
       parameters:
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 1
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            default: 10
-        - name: sort
-          in: query
-          schema:
-            type: string
-        - name: search
-          in: query
-          schema:
-            type: string
+        - $ref: '#/components/parameters/FindQuery'
+        - $ref: '#/components/parameters/PageQuery'
+        - $ref: '#/components/parameters/ItemsPerPageQuery'
+        - $ref: '#/components/parameters/SortDirectionQuery'
+        - $ref: '#/components/parameters/StoryOrderByQuery'
+        - $ref: '#/components/parameters/CategoryFilterQuery'
       responses:
         '200':
-          description: A list of stories
+          description: Stories retrieved successfully
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Story'
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      result:
+                        $ref: '#/components/schemas/PaginatedStories'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /stories/user/{userId}:
     get:
-      tags:
-        - Stories
-      summary: Get stories by user
+      tags: [Stories]
+      summary: List stories by a specific user (paginated)
+      description: Public endpoint.
       operationId: getStoriesByUser
       parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 1
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            default: 10
-        - name: sort
-          in: query
-          schema:
-            type: string
-        - name: search
-          in: query
-          schema:
-            type: string
+        - $ref: '#/components/parameters/UserIdPath'
+        - $ref: '#/components/parameters/FindQuery'
+        - $ref: '#/components/parameters/PageQuery'
+        - $ref: '#/components/parameters/ItemsPerPageQuery'
+        - $ref: '#/components/parameters/SortDirectionQuery'
+        - $ref: '#/components/parameters/StoryOrderByQuery'
+        - $ref: '#/components/parameters/CategoryFilterQuery'
       responses:
         '200':
-          description: A list of stories
+          description: User stories retrieved successfully
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Story'
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      result:
+                        $ref: '#/components/schemas/PaginatedStories'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /stories/{storyId}:
     get:
-      tags:
-        - Stories
-      summary: Get story by ID
+      tags: [Stories]
+      summary: Get a story by ID
+      description: Public endpoint.
       operationId: getStoryById
       parameters:
-        - name: storyId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: '#/components/parameters/StoryIdPath'
       responses:
         '200':
-          description: The story
+          description: Story retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Story'
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      result:
+                        $ref: '#/components/schemas/Story'
+        '400':
+          $ref: '#/components/responses/ValidationError'
         '404':
-          description: Story not found
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     patch:
-      tags:
-        - Stories
+      tags: [Stories]
       summary: Update a story
+      description: >
+        Updates a story. Requires authentication; the caller must be the story
+        owner or an admin. At least one field is required.
       operationId: updateStory
       security:
         - bearerAuth: []
       parameters:
-        - name: storyId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: '#/components/parameters/StoryIdPath'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateStoryDto'
+              $ref: '#/components/schemas/UpdateStoryRequest'
       responses:
         '200':
-          description: The updated story
+          description: Story updated successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Story'
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      result:
+                        $ref: '#/components/schemas/Story'
         '400':
-          description: Bad request
+          $ref: '#/components/responses/ValidationError'
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/UnauthorizedError'
         '403':
-          description: Forbidden
+          $ref: '#/components/responses/ForbiddenError'
         '404':
-          description: Story not found
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     delete:
-      tags:
-        - Stories
+      tags: [Stories]
       summary: Delete a story
+      description: >
+        Soft-deletes a story. Requires authentication; the caller must be the
+        story owner or an admin.
       operationId: deleteStory
       security:
         - bearerAuth: []
       parameters:
-        - name: storyId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: '#/components/parameters/StoryIdPath'
       responses:
         '204':
-          description: Story deleted successfully
+          description: Story deleted successfully (no content)
+        '400':
+          $ref: '#/components/responses/ValidationError'
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/UnauthorizedError'
         '403':
-          description: Forbidden
+          $ref: '#/components/responses/ForbiddenError'
         '404':
-          description: Story not found
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ==================== CATEGORIES ====================
+  /categories:
+    get:
+      tags: [Categories]
+      summary: List all categories
+      description: Returns all categories as a flat array (not paginated). Public endpoint.
+      operationId: getAllCategories
+      responses:
+        '200':
+          description: Categories retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Category'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags: [Categories]
+      summary: Create a category (admin only)
+      operationId: createCategory
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCategoryRequest'
+      responses:
+        '201':
+          description: Category created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      result:
+                        $ref: '#/components/schemas/Category'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /categories/{categoryId}:
+    patch:
+      tags: [Categories]
+      summary: Update a category (admin only)
+      description: Updates a category. At least one field is required.
+      operationId: updateCategory
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CategoryIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCategoryRequest'
+      responses:
+        '200':
+          description: Category updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      result:
+                        $ref: '#/components/schemas/Category'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags: [Categories]
+      summary: Delete a category (admin only)
+      operationId: deleteCategory
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CategoryIdPath'
+      responses:
+        '204':
+          description: Category deleted successfully (no content)
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token obtained from POST /auth/login
+
+  parameters:
+    UserIdPath:
+      name: userId
+      in: path
+      required: true
+      description: User UUID
+      schema:
+        type: string
+        format: uuid
+    StoryIdPath:
+      name: storyId
+      in: path
+      required: true
+      description: Story UUID
+      schema:
+        type: string
+        format: uuid
+    CategoryIdPath:
+      name: categoryId
+      in: path
+      required: true
+      description: Category UUID
+      schema:
+        type: string
+        format: uuid
+    FindQuery:
+      name: find
+      in: query
+      required: false
+      description: Free-text search term
+      schema:
+        type: string
+    PageQuery:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    ItemsPerPageQuery:
+      name: itemsPerPage
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+    SortDirectionQuery:
+      name: sortDirection
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [ASC, DESC]
+        default: ASC
+    StoryOrderByQuery:
+      name: orderBy
+      in: query
+      required: false
+      description: Field to order results by
+      schema:
+        type: string
+        enum: [storyId, userId, title, body, createdAt, updatedAt]
+        default: userId
+    CategoryFilterQuery:
+      name: category
+      in: query
+      required: false
+      description: >
+        Filter by one or more category names (case-insensitive). Repeat the
+        parameter to pass multiple values, e.g.
+        `?category=Backend&category=System%20Design`.
+      schema:
+        type: array
+        items:
+          type: string
+      style: form
+      explode: true
+
   schemas:
-    User:
+    # ---------- Auth ----------
+    SignupRequest:
+      type: object
+      additionalProperties: false
+      required: [userName, email, name, password, confirmPassword]
+      properties:
+        userName:
+          type: string
+          minLength: 3
+          maxLength: 50
+          pattern: '^[a-z0-9_]+$'
+          example: john_doe
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          example: john@example.com
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+          example: John Doe
+        password:
+          type: string
+          minLength: 6
+          maxLength: 128
+          description: Must include lowercase, uppercase, a number, and a special character.
+          example: Passw0rd!
+        confirmPassword:
+          type: string
+          minLength: 6
+          maxLength: 128
+          example: Passw0rd!
+
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      required: [userName, password]
+      properties:
+        userName:
+          type: string
+          example: john_doe
+        password:
+          type: string
+          example: Passw0rd!
+
+    AuthResult:
       type: object
       properties:
-        id:
+        accessToken:
+          type: string
+          description: JWT access token
+        expiresIn:
+          type: integer
+          description: Token lifetime in seconds
+          example: 2592000
+        user:
+          $ref: '#/components/schemas/UserProfile'
+
+    # ---------- Users ----------
+    UpdateUserProfileRequest:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      description: At least one field must be provided.
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+        bio:
+          type: string
+          maxLength: 1000
+          nullable: true
+        organization:
+          type: string
+          maxLength: 255
+          nullable: true
+        linkedInUrl:
+          type: string
+          format: uri
+          maxLength: 255
+          nullable: true
+        githubUrl:
+          type: string
+          format: uri
+          maxLength: 255
+          nullable: true
+        portfolioUrl:
+          type: string
+          format: uri
+          maxLength: 255
+          nullable: true
+
+    UpdateUserRoleRequest:
+      type: object
+      additionalProperties: false
+      required: [role]
+      properties:
+        role:
+          type: string
+          enum: [ADMIN, USER]
+
+    UserProfile:
+      type: object
+      properties:
+        userId:
           type: string
           format: uuid
         userName:
           type: string
+        name:
+          type: string
         email:
           type: string
           format: email
-        name:
-          type: string
-        role:
-          type: string
-          enum: ['USER', 'ADMIN']
-        isEmailVerified:
-          type: boolean
         bio:
           type: string
+          nullable: true
         organization:
           type: string
+          nullable: true
         linkedInUrl:
           type: string
+          format: uri
+          nullable: true
         githubUrl:
           type: string
+          format: uri
+          nullable: true
         portfolioUrl:
           type: string
+          format: uri
+          nullable: true
+        isEmailVerified:
+          type: boolean
+        role:
+          type: string
+          enum: [ADMIN, USER]
+        joinDate:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PaginatedUsers:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserProfile'
+        pagination:
+          $ref: '#/components/schemas/PaginationMetadata'
+
+    # ---------- Stories ----------
+    CreateStoryRequest:
+      type: object
+      additionalProperties: false
+      required: [title, body, generateSummary]
+      properties:
+        title:
+          type: string
+          minLength: 5
+          maxLength: 255
+          example: My Google onsite experience
+        body:
+          type: string
+          minLength: 10
+          maxLength: 5000
+        categoryIds:
+          type: array
+          default: []
+          items:
+            type: string
+            format: uuid
+        generateSummary:
+          type: boolean
+          description: Whether to generate an AI summary for the story.
+          example: false
+
+    UpdateStoryRequest:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      description: At least one field must be provided.
+      properties:
+        title:
+          type: string
+          minLength: 5
+          maxLength: 255
+        body:
+          type: string
+          minLength: 10
+          maxLength: 5000
+        categoryIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        generateSummary:
+          type: boolean
+
+    Story:
+      type: object
+      properties:
+        storyId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        body:
+          type: string
+        summary:
+          type: string
+          nullable: true
         createdAt:
           type: string
           format: date-time
         updatedAt:
           type: string
           format: date-time
-    UpdateUserProfileDto:
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoryCategory'
+        user:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/StoryUser'
+
+    StoryCategory:
       type: object
       properties:
+        categoryId:
+          type: string
+          format: uuid
         name:
           type: string
-        bio:
+        description:
+          type: string
+          nullable: true
+
+    StoryUser:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        userName:
+          type: string
+        name:
           type: string
         organization:
           type: string
-        linkedInUrl:
-          type: string
-        githubUrl:
-          type: string
-        portfolioUrl:
-          type: string
-    UpdateUserRoleDto:
+          nullable: true
+
+    PaginatedStories:
       type: object
       properties:
-        role:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Story'
+        pagination:
+          $ref: '#/components/schemas/PaginationMetadata'
+
+    # ---------- Categories ----------
+    CreateCategoryRequest:
+      type: object
+      additionalProperties: false
+      required: [name]
+      properties:
+        name:
           type: string
-          enum: ['USER', 'ADMIN']
+          minLength: 1
+          maxLength: 50
+          example: System Design
+        description:
+          type: string
+          maxLength: 255
+          nullable: true
+
+    UpdateCategoryRequest:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      description: At least one field must be provided.
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+        description:
+          type: string
+          maxLength: 255
+          nullable: true
+
     Category:
       type: object
       properties:
@@ -558,138 +975,109 @@ components:
           type: string
         description:
           type: string
+          nullable: true
         createdAt:
           type: string
           format: date-time
-    CreateCategoryDto:
+
+    # ---------- Shared ----------
+    PaginationMetadata:
       type: object
       properties:
-        name:
-          type: string
-        description:
-          type: string
-    UpdateCategoryDto:
-      type: object
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-    Story:
-      type: object
-      properties:
-        storyId:
-          type: string
-          format: uuid
-        title:
-          type: string
-        content:
-          type: string
-        summary:
-          type: string
-        isPublished:
+        totalItems:
+          type: integer
+        totalPages:
+          type: integer
+        currentPage:
+          type: integer
+        itemsPerPage:
+          type: integer
+        hasNextPage:
           type: boolean
-        createdAt:
+        hasPreviousPage:
+          type: boolean
+        nextPage:
+          type: integer
+          nullable: true
+        previousPage:
+          type: integer
+          nullable: true
+
+    SuccessEnvelope:
+      type: object
+      required: [success, statusCode, message]
+      properties:
+        success:
+          type: boolean
+          example: true
+        statusCode:
+          type: integer
+          example: 200
+        message:
           type: string
-          format: date-time
-        updatedAt:
+        result:
+          description: Present only when the endpoint returns data.
+          nullable: true
+
+    ErrorEnvelope:
+      type: object
+      required: [success, statusCode, message]
+      properties:
+        success:
+          type: boolean
+          example: false
+        statusCode:
+          type: integer
+        message:
           type: string
-          format: date-time
-        user:
-          $ref: '#/components/schemas/User'
-        categories:
+        details:
           type: array
+          nullable: true
           items:
-            $ref: '#/components/schemas/Category'
-    CreateStoryDto:
+            $ref: '#/components/schemas/ErrorDetail'
+
+    ErrorDetail:
       type: object
       properties:
-        title:
+        field:
           type: string
-        content:
+        message:
           type: string
-        summary:
-          type: string
-        isPublished:
-          type: boolean
-        categoryIds:
-          type: array
-          items:
-            type: string
-            format: uuid
-    UpdateStoryDto:
-      type: object
-      properties:
-        title:
-          type: string
-        content:
-          type: string
-        summary:
-          type: string
-        isPublished:
-          type: boolean
-        categoryIds:
-          type: array
-          items:
-            type: string
-            format: uuid
-    SignupDto:
-      type: object
-      properties:
-        userName:
-          type: string
-        email:
-          type: string
-          format: email
-        name:
-          type: string
-        password:
-          type: string
-        confirmPassword:
-          type: string
-    LoginDto:
-      type: object
-      properties:
-        userName:
-          type: string
-        password:
-          type: string
-    AuthResponseDto:
-      type: object
-      properties:
-        accessToken:
-          type: string
-        expiresIn:
-          type: number
-        user:
-          $ref: '#/components/schemas/User'
-    UserResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        userName:
-          type: string
-        email:
-          type: string
-          format: email
-        name:
-          type: string
-        role:
-          type: string
-          enum: ['USER', 'ADMIN']
-        isEmailVerified:
-          type: boolean
-          default: true
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+
+  responses:
+    ValidationError:
+      description: Invalid input data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    UnauthorizedError:
+      description: Missing or invalid authentication / credentials
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    ForbiddenError:
+      description: The caller lacks permission to perform this action
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    ConflictError:
+      description: Conflict (e.g. duplicate username, email, or category name)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
