@@ -123,8 +123,8 @@ var _User = class _User {
 __name(_User, "User");
 var User = _User;
 _ts_decorate([
-  PrimaryGeneratedColumn("uuid"),
-  _ts_metadata("design:type", String)
+  PrimaryGeneratedColumn(),
+  _ts_metadata("design:type", Number)
 ], User.prototype, "userId", void 0);
 _ts_decorate([
   Column2({
@@ -229,8 +229,8 @@ var _Auth = class _Auth {
 __name(_Auth, "Auth");
 var Auth = _Auth;
 _ts_decorate2([
-  PrimaryColumn("uuid"),
-  _ts_metadata2("design:type", String)
+  PrimaryColumn("int"),
+  _ts_metadata2("design:type", Number)
 ], Auth.prototype, "userId", void 0);
 _ts_decorate2([
   Column3(),
@@ -284,8 +284,8 @@ var _Category = class _Category {
 __name(_Category, "Category");
 var Category = _Category;
 _ts_decorate3([
-  PrimaryGeneratedColumn2("uuid"),
-  _ts_metadata3("design:type", String)
+  PrimaryGeneratedColumn2(),
+  _ts_metadata3("design:type", Number)
 ], Category.prototype, "categoryId", void 0);
 _ts_decorate3([
   Column4({
@@ -346,12 +346,12 @@ var _Story = class _Story {
 __name(_Story, "Story");
 var Story = _Story;
 _ts_decorate4([
-  PrimaryGeneratedColumn3("uuid"),
-  _ts_metadata4("design:type", String)
+  PrimaryGeneratedColumn3(),
+  _ts_metadata4("design:type", Number)
 ], Story.prototype, "storyId", void 0);
 _ts_decorate4([
-  Column5("uuid"),
-  _ts_metadata4("design:type", String)
+  Column5("int"),
+  _ts_metadata4("design:type", Number)
 ], Story.prototype, "userId", void 0);
 _ts_decorate4([
   Column5({
@@ -729,7 +729,7 @@ var VALIDATION_MESSAGES = {
   },
   USER: {
     USER_ID: {
-      INVALID: "User ID must be a valid UUID"
+      INVALID: "User ID must be a positive integer"
     },
     USERNAME: {
       MIN: "Username must be at least 3 characters",
@@ -756,7 +756,7 @@ var VALIDATION_MESSAGES = {
       REQUIRED: "generateSummary must be a boolean value"
     },
     USER_ID: {
-      INVALID: "userId must be a valid UUID"
+      INVALID: "userId must be a positive integer"
     },
     TITLE: {
       MIN: "Title must be at least 5 characters",
@@ -769,7 +769,7 @@ var VALIDATION_MESSAGES = {
       REQUIRED: "Body is required"
     },
     STORY_ID: {
-      INVALID: "Story ID must be a valid UUID"
+      INVALID: "Story ID must be a positive integer"
     }
   },
   PASSWORD: {
@@ -794,7 +794,7 @@ var VALIDATION_MESSAGES = {
     DESCRIPTION: {
       MAX: "Description must be at most 255 characters long"
     },
-    INVALID: "Category ID must be a valid UUID"
+    INVALID: "Category ID must be a positive integer"
   }
 };
 
@@ -804,7 +804,7 @@ var baseUrlSchema = z.url({
   message: VALIDATION_MESSAGES.URL.INVALID
 }).trim().max(255, VALIDATION_MESSAGES.URL.MAX);
 var baseUserSchema = z.object({
-  userId: z.uuidv4(VALIDATION_MESSAGES.USER.USER_ID.INVALID),
+  userId: z.number(VALIDATION_MESSAGES.USER.USER_ID.INVALID).int().positive(),
   userName: z.string().nonempty(VALIDATION_MESSAGES.USER.USERNAME.REQUIRED).min(3, VALIDATION_MESSAGES.USER.USERNAME.MIN).max(50, VALIDATION_MESSAGES.USER.USERNAME.MAX).regex(/^[a-z0-9_]+$/, VALIDATION_MESSAGES.USER.USERNAME.INVALID),
   email: z.string().nonempty(VALIDATION_MESSAGES.USER.EMAIL.REQUIRED).email({
     message: VALIDATION_MESSAGES.USER.EMAIL.INVALID
@@ -829,7 +829,7 @@ var basePasswordSchema = z.string({
 var baseStorySchema = z.object({
   title: z.string().trim().nonempty(VALIDATION_MESSAGES.STORY.TITLE.REQUIRED).min(5, VALIDATION_MESSAGES.STORY.TITLE.MIN).max(255, VALIDATION_MESSAGES.STORY.TITLE.MAX),
   body: z.string().trim().nonempty(VALIDATION_MESSAGES.STORY.BODY.REQUIRED).min(10, VALIDATION_MESSAGES.STORY.BODY.MIN).max(5e3, VALIDATION_MESSAGES.STORY.BODY.MAX),
-  categoryIds: z.array(z.uuid(VALIDATION_MESSAGES.CATEGORY.INVALID))
+  categoryIds: z.array(z.number(VALIDATION_MESSAGES.CATEGORY.INVALID).int().positive())
 });
 var basePaginationSchema = z.object({
   find: z.string().optional(),
@@ -879,7 +879,7 @@ var updateUserRoleSchema = z2.object({
     message: VALIDATION_MESSAGES.USER.ROLE.INVALID
   })
 }).strict();
-var userParamSchema = z2.uuidv4(VALIDATION_MESSAGES.USER.USER_ID.INVALID);
+var userParamSchema = z2.coerce.number(VALIDATION_MESSAGES.USER.USER_ID.INVALID).int(VALIDATION_MESSAGES.USER.USER_ID.INVALID).positive(VALIDATION_MESSAGES.USER.USER_ID.INVALID);
 
 // src/mappers/userMapper.ts
 var mapUserToProfileDto = /* @__PURE__ */ __name((user) => userProfileSchema.parse(user), "mapUserToProfileDto");
@@ -1102,7 +1102,7 @@ var _UserController = class _UserController {
       return ResponseHandler.success(res, users, RESPONSE_MESSAGES.USER.FETCH.ALL_SUCCESS);
     }, "getAllUsers"));
     __publicField(this, "getUserById", /* @__PURE__ */ __name(async (req, res) => {
-      const user = await this.userService.getUserById(req.params.userId);
+      const user = await this.userService.getUserById(Number(req.params.userId));
       return ResponseHandler.success(res, user, RESPONSE_MESSAGES.USER.FETCH.BY_ID_SUCCESS);
     }, "getUserById"));
     __publicField(this, "getCurrentUserProfile", /* @__PURE__ */ __name(async (req, res) => {
@@ -1110,7 +1110,7 @@ var _UserController = class _UserController {
       return ResponseHandler.success(res, user, RESPONSE_MESSAGES.USER.FETCH.PROFILE_SUCCESS);
     }, "getCurrentUserProfile"));
     __publicField(this, "updateUser", /* @__PURE__ */ __name(async (req, res) => {
-      const updatedUser = await this.userService.updateUser(req.params.userId, req.body);
+      const updatedUser = await this.userService.updateUser(Number(req.params.userId), req.body);
       return ResponseHandler.success(res, updatedUser, RESPONSE_MESSAGES.USER.UPDATE.SUCCESS);
     }, "updateUser"));
     __publicField(this, "updateUserProfile", /* @__PURE__ */ __name(async (req, res) => {
@@ -1118,7 +1118,7 @@ var _UserController = class _UserController {
       return ResponseHandler.success(res, updatedUser, RESPONSE_MESSAGES.USER.UPDATE.SUCCESS);
     }, "updateUserProfile"));
     __publicField(this, "deleteUser", /* @__PURE__ */ __name(async (req, res) => {
-      await this.userService.deleteUser(req.params.userId);
+      await this.userService.deleteUser(Number(req.params.userId));
       return ResponseHandler.noContent(res);
     }, "deleteUser"));
   }
@@ -1216,10 +1216,10 @@ var updateCategorySchema = baseCategorySchema.partial().strict().refine((data) =
   message: VALIDATION_MESSAGES.COMMON.AT_LEAST_ONE_FIELD
 });
 var categoryResponseSchema = baseCategorySchema.extend({
-  categoryId: z4.uuidv4(),
+  categoryId: z4.number().int().positive(),
   createdAt: z4.date()
 }).strip();
-var categoryParamSchema = z4.uuidv4(VALIDATION_MESSAGES.CATEGORY.INVALID);
+var categoryParamSchema = z4.coerce.number(VALIDATION_MESSAGES.CATEGORY.INVALID).int(VALIDATION_MESSAGES.CATEGORY.INVALID).positive(VALIDATION_MESSAGES.CATEGORY.INVALID);
 
 // src/validators/storyValidator.ts
 var createStorySchema = baseStorySchema.extend({
@@ -1236,7 +1236,7 @@ var updateStorySchema = baseStorySchema.extend({
 var storyResponseSchema = baseStorySchema.omit({
   categoryIds: true
 }).extend({
-  storyId: z5.uuidv4(),
+  storyId: z5.number().int().positive(),
   createdAt: z5.date(),
   updatedAt: z5.date(),
   summary: z5.string().nullable().optional(),
@@ -1252,7 +1252,7 @@ var storyResponseSchema = baseStorySchema.omit({
     organization: true
   }).strip().nullable().optional()
 }).strip();
-var storyParamSchema = z5.uuidv4(VALIDATION_MESSAGES.STORY.STORY_ID.INVALID);
+var storyParamSchema = z5.coerce.number(VALIDATION_MESSAGES.STORY.STORY_ID.INVALID).int(VALIDATION_MESSAGES.STORY.STORY_ID.INVALID).positive(VALIDATION_MESSAGES.STORY.STORY_ID.INVALID);
 
 // src/mappers/storyMapper.ts
 var mapStoryToDto = /* @__PURE__ */ __name((story) => storyResponseSchema.parse(story), "mapStoryToDto");
@@ -1621,7 +1621,7 @@ var authorizeRoles = /* @__PURE__ */ __name((...roles) => {
 }, "authorizeRoles");
 var authorizeStoryOwnerOrAdmin = /* @__PURE__ */ __name(async (req, _res, next) => {
   const storyService = new StoryService();
-  const storyId = req.params.storyId;
+  const storyId = Number(req.params.storyId);
   const storyAuthorUserId = await storyService.storyAuthorUserId(storyId);
   if (req.userId !== storyAuthorUserId && req.role !== UserRole.ADMIN) {
     throw new ForbiddenError(ERROR_MESSAGES.AUTH.UNAUTHORIZED, CONTEXT.MIDDLEWARE.AUTHORIZATION);
@@ -1629,7 +1629,7 @@ var authorizeStoryOwnerOrAdmin = /* @__PURE__ */ __name(async (req, _res, next) 
   next();
 }, "authorizeStoryOwnerOrAdmin");
 var authorizeOwnerOrAdmin = /* @__PURE__ */ __name((req, _res, next) => {
-  const resourceOwnerId = req.params.userId;
+  const resourceOwnerId = Number(req.params.userId);
   if (req.userId !== resourceOwnerId && req.role !== UserRole.ADMIN) {
     throw new ForbiddenError(ERROR_MESSAGES.AUTH.UNAUTHORIZED, CONTEXT.MIDDLEWARE.AUTHORIZATION);
   }
@@ -1827,19 +1827,19 @@ var _StoryController = class _StoryController {
       return ResponseHandler.success(res, stories, RESPONSE_MESSAGES.STORY.FETCH.ALL_SUCCESS);
     }, "getAllStories"));
     __publicField(this, "getStoriesByUser", /* @__PURE__ */ __name(async (req, res) => {
-      const stories = await this.storyService.getStories(req.validatedQuery, req.params.userId);
+      const stories = await this.storyService.getStories(req.validatedQuery, Number(req.params.userId));
       return ResponseHandler.success(res, stories, RESPONSE_MESSAGES.STORY.FETCH.BY_USER_SUCCESS);
     }, "getStoriesByUser"));
     __publicField(this, "getStoryById", /* @__PURE__ */ __name(async (req, res) => {
-      const story = await this.storyService.getStoryById(req.params.storyId);
+      const story = await this.storyService.getStoryById(Number(req.params.storyId));
       return ResponseHandler.success(res, story, RESPONSE_MESSAGES.STORY.FETCH.BY_ID_SUCCESS);
     }, "getStoryById"));
     __publicField(this, "updateStory", /* @__PURE__ */ __name(async (req, res) => {
-      const updatedStory = await this.storyService.updateStory(req.params.storyId, req.body);
+      const updatedStory = await this.storyService.updateStory(Number(req.params.storyId), req.body);
       return ResponseHandler.success(res, updatedStory, RESPONSE_MESSAGES.STORY.UPDATE.SUCCESS);
     }, "updateStory"));
     __publicField(this, "deleteStory", /* @__PURE__ */ __name(async (req, res) => {
-      await this.storyService.deleteStory(req.params.storyId);
+      await this.storyService.deleteStory(Number(req.params.storyId));
       return ResponseHandler.noContent(res);
     }, "deleteStory"));
   }
@@ -2185,7 +2185,7 @@ var changePasswordSchema = z7.object({
   ]
 });
 var tokenPayloadSchema = z7.object({
-  userId: z7.uuidv4(),
+  userId: z7.number().int().positive(),
   role: z7.enum(UserRole),
   tokenType: z7.enum(TOKEN_TYPE)
 }).strict();
@@ -2198,7 +2198,7 @@ var authResponseSchema = z7.object({
   })
 }).strip();
 var createAuthSchema = z7.object({
-  userId: z7.uuidv4(),
+  userId: z7.number().int().positive(),
   hashedPassword: z7.string()
 }).strict();
 var changePasswordResponseSchema = z7.object({
@@ -2228,11 +2228,11 @@ var _CategoryController = class _CategoryController {
       return ResponseHandler.success(res, categories, RESPONSE_MESSAGES.CATEGORY.FETCH.ALL_SUCCESS);
     }, "getAllCategories"));
     __publicField(this, "updateCategory", /* @__PURE__ */ __name(async (req, res) => {
-      const updatedCategory = await this.categoryService.updateCategory(req.params.categoryId, req.body);
+      const updatedCategory = await this.categoryService.updateCategory(Number(req.params.categoryId), req.body);
       return ResponseHandler.success(res, updatedCategory, RESPONSE_MESSAGES.CATEGORY.UPDATE.SUCCESS);
     }, "updateCategory"));
     __publicField(this, "deleteCategory", /* @__PURE__ */ __name(async (req, res) => {
-      await this.categoryService.deleteCategory(req.params.categoryId);
+      await this.categoryService.deleteCategory(Number(req.params.categoryId));
       return ResponseHandler.noContent(res);
     }, "deleteCategory"));
   }

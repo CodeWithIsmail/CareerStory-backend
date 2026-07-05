@@ -17,7 +17,7 @@ export const authorizeRoles = (...roles: UserRole[]) => {
 
 export const authorizeStoryOwnerOrAdmin = async (req: AuthRequest, _res: Response, next: NextFunction) => {
   const storyService = new StoryService();
-  const storyId = req.params.storyId;
+  const storyId = Number(req.params.storyId);
   const storyAuthorUserId = await storyService.storyAuthorUserId(storyId);
 
   if (req.userId !== storyAuthorUserId && req.role !== UserRole.ADMIN) {
@@ -27,7 +27,7 @@ export const authorizeStoryOwnerOrAdmin = async (req: AuthRequest, _res: Respons
 };
 
 export const authorizeOwnerOrAdmin = (req: AuthRequest, _res: Response, next: NextFunction) => {
-  const resourceOwnerId = req.params.userId;
+  const resourceOwnerId = Number(req.params.userId);
 
   if (req.userId !== resourceOwnerId && req.role !== UserRole.ADMIN) {
     throw new ForbiddenError(ERROR_MESSAGES.AUTH.UNAUTHORIZED, CONTEXT.MIDDLEWARE.AUTHORIZATION);

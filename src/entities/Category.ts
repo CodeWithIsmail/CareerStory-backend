@@ -10,8 +10,8 @@ import { Story } from '../entities/Story.ts';
 
 @Entity('categories')
 export class Category {
-  @PrimaryGeneratedColumn('uuid')
-  categoryId: string;
+  @PrimaryGeneratedColumn()
+  categoryId: number;
 
   @Column({ length: 50, unique: true })
   name: string;

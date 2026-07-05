@@ -46,7 +46,7 @@ export const changePasswordSchema = z
 
 export const tokenPayloadSchema = z
   .object({
-    userId: z.uuidv4(),
+    userId: z.number().int().positive(),
     role: z.enum(UserRole),
     tokenType: z.enum(TOKEN_TYPE),
   })
@@ -64,7 +64,7 @@ export const authResponseSchema = z
 
 export const createAuthSchema = z
   .object({
-    userId: z.uuidv4(),
+    userId: z.number().int().positive(),
     hashedPassword: z.string(),
   })
   .strict();

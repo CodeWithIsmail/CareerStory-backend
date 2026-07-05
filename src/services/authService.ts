@@ -78,7 +78,7 @@ export class AuthService {
     };
   }
 
-  async getAuthByUserId(userId: string, context: string): Promise<AuthOrNull> {
+  async getAuthByUserId(userId: number, context: string): Promise<AuthOrNull> {
     const auth = await this.authRepository.getAuthByUserId(userId);
     if (!auth) {
       throw new UnauthorizedError(ERROR_MESSAGES.USER.UNAUTHORIZED, context);
@@ -86,7 +86,7 @@ export class AuthService {
     return auth;
   }
 
-  async changePassword(userId: string, changePasswordDto: ChangePasswordDto): Promise<void> {
+  async changePassword(userId: number, changePasswordDto: ChangePasswordDto): Promise<void> {
     const { currentPassword, newPassword } = changePasswordDto;
 
     const auth = await this.getAuthByUserId(userId, CONTEXT.AUTH.CHANGE_PASSWORD);

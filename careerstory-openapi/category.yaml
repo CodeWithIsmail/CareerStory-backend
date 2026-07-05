@@ -146,10 +146,9 @@ components:
       name: categoryId
       in: path
       required: true
-      description: Category UUID
+      description: Category ID
       schema:
-        type: string
-        format: uuid
+        type: integer
 
   schemas:
     CreateCategoryRequest:
@@ -186,8 +185,7 @@ components:
       type: object
       properties:
         categoryId:
-          type: string
-          format: uuid
+          type: integer
         name:
           type: string
         description:

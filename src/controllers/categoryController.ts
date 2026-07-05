@@ -17,12 +17,15 @@ export class CategoryController {
   };
 
   updateCategory = async (req: Request, res: Response) => {
-    const updatedCategory = await this.categoryService.updateCategory(req.params.categoryId, req.body);
+    const updatedCategory = await this.categoryService.updateCategory(
+      Number(req.params.categoryId),
+      req.body,
+    );
     return ResponseHandler.success(res, updatedCategory, RESPONSE_MESSAGES.CATEGORY.UPDATE.SUCCESS);
   };
 
   deleteCategory = async (req: Request, res: Response) => {
-    await this.categoryService.deleteCategory(req.params.categoryId);
+    await this.categoryService.deleteCategory(Number(req.params.categoryId));
     return ResponseHandler.noContent(res);
   };
 }

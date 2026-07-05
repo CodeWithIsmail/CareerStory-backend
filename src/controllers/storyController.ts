@@ -18,22 +18,22 @@ export class StoryController {
   };
 
   getStoriesByUser = async (req: Request, res: Response) => {
-    const stories = await this.storyService.getStories(req.validatedQuery, req.params.userId);
+    const stories = await this.storyService.getStories(req.validatedQuery, Number(req.params.userId));
     return ResponseHandler.success(res, stories, RESPONSE_MESSAGES.STORY.FETCH.BY_USER_SUCCESS);
   };
 
   getStoryById = async (req: Request, res: Response) => {
-    const story = await this.storyService.getStoryById(req.params.storyId);
+    const story = await this.storyService.getStoryById(Number(req.params.storyId));
     return ResponseHandler.success(res, story, RESPONSE_MESSAGES.STORY.FETCH.BY_ID_SUCCESS);
   };
 
   updateStory = async (req: Request, res: Response) => {
-    const updatedStory = await this.storyService.updateStory(req.params.storyId, req.body);
+    const updatedStory = await this.storyService.updateStory(Number(req.params.storyId), req.body);
     return ResponseHandler.success(res, updatedStory, RESPONSE_MESSAGES.STORY.UPDATE.SUCCESS);
   };
 
   deleteStory = async (req: Request, res: Response) => {
-    await this.storyService.deleteStory(req.params.storyId);
+    await this.storyService.deleteStory(Number(req.params.storyId));
     return ResponseHandler.noContent(res);
   };
 }

@@ -38,7 +38,7 @@ export class StoryService {
 
   async getStories(
     paginationParams: StoryPaginationQuery,
-    userId?: string,
+    userId?: number,
   ): Promise<PaginatedResponse<StoryResponseDto>> {
     let paginatedStories;
     if (userId) {
@@ -53,7 +53,7 @@ export class StoryService {
     return mapPaginatedResponse(paginatedStories, mapStoriesToDtoList);
   }
 
-  async getStoryById(storyId: string): Promise<StoryResponseDto> {
+  async getStoryById(storyId: number): Promise<StoryResponseDto> {
     const story = await this.storyRepository.getStoryById(storyId);
     if (!story) {
       throw new NotFoundError(ERROR_MESSAGES.STORY.NOT_FOUND, CONTEXT.STORY.FETCH);
@@ -61,7 +61,7 @@ export class StoryService {
     return mapStoryToDto(story);
   }
 
-  async updateStory(storyId: string, updateData: UpdateStoryDto): Promise<StoryResponseDto> {
+  async updateStory(storyId: number, updateData: UpdateStoryDto): Promise<StoryResponseDto> {
     const story = await this.getStoryById(storyId);
     let updatedStory: StoryOrNull;
     const { generateSummary, ...newUpdateData } = updateData;
@@ -84,19 +84,19 @@ export class StoryService {
     return mapStoryToDto(updatedStory);
   }
 
-  async deleteStory(storyId: string): Promise<void> {
+  async deleteStory(storyId: number): Promise<void> {
     const result = await this.storyRepository.deleteStory(storyId);
     if (result.affected === 0) {
       throw new NotFoundError(ERROR_MESSAGES.STORY.NOT_FOUND, CONTEXT.STORY.DELETE);
     }
   }
 
-  async storyAuthorUserId(storyId: string): Promise<string | null> {
+  async storyAuthorUserId(storyId: number): Promise<number | null> {
     const story = await this.getStoryById(storyId);
     return story.user?.userId;
   }
 
-  async validateAndFetchCategories(categoryIds: string[], context: string): Promise<Category[]> {
+  async validateAndFetchCategories(categoryIds: number[], context: string): Promise<Category[]> {
     const categories = await this.categoryService.getCategoriesByIds(categoryIds);
     const validCategoryIds = categories.map((category) => category.categoryId);
     const invalidCategoryIds = categoryIds.filter((categoryId) => !validCategoryIds.includes(categoryId));

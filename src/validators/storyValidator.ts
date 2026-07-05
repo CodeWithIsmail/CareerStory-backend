@@ -24,7 +24,7 @@ export const updateStorySchema = baseStorySchema
 export const storyResponseSchema = baseStorySchema
   .omit({ categoryIds: true })
   .extend({
-    storyId: z.uuidv4(),
+    storyId: z.number().int().positive(),
     createdAt: z.date(),
     updatedAt: z.date(),
     summary: z.string().nullable().optional(),
@@ -40,4 +40,7 @@ export const storyResponseSchema = baseStorySchema
   })
   .strip();
 
-export const storyParamSchema = z.uuidv4(VALIDATION_MESSAGES.STORY.STORY_ID.INVALID);
+export const storyParamSchema = z.coerce
+  .number(VALIDATION_MESSAGES.STORY.STORY_ID.INVALID)
+  .int(VALIDATION_MESSAGES.STORY.STORY_ID.INVALID)
+  .positive(VALIDATION_MESSAGES.STORY.STORY_ID.INVALID);

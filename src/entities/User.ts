@@ -11,8 +11,8 @@ import { UserRole } from '../types/customTypes.ts';
 
 @Entity({ name: 'users' })
 export class User {
-  @PrimaryGeneratedColumn('uuid')
-  userId: string;
+  @PrimaryGeneratedColumn()
+  userId: number;
 
   @Column({ unique: true, length: 50 })
   userName: string;

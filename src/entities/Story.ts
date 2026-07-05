@@ -15,11 +15,11 @@ import { User } from './User.ts';
 
 @Entity({ name: 'stories' })
 export class Story {
-  @PrimaryGeneratedColumn('uuid')
-  storyId: string;
+  @PrimaryGeneratedColumn()
+  storyId: number;
 
-  @Column('uuid')
-  userId: string;
+  @Column('int')
+  userId: number;
 
   @Column({ length: 255 })
   title: string;

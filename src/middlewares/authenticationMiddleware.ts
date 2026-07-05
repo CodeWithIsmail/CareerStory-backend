@@ -7,7 +7,7 @@ import { verifyToken } from '../utils/tokenUtils.ts';
 import { UnauthorizedError } from '../errors/CustomErrors.ts';
 
 export interface AuthRequest extends Request {
-  userId: string;
+  userId: number;
   role: UserRole;
 }
 

@@ -190,10 +190,9 @@ components:
       name: userId
       in: path
       required: true
-      description: User UUID
+      description: User ID
       schema:
-        type: string
-        format: uuid
+        type: integer
     FindQuery:
       name: find
       in: query
@@ -275,8 +274,7 @@ components:
       type: object
       properties:
         userId:
-          type: string
-          format: uuid
+          type: integer
         userName:
           type: string
         name:

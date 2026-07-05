@@ -45,4 +45,7 @@ export const updateUserRoleSchema = z
   })
   .strict();
 
-export const userParamSchema = z.uuidv4(VALIDATION_MESSAGES.USER.USER_ID.INVALID);
+export const userParamSchema = z.coerce
+  .number(VALIDATION_MESSAGES.USER.USER_ID.INVALID)
+  .int(VALIDATION_MESSAGES.USER.USER_ID.INVALID)
+  .positive(VALIDATION_MESSAGES.USER.USER_ID.INVALID);

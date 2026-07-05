@@ -19,7 +19,7 @@ export class StoryRepository {
 
   async getStories(
     paginationParams: StoryPaginationQuery,
-    userId?: string,
+    userId?: number,
     categoryName?: string[],
   ): Promise<PaginatedResponse<Story>> {
     const query = this.storyRepository
@@ -40,7 +40,7 @@ export class StoryRepository {
     return PaginationHelper.paginate(query, paginationParams, paginationConfig);
   }
 
-  async getStoryById(storyId: string): Promise<StoryOrNull> {
+  async getStoryById(storyId: number): Promise<StoryOrNull> {
     return this.storyRepository.findOne({
       where: { storyId },
       relations: ['user', 'categories'],
@@ -48,7 +48,7 @@ export class StoryRepository {
   }
 
   async updateStory(
-    storyId: string,
+    storyId: number,
     updateData: UpdateStoryDto,
     categories?: Category[],
   ): Promise<StoryOrNull> {
@@ -68,7 +68,7 @@ export class StoryRepository {
     return this.getStoryById(storyId);
   }
 
-  async deleteStory(storyId: string): Promise<DeleteResult> {
+  async deleteStory(storyId: number): Promise<DeleteResult> {
     return this.storyRepository.softDelete({ storyId, deletedAt: IsNull() });
   }
 }

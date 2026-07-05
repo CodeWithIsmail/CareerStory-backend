@@ -28,7 +28,7 @@ export class UserRepository {
     return PaginationHelper.paginate(query, paginationParams, paginationConfig);
   }
 
-  async getUserById(userId: string): Promise<UserOrNull> {
+  async getUserById(userId: number): Promise<UserOrNull> {
     return this.userRepository.findOneBy({ userId });
   }
 
@@ -44,14 +44,14 @@ export class UserRepository {
   }
 
   async updateUser(
-    userId: string,
+    userId: number,
     updateData: UpdateUserProfileDto | UpdateUserStatusDto | UpdateUserRoleDto,
   ): Promise<UserOrNull> {
     await this.userRepository.update(userId, updateData);
     return this.getUserById(userId);
   }
 
-  async deleteUser(userId: string): Promise<DeleteResult> {
+  async deleteUser(userId: number): Promise<DeleteResult> {
     return this.userRepository.softDelete({ userId, deletedAt: IsNull() });
   }
 }

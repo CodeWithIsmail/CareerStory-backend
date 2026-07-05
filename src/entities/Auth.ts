@@ -3,8 +3,8 @@ import { User } from './User.ts';
 
 @Entity()
 export class Auth {
-  @PrimaryColumn('uuid')
-  userId: string;
+  @PrimaryColumn('int')
+  userId: number;
 
   @Column()
   hashedPassword: string;

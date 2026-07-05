@@ -153,8 +153,7 @@ components:
       type: object
       properties:
         userId:
-          type: string
-          format: uuid
+          type: integer
         userName:
           type: string
         name:

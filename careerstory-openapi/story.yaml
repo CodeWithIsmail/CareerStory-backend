@@ -240,18 +240,16 @@ components:
       name: storyId
       in: path
       required: true
-      description: Story UUID
+      description: Story ID
       schema:
-        type: string
-        format: uuid
+        type: integer
     UserIdPath:
       name: userId
       in: path
       required: true
-      description: User UUID
+      description: User ID
       schema:
-        type: string
-        format: uuid
+        type: integer
     FindQuery:
       name: find
       in: query
@@ -313,8 +311,7 @@ components:
           type: array
           default: []
           items:
-            type: string
-            format: uuid
+            type: integer
         generateSummary:
           type: boolean
           description: Whether to generate an AI summary for the story.
@@ -337,8 +334,7 @@ components:
         categoryIds:
           type: array
           items:
-            type: string
-            format: uuid
+            type: integer
         generateSummary:
           type: boolean
 
@@ -346,8 +342,7 @@ components:
       type: object
       properties:
         storyId:
-          type: string
-          format: uuid
+          type: integer
         title:
           type: string
         body:
@@ -374,8 +369,7 @@ components:
       type: object
       properties:
         categoryId:
-          type: string
-          format: uuid
+          type: integer
         name:
           type: string
         description:
@@ -386,8 +380,7 @@ components:
       type: object
       properties:
         userId:
-          type: string
-          format: uuid
+          type: integer
         userName:
           type: string
         name:

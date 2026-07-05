@@ -17,7 +17,7 @@ export const VALIDATION_MESSAGES = {
 
   USER: {
     USER_ID: {
-      INVALID: 'User ID must be a valid UUID',
+      INVALID: 'User ID must be a positive integer',
     },
     USERNAME: {
       MIN: 'Username must be at least 3 characters',
@@ -45,7 +45,7 @@ export const VALIDATION_MESSAGES = {
       REQUIRED: 'generateSummary must be a boolean value',
     },
     USER_ID: {
-      INVALID: 'userId must be a valid UUID',
+      INVALID: 'userId must be a positive integer',
     },
     TITLE: {
       MIN: 'Title must be at least 5 characters',
@@ -58,7 +58,7 @@ export const VALIDATION_MESSAGES = {
       REQUIRED: 'Body is required',
     },
     STORY_ID: {
-      INVALID: 'Story ID must be a valid UUID',
+      INVALID: 'Story ID must be a positive integer',
     },
   },
 
@@ -86,6 +86,6 @@ export const VALIDATION_MESSAGES = {
     DESCRIPTION: {
       MAX: 'Description must be at most 255 characters long',
     },
-    INVALID: 'Category ID must be a valid UUID',
+    INVALID: 'Category ID must be a positive integer',
   },
 };
