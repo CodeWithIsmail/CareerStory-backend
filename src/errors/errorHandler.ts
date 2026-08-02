@@ -54,10 +54,10 @@ export class ErrorHandler {
       const pgError = error as any;
 
       switch (pgError.code) {
-        case '23505':
-          statusCode = HTTP_STATUS_CODES.CONFLICT;
-          message = ERROR_MESSAGES.DATABASE.DUPLICATE_ENTRY;
-          break;
+        // case '23505':
+        //   statusCode = HTTP_STATUS_CODES.CONFLICT;
+        //   message = ERROR_MESSAGES.DATABASE.DUPLICATE_ENTRY;
+        //   break;
         case '23503':
           statusCode = HTTP_STATUS_CODES.BAD_REQUEST;
           message = ERROR_MESSAGES.DATABASE.FOREIGN_KEY_CONFLICT;
