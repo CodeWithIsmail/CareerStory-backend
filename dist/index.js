@@ -875,15 +875,6 @@ var userParamSchema = z2.coerce.number(VALIDATION_MESSAGES.USER.USER_ID.INVALID)
 var mapUserToProfileDto = /* @__PURE__ */ __name((user) => userProfileSchema.parse(user), "mapUserToProfileDto");
 var mapUsersToProfileDtoList = /* @__PURE__ */ __name((users) => users.map((user) => mapUserToProfileDto(user)), "mapUsersToProfileDtoList");
 
-// src/utils/userUtils.ts
-var checkForDuplicateUser = /* @__PURE__ */ __name((isExistingUser, user, context) => {
-  if (isExistingUser) {
-    if (isExistingUser.email == user.email && isExistingUser.userName == user.userName) throw new ConflictError(ERROR_MESSAGES.USER.DUPLICATE_EMAIL_AND_USERNAME, context);
-    else if (isExistingUser.email === user.email) throw new ConflictError(ERROR_MESSAGES.USER.DUPLICATE_EMAIL, context);
-    else throw new ConflictError(ERROR_MESSAGES.USER.DUPLICATE_USERNAME, context);
-  }
-}, "checkForDuplicateUser");
-
 // src/constants/context.ts
 var CONTEXT = {
   MIDDLEWARE: {
@@ -936,7 +927,6 @@ var _UserService = class _UserService {
   }
   async createUser(user) {
     const isExistingUser = await this.userRepository.getUserByUsernameOrEmail(user.email, user.userName);
-    checkForDuplicateUser(isExistingUser, user, CONTEXT.USER.CREATE);
     const newUser = await this.userRepository.createUser(user);
     if (!newUser) {
       throw new DatabaseError(ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR, CONTEXT.USER.CREATE);

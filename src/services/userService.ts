@@ -21,7 +21,7 @@ export class UserService {
 
   async createUser(user: CreateUserDto): Promise<UserProfileDto> {
     const isExistingUser = await this.userRepository.getUserByUsernameOrEmail(user.email, user.userName);
-    checkForDuplicateUser(isExistingUser, user, CONTEXT.USER.CREATE);
+    // checkForDuplicateUser(isExistingUser, user, CONTEXT.USER.CREATE);
     const newUser = await this.userRepository.createUser(user);
     if (!newUser) {
       throw new DatabaseError(ERROR_MESSAGES.SERVER.INTERNAL_SERVER_ERROR, CONTEXT.USER.CREATE);
